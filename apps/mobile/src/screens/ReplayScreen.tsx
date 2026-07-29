@@ -5,15 +5,8 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-  type LayoutChangeEvent,
-} from 'react-native';
-import { Pause, Play, SkipBack, SkipForward } from 'lucide-react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Eye } from 'lucide-react-native';
 import { buildBoard } from '@trm/engine';
 import type { Action, Board, GameConfig } from '@trm/engine';
 import { asPlayerId, type RuleParams, type SeatIndex } from '@trm/shared';
@@ -35,6 +28,8 @@ import { seatColor } from '../theme/colors';
 import { useTheme } from '../theme/useTheme';
 import { ErrorText, MutedText } from '../theme/chrome';
 import { useGlassHeaderPad } from '../hooks/useGlassHeaderPad';
+import { usePlayerName } from '../game/playerName';
+import { ReplayTransport } from '../features/replay/ReplayTransport';
 import { GameStage } from './GameStage';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Replay'>;
@@ -198,6 +193,7 @@ function ReplayStage({
   const gameStore = useGameStoreApi();
   const logStore = useLogStoreApi();
   const reducedMotion = useReducedMotion();
+  const nameOf = usePlayerName();
   const stores = useMemo(() => ({ game: gameStore, log: logStore }), [gameStore, logStore]);
   const player = useReplayPlayer(board, config, actions, initialViewer, stores, {
     finalDigest,
@@ -206,7 +202,6 @@ function ReplayStage({
   const snapshot = useGameStore((s) => s.snapshot);
   const followActing = useUi((s) => s.followActing);
   const setFollowActing = useUi((s) => s.setFollowActing);
-  const [trackWidth, setTrackWidth] = useState(0);
 
   // Replay is meant to be watched — default auto-follow on (the board's eye toggle still works).
   useEffect(() => {
@@ -266,11 +261,12 @@ function ReplayStage({
           selected={player.viewer === null}
           color={tokens.inkSoft}
           onPress={() => player.setViewer(null)}
+          icon
         />
         {players.map((p) => (
           <PerspectiveChip
             key={p.userId}
-            label={p.displayName || `P${p.seat + 1}`}
+            label={nameOf({ id: p.userId, seat: seatOf.get(p.userId) ?? 0 })}
             selected={player.viewer === p.userId}
             color={seatColor(seatOf.get(p.userId) ?? 0)}
             onPress={() => player.setViewer(asPlayerId(p.userId))}
@@ -278,83 +274,24 @@ function ReplayStage({
         ))}
       </ScrollView>
 
-      {/* ── transport: prev / play-pause / next + a tap-to-seek progress track ── */}
-      <View
-        style={[styles.controls, { backgroundColor: tokens.surface, borderColor: tokens.line }]}
-      >
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('tutorial.prevStep')}
-          disabled={player.step <= 0}
-          style={[styles.ctlBtn, player.step <= 0 && styles.disabled]}
-          onPress={player.prev}
-        >
-          <SkipBack size={18} color={tokens.ink} />
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={player.playing ? t('tutorial.pause') : t('tutorial.play')}
-          disabled={player.atEnd}
-          style={[styles.ctlBtn, player.atEnd && styles.disabled]}
-          onPress={player.playing ? player.pause : player.play}
-          testID="replay-playpause"
-        >
-          {player.playing ? (
-            <Pause size={18} color={tokens.ink} />
-          ) : (
-            <Play size={18} color={tokens.ink} />
-          )}
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('tutorial.nextStep')}
-          disabled={player.atEnd}
-          style={[styles.ctlBtn, player.atEnd && styles.disabled]}
-          onPress={player.next}
-          testID="replay-next"
-        >
-          <SkipForward size={18} color={tokens.ink} />
-        </Pressable>
-        <Pressable
-          accessibilityRole="adjustable"
-          accessibilityLabel={t('history.step', { n: player.step, total: player.total })}
-          style={styles.track}
-          onLayout={(e: LayoutChangeEvent) => setTrackWidth(e.nativeEvent.layout.width)}
-          onPress={(e) => {
-            if (trackWidth <= 0 || player.total === 0) return;
-            const ratio = Math.max(0, Math.min(1, e.nativeEvent.locationX / trackWidth));
-            player.seek(Math.round(ratio * player.total));
-          }}
-        >
-          <View style={[styles.trackBed, { backgroundColor: tokens.line }]} />
-          <View
-            style={[
-              styles.trackFill,
-              {
-                backgroundColor: tokens.blue,
-                width: `${player.total > 0 ? (player.step / player.total) * 100 : 0}%`,
-              },
-            ]}
-          />
-        </Pressable>
-        <Text style={[styles.stepText, { color: tokens.inkSoft }]}>
-          {t('history.step', { n: player.step, total: player.total })}
-        </Text>
-      </View>
+      <ReplayTransport actions={actions} players={players} player={player} playerName={nameOf} />
     </View>
   );
 }
 
+/** A seat's livery bar + name (web's `.perspective-pill`), or the eye for the public projection. */
 function PerspectiveChip({
   label,
   selected,
   color,
   onPress,
+  icon,
 }: {
   label: string;
   selected: boolean;
   color: string;
   onPress(): void;
+  icon?: boolean;
 }): React.JSX.Element {
   const { tokens } = useTheme();
   return (
@@ -364,12 +301,24 @@ function PerspectiveChip({
       onPress={onPress}
       style={[
         styles.chip,
-        { borderColor: selected ? color : tokens.line },
-        selected && { backgroundColor: `${color}22` },
+        { backgroundColor: tokens.surface, borderColor: selected ? color : tokens.line },
+        selected && { backgroundColor: `${color}20` },
       ]}
     >
-      <View style={[styles.chipDot, { backgroundColor: color }]} />
-      <Text style={[styles.chipText, { color: selected ? color : tokens.ink }]}>{label}</Text>
+      {icon ? (
+        <Eye size={13} color={selected ? tokens.ink : tokens.inkSoft} />
+      ) : (
+        <View style={[styles.chipBar, { backgroundColor: color }]} />
+      )}
+      <Text
+        style={[
+          styles.chipText,
+          { color: selected ? tokens.ink : tokens.inkSoft },
+          selected && styles.chipTextOn,
+        ]}
+      >
+        {label}
+      </Text>
     </Pressable>
   );
 }
@@ -386,30 +335,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     borderWidth: 1,
-    borderRadius: 999,
-    paddingHorizontal: 12,
+    borderRadius: 6,
+    paddingHorizontal: 10,
     minHeight: 36,
   },
-  chipDot: { width: 8, height: 8, borderRadius: 4 },
-  chipText: { fontSize: 13, fontWeight: '600' },
-  controls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    borderTopWidth: 1,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-  },
-  ctlBtn: {
-    padding: 10,
-    minWidth: 44,
-    minHeight: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  disabled: { opacity: 0.35 },
-  track: { flex: 1, height: 44, justifyContent: 'center' },
-  trackBed: { position: 'absolute', left: 0, right: 0, height: 4, borderRadius: 2 },
-  trackFill: { position: 'absolute', left: 0, height: 4, borderRadius: 2 },
-  stepText: { fontSize: 11, fontVariant: ['tabular-nums'] },
+  chipBar: { width: 4, height: 14, borderRadius: 1 },
+  chipText: { fontSize: 13 },
+  chipTextOn: { fontWeight: '700' },
 });

@@ -131,7 +131,7 @@
 .replay-transport {
   grid-area: controls;
   display: grid;
-  gap: var(--tr-space-2);
+  gap: var(--tr-space-1);
   padding: var(--tr-space-3) var(--tr-space-4) var(--tr-space-2);
   background: var(--tr-surface);
   border: 1px solid var(--tr-line);
@@ -206,9 +206,13 @@
 }
 
 /* ── The route strip ────────────────────────────────────────────────────────── */
+/* ONE line, not stacked rows. A second glyph row could never work here: at any real width a step
+   is a few pixels, so drawing every claim put ~40 marks inside their own width of each other and
+   the row read as a smear. Track-laying moved onto the line's WEIGHT, which leaves only the rare
+   marks — and those fit on the line itself, the way stations sit on a route diagram. */
 .replay-strip {
   position: relative;
-  height: 34px;
+  height: 30px;
 }
 .strip-plot {
   position: absolute;
@@ -219,23 +223,21 @@
 .strip-plot::after {
   content: '';
   position: absolute;
-  top: 11px;
+  top: 50%;
   left: 0;
   right: 0;
   height: 1px;
+  margin-top: -0.5px;
   background: var(--tr-line);
 }
 
 /* The line, in sections: one per turn, as long as that turn ran, in the acting seat's livery.
-   Turn order is learned in one cycle and then repeats, so the sections stay a thin rule rather
-   than a bar chart — what varies is section LENGTH (who stalled on a long draft) and where the
-   current turn sits, and that is what the height change is spent on. */
+   Height says whether that turn turned cards into track; the section under the playhead goes to
+   full saturation. Turn order is learned in one cycle and then repeats, so it is never worth
+   spending height on. */
 .strip-turns {
   position: absolute;
-  top: 4px;
-  left: 0;
-  right: 0;
-  height: 15px;
+  inset: 0;
   display: flex;
   align-items: center;
   gap: 1px;
@@ -243,14 +245,16 @@
 .strip-turn {
   flex-basis: 0;
   min-width: 1px;
-  height: 7px;
+  height: 5px;
   border-radius: 1px;
-  background: color-mix(in srgb, var(--seat) 72%, transparent);
+  background: color-mix(in srgb, var(--seat) 62%, transparent);
 }
-/* The section the train is in, raised off the line. */
-.strip-turn.is-now {
-  height: 15px;
+/* A turn that laid or repaired track — the move that moves a game. */
+.strip-turn.has-track {
+  height: 13px;
   border-radius: 2px;
+}
+.strip-turn.is-now {
   background: var(--seat);
 }
 /* The opening mission draft is simultaneous — hatched, because it is not anyone's turn. */
@@ -258,37 +262,25 @@
   background: repeating-linear-gradient(45deg, var(--tr-line) 0 3px, transparent 3px 6px);
 }
 
-/* Station glyphs hanging off the line. Shape carries the meaning and colour only says whose, so
-   the strip survives the colour-blind setting; size carries how notable — a claim is the everyday
-   move, a station or a tunnel is the turn someone will want to find again. */
+/* Station marks ON the line. Shape carries the meaning and colour only says whose, so the strip
+   survives the colour-blind setting; the halo keeps them legible over a saturated section. */
 .strip-moment {
   position: absolute;
-  border: 1.5px solid var(--seat);
-}
-.strip-moment.is-claim,
-.strip-moment.is-repair {
-  top: 22px;
-  width: 6px;
-  height: 6px;
-  margin-left: -3px;
-  transform: rotate(45deg);
-}
-.strip-moment.is-claim {
-  background: var(--seat);
-}
-.strip-moment.is-station,
-.strip-moment.is-tunnel {
-  top: 21px;
-  width: 8px;
-  height: 8px;
-  margin-left: -4px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  z-index: 1;
+  box-shadow: 0 0 0 1.5px var(--tr-surface);
 }
 .strip-moment.is-station {
-  border-radius: 1px;
+  border-radius: 2px;
   background: var(--seat);
 }
 .strip-moment.is-tunnel {
   border-radius: 50%;
+  background: var(--tr-surface);
+  border: 2.5px solid var(--seat);
 }
 
 /* The stretch not yet travelled, washed toward the card — quiet enough to read as ahead of you,
@@ -461,6 +453,11 @@
   }
   .replay-transport {
     padding: var(--tr-space-2) var(--tr-space-3);
+  }
+  /* A five-dash stub between a squeezed readout and the speed pills reads as a mistake — the
+     leader only earns its place when there is a run of empty bar to lead across. */
+  .transport-head::before {
+    display: none;
   }
   /* Thumb-sized transport; the strip keeps its full width on its own row. */
   .transport-buttons .icon-btn {

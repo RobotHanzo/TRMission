@@ -16,11 +16,18 @@ animate.
 ## The transport (`ReplayTransport.tsx`)
 
 The scrubber is a route strip: `@trm/client-core`'s `buildReplayTimeline` groups the action log
-into turns (a maximal run of consecutive actions by one player) and moments (claim / station /
-tunnel / repair), and the strip draws them as a liveried line with station glyphs. Nothing there
-replays the engine — it is pure derivation off `Action[]`, so it is available before step 1.
+into turns (a maximal run of consecutive actions by one player, each carrying how much `track` it
+laid) and moments (station / tunnel), and the strip draws them as one liveried line — section
+length = turn length, section height = did that turn lay track, marks on the line = the rare
+moments. Nothing there replays the engine; it is pure derivation off `Action[]`, so it is
+available before step 1.
 
-Two rules hold it together:
+**Everything lives on one line, deliberately.** A stacked layout (bands + a separate glyph row) was
+tried and cut: at any real width a step is a few pixels, so drawing every claim put ~40 marks
+inside their own width of each other and the row read as a smear. Claims moved onto section weight,
+which leaves only marks sparse enough to sit on the line itself. Don't add a second row back.
+
+Two more rules hold it together:
 
 - **The painted strip is decoration; the range input over it is the control.** Everything in
   `.strip-plot` is `aria-hidden`, and the one `<input type="range">` owns dragging, arrow keys and
@@ -36,5 +43,8 @@ The rail (perspective / log / share) is ONE card, hairline-divided — `.replay-
 card chrome and its children are sections, so `PerspectiveSwitcher`/`ReplayShare` must not add
 `.card` back.
 
-`apps/mobile`'s `screens/ReplayScreen.tsx` still renders the older plain progress-bar transport; it
-shares the timeline model and speed control but not this presentation.
+`apps/mobile/src/features/replay/ReplayTransport.tsx` is the RN port of this component and must
+stay recognisably the same instrument. Its differences are forced by the platform, not taste: the
+strip itself is the seek target (no range input to lay over it), marks wear a real halo View (RN
+shadows are a glow on iOS and nothing on Android), and the opening draft is flat line-colour rather
+than hatched (no repeating gradients).

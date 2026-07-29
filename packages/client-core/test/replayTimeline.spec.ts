@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { Action } from '@trm/engine';
-import { asPlayerId, type PlayerId, type RouteId, type TicketId } from '@trm/shared';
+import { asPlayerId, type CityId, type PlayerId, type RouteId, type TicketId } from '@trm/shared';
 import { buildReplayTimeline, turnAtStep, turnBoundaries } from '../src/replay/timeline';
 
 const p1 = asPlayerId('p1');
@@ -22,7 +22,17 @@ const claim = (player: PlayerId, routeId: string): Action => ({
   routeId: routeId as RouteId,
   payment: { color: 'RED', colorCount: 2, locomotives: 0 },
 });
-const resolveTunnel = (player: PlayerId): Action => ({ t: 'RESOLVE_TUNNEL', player, commit: true });
+const resolveTunnel = (player: PlayerId, commit = true): Action => ({
+  t: 'RESOLVE_TUNNEL',
+  player,
+  commit,
+});
+const buildStation = (player: PlayerId): Action => ({
+  t: 'BUILD_STATION',
+  player,
+  cityId: 'c1' as CityId,
+  payment: { color: 'RED', colorCount: 1, locomotives: 0 },
+});
 
 describe('buildReplayTimeline', () => {
   it('collapses the simultaneous opening draft into one segment', () => {
@@ -45,15 +55,35 @@ describe('buildReplayTimeline', () => {
     expect(timeline.turns.map((t) => t.index)).toEqual([1, 2, 3]);
   });
 
-  it('marks claims, stations and repairs — and lets a tunnel resolve own its claim', () => {
+  it('marks only the rare moments — stations and tunnels, never everyday claims', () => {
     const timeline = buildReplayTimeline(
-      [claim(p1, 'r1'), draw(p2), claim(p2, 'r2'), resolveTunnel(p2)],
+      [claim(p1, 'r1'), draw(p2), buildStation(p2), claim(p1, 'r2'), resolveTunnel(p1)],
       seats,
     );
     expect(timeline.moments).toEqual([
-      { step: 1, kind: 'claim', player: 'p1', seat: 0 },
-      { step: 4, kind: 'tunnel', player: 'p2', seat: 1 },
+      { step: 3, kind: 'station', player: 'p2', seat: 1 },
+      { step: 5, kind: 'tunnel', player: 'p1', seat: 0 },
     ]);
+  });
+
+  it('counts track laid per turn, once for a tunnel and not at all when it is aborted', () => {
+    const timeline = buildReplayTimeline(
+      [
+        claim(p1, 'r1'), // a plain claim
+        claim(p1, 'r2'),
+        resolveTunnel(p1), // a bore committed: still one route
+        draw(p2),
+        claim(p2, 'r3'),
+        resolveTunnel(p2, false), // backed out: no track went down
+      ],
+      seats,
+    );
+    expect(timeline.turns.map((t) => t.track)).toEqual([2, 0]);
+  });
+
+  it('leaves a card-drawing turn with no track', () => {
+    const timeline = buildReplayTimeline([draw(p1), draw(p1)], seats);
+    expect(timeline.turns[0]?.track).toBe(0);
   });
 
   it('locates the turn a step is inside, and nothing before the first action', () => {

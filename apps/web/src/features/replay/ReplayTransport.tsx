@@ -1,11 +1,11 @@
 // The replay transport — a route strip rather than a progress bar.
 //
 // A finished game is a line already travelled, so the scrubber is drawn as one: the line runs in
-// sections, one per turn, as long as that turn ran and in the acting seat's livery; the moments
-// worth seeking to (track claimed, station built, tunnel resolved, rail repaired) hang off it as
-// station glyphs; the section holding the playhead is raised off the line, and everything past it
-// is washed back. Who was slow, where the game's decisive stretches sit, and how much is left are
-// all readable before you touch anything.
+// sections, one per turn, as long as that turn ran and in the acting seat's livery, thickening on
+// the turns that put track on the board; stations and tunnels sit on the line as marks; the
+// section under the playhead goes to full saturation and everything past it is washed back. Who
+// was slow, where the game's decisive stretches sit, and how much is left are all readable before
+// you touch anything.
 //
 // The painted strip is decoration over one real control: a native range input laid across it owns
 // every interaction, so dragging, arrow keys and screen readers all get the same slider. The
@@ -96,6 +96,7 @@ export function ReplayTransport({
                 key={turn.from}
                 className={
                   'strip-turn' +
+                  (turn.track > 0 ? ' has-track' : '') +
                   (turn.setup ? ' is-setup' : '') +
                   (turn === current ? ' is-now' : '')
                 }

@@ -47,14 +47,44 @@ describe('HistoryScreen', () => {
     window.history.replaceState(null, '', '/history');
   });
 
-  it('renders rows with names and a role badge; the replay button opens the player', async () => {
+  it('renders the roster and opens the player when the row is clicked', async () => {
     mocked.history.mockResolvedValue([row()]);
     render(<HistoryScreen />);
     expect(await screen.findByText('Rival')).toBeInTheDocument();
-    expect(screen.getByText('玩家')).toBeInTheDocument();
+    // The viewer is named "you", not by their account name.
+    expect(screen.getByText('你')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /重播/ }));
     expect(useUi.getState().view).toBe('replay');
     expect(useUi.getState().replayGameId).toBe('g1');
+  });
+
+  it('states who won in the row label, so it is not colour-only', async () => {
+    mocked.history.mockResolvedValue([row()]);
+    render(<HistoryScreen />);
+    expect(await screen.findByRole('button', { name: /Rival 獲勝/ })).toBeInTheDocument();
+  });
+
+  it('shows each player final score when the game carries a scoreboard', async () => {
+    mocked.history.mockResolvedValue([
+      row({
+        finalScores: {
+          players: [
+            { playerId: 'u1', total: 118 },
+            { playerId: 'u2', total: 141 },
+          ],
+        },
+      }),
+    ]);
+    render(<HistoryScreen />);
+    expect(await screen.findByText('118')).toBeInTheDocument();
+    expect(screen.getByText('141')).toBeInTheDocument();
+  });
+
+  it('badges only the exception — a played game carries no "player" badge', async () => {
+    mocked.history.mockResolvedValue([row()]);
+    render(<HistoryScreen />);
+    await screen.findByText('Rival');
+    expect(screen.queryByText('玩家')).not.toBeInTheDocument();
   });
 
   it('disables replay for non-replayable games', async () => {

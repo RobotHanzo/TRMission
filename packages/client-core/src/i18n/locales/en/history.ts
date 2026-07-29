@@ -11,6 +11,7 @@ export default {
   notReplayable: 'Played on an older game version — replay unavailable',
   unknownMap: 'The map version this game used is not available',
   loadFailed: 'Could not load the game',
+  wonBy: '{{name}} won',
   perspective: 'Perspective',
   publicView: 'Public view',
   step: 'Step {{n}} / {{total}}',

@@ -4,11 +4,12 @@
 import type { Action } from '@trm/engine';
 
 /**
- * A moment a viewer would actually seek to. Deliberately short: track going down, a station going
- * up, a tunnel gamble, a repair. Card draws and ticket picks are the connective tissue between
- * them and would swamp the strip without telling anyone anything.
+ * A moment rare enough to be worth its own mark on a strip. Claiming track is the everyday move —
+ * forty of them per game, which as forty glyphs is a smear rather than a signal — so it lives on
+ * the turn as `track` instead. What is left is the handful of turns someone will want to find
+ * again: a station going up, a tunnel gamble.
  */
-export type ReplayMomentKind = 'claim' | 'station' | 'tunnel' | 'repair';
+export type ReplayMomentKind = 'station' | 'tunnel';
 
 export interface ReplayTurn {
   /** Steps [from, to). A step is "n actions applied", so action i is applied at step i + 1. */
@@ -21,6 +22,9 @@ export interface ReplayTurn {
   /** 1-based turn number; 0 for the opening draft. */
   readonly index: number;
   readonly setup: boolean;
+  /** Routes claimed or repaired this turn. Turning cards into track is the move that moves a game,
+   *  so a transport can weight the turn by it and skip drawing every claim separately. */
+  readonly track: number;
 }
 
 export interface ReplayMoment {
@@ -39,21 +43,24 @@ export interface ReplayTimeline {
   readonly turnCount: number;
 }
 
-/** A tunnel claim is two actions (CLAIM_ROUTE → RESOLVE_TUNNEL); the resolve carries the outcome,
- *  so it owns the marker rather than the pair stamping two glyphs side by side. */
-const momentKind = (action: Action, next: Action | undefined): ReplayMomentKind | null => {
+const momentKind = (action: Action): ReplayMomentKind | null => {
   switch (action.t) {
-    case 'CLAIM_ROUTE':
-      return next?.t === 'RESOLVE_TUNNEL' && next.player === action.player ? null : 'claim';
+    // Either outcome: the drama is the reveal, and an abort is exactly the turn you want to find.
     case 'RESOLVE_TUNNEL':
       return 'tunnel';
     case 'BUILD_STATION':
       return 'station';
-    case 'REPAIR_ROUTE':
-      return 'repair';
     default:
       return null;
   }
+};
+
+/** Did this action put track on the board? A tunnel claim is two actions (CLAIM_ROUTE →
+ *  RESOLVE_TUNNEL) and only counts once, and not at all if the player backed out of the bore. */
+const laysTrack = (action: Action, next: Action | undefined): boolean => {
+  if (action.t === 'REPAIR_ROUTE') return true;
+  if (action.t !== 'CLAIM_ROUTE') return false;
+  return !(next?.t === 'RESOLVE_TUNNEL' && next.player === action.player && !next.commit);
 };
 
 /**
@@ -76,20 +83,25 @@ export function buildReplayTimeline(
   // a round of play that never happened.
   if (actions[0]?.t === 'KEEP_INITIAL_TICKETS') {
     while (actions[i]?.t === 'KEEP_INITIAL_TICKETS') i++;
-    turns.push({ from: 0, to: i, player: '', seat: -1, index: 0, setup: true });
+    turns.push({ from: 0, to: i, player: '', seat: -1, index: 0, setup: true, track: 0 });
   }
 
   while (i < actions.length) {
     const player = actions[i]!.player as string;
     const from = i;
-    while (i < actions.length && (actions[i]!.player as string) === player) i++;
+    let track = 0;
+    while (i < actions.length && (actions[i]!.player as string) === player) {
+      if (laysTrack(actions[i]!, actions[i + 1])) track += 1;
+      i++;
+    }
     played += 1;
-    turns.push({ from, to: i, player, seat: seats.get(player) ?? 0, index: played, setup: false });
+    const seat = seats.get(player) ?? 0;
+    turns.push({ from, to: i, player, seat, index: played, setup: false, track });
   }
 
   for (let k = 0; k < actions.length; k++) {
     const action = actions[k]!;
-    const kind = momentKind(action, actions[k + 1]);
+    const kind = momentKind(action);
     if (!kind) continue;
     const player = action.player as string;
     moments.push({ step: k + 1, kind, player, seat: seats.get(player) ?? 0 });

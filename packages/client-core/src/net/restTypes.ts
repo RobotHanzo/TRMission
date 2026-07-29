@@ -137,13 +137,21 @@ export interface HistoryPlayer {
   seat: number;
   displayName?: string;
 }
+/**
+ * The engine's `FinalScoreboard`, which the server passes through on every history row. Narrowed
+ * here to the slice a list can use — the wire value carries the full per-category breakdown, and
+ * anything wanting that should read the scoreboard, not widen this.
+ */
+export interface MatchFinalScores {
+  players?: { playerId: string; total: number }[];
+}
 export interface MatchSummary {
   gameId: string;
   players: HistoryPlayer[];
   winners: string[];
   completedAt: string;
   role: 'player' | 'spectator';
-  finalScores: unknown;
+  finalScores: MatchFinalScores | null;
   replayable: boolean;
 }
 export interface ReplayPlayerMeta extends HistoryPlayer {

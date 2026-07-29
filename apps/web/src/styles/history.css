@@ -1,51 +1,177 @@
-.history-screen .card {
-  max-width: 720px;
+/* Game history as a departures board: a block per day, a service per game. Every player reads in
+   the seat livery the board and the replay strip use, so one identity system runs the whole app. */
+.history-screen {
+  max-width: 760px;
   margin: 0 auto;
+  width: 100%;
+  gap: var(--tr-space-6);
 }
+.history-title {
+  margin: 0;
+}
+
+/* ── Day block ──────────────────────────────────────────────────────────────── */
+.history-day {
+  display: grid;
+  gap: var(--tr-space-2);
+}
+/* The timetable column head (game.css `.tray-head`): title ── dashed leader ── count. */
+.history-day-head {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-2);
+}
+.history-day-head h3 {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tr-ink-soft);
+}
+.history-day-head::after {
+  content: '';
+  order: 1;
+  flex: 1;
+  height: 1px;
+  background: repeating-linear-gradient(to right, var(--tr-line) 0 6px, transparent 6px 10px);
+}
+.history-day-count {
+  order: 2;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--tr-surface-2);
+  color: var(--tr-ink-soft);
+  font-family: var(--tr-font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--tr-space-2);
+}
+
+/* ── One service ────────────────────────────────────────────────────────────── */
 .history-row {
+  width: 100%;
   display: flex;
   align-items: center;
   gap: var(--tr-space-3);
-  padding: var(--tr-space-3) 0;
-  border-top: 1px solid var(--tr-line);
+  text-align: left;
+  padding: var(--tr-space-3);
+  background: var(--tr-surface);
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius);
+  color: inherit;
+  font: inherit;
 }
-.history-row:first-of-type {
-  border-top: none;
+button.history-row:hover:not(:disabled) {
+  filter: none;
+  border-color: color-mix(in srgb, var(--tr-blue) 45%, var(--tr-line));
+  box-shadow: var(--tr-shadow);
 }
-.history-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 160px;
+button.history-row:disabled {
+  opacity: 1; /* the row is still worth reading; only the go-arrow says it cannot be opened */
+  cursor: not-allowed;
+  background: color-mix(in srgb, var(--tr-surface-2) 40%, var(--tr-surface));
 }
-.history-date {
-  font-size: 0.85em;
-  color: var(--tr-ink-soft);
+.history-row.is-static {
+  cursor: default;
 }
-.history-role {
-  font-size: 0.75em;
-  width: fit-content;
-  padding: 1px var(--tr-space-2);
-  border-radius: 999px;
-  border: 1px solid currentColor;
-  color: var(--tr-ink-soft);
+
+/* Departure time — mono and tabular so the column aligns down the day. */
+.history-time {
+  flex: none;
+  font-family: var(--tr-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.92rem;
+  letter-spacing: 0.02em;
+  color: var(--tr-ink);
 }
+
 .history-players {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   gap: var(--tr-space-1) var(--tr-space-2);
 }
+.history-player {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 6px 2px 4px;
+  border-radius: var(--tr-radius-sm);
+  font-size: 0.82rem;
+  color: var(--tr-ink-soft);
+}
+/* The seat's livery bar — the same mark the replay's perspective switcher and strip use. */
+.history-livery {
+  width: 3px;
+  height: 12px;
+  border-radius: 1px;
+  background: var(--seat);
+  flex: none;
+}
+/* Winning is the one thing a history row exists to answer, so it gets the fill. */
 .history-player.is-winner {
+  background: color-mix(in srgb, var(--seat) 15%, transparent);
+  color: var(--tr-ink);
   font-weight: 700;
 }
-.history-player.is-winner::after {
-  content: ' ★';
+.history-player.is-winner .history-livery {
+  height: 15px;
+}
+/* You are named "you"; that is marker enough without a second badge. */
+.history-player.is-me .history-player-name {
+  color: var(--tr-ink);
+}
+.history-player-score {
+  font-family: var(--tr-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.78rem;
+  color: var(--tr-ink-soft);
+}
+.history-player.is-winner .history-player-score {
+  color: var(--tr-ink);
+}
+
+.history-role {
+  flex: none;
+  font-size: 0.72rem;
+  padding: 1px var(--tr-space-2);
+  border-radius: 999px;
+  border: 1px solid var(--tr-line);
+  color: var(--tr-ink-soft);
+}
+.history-go {
+  flex: none;
+  color: var(--tr-ink-soft);
+}
+button.history-row:hover:not(:disabled) .history-go {
+  color: var(--tr-blue);
+}
+button.history-row:disabled .history-go,
+.history-row.is-static .history-go {
+  display: none;
+}
+
+.history-ad-row {
+  list-style: none;
 }
 .history-empty,
 .history-error {
   color: var(--tr-ink-soft);
-  padding: var(--tr-space-2) 0;
+  margin: 0;
 }
 .history-error {
   color: var(--tr-danger);
@@ -55,16 +181,14 @@
 @media (max-width: 700px) {
   .history-row {
     flex-wrap: wrap;
+    row-gap: var(--tr-space-2);
   }
-  .history-meta {
-    min-width: 0;
-  }
-  /* Players get their own full-width line under the meta + replay button. */
+  /* Time and badges hold the top line; the roster gets the full width beneath them. */
   .history-players {
     flex: 1 1 100%;
     order: 3;
   }
-  .history-row > button {
+  .history-go {
     margin-left: auto;
   }
 }

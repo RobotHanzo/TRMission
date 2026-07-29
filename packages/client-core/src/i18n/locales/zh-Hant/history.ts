@@ -10,6 +10,7 @@ export default {
   notReplayable: '此對局由較舊的遊戲版本產生，無法重播',
   unknownMap: '找不到此對局使用的地圖版本',
   loadFailed: '無法載入對局',
+  wonBy: '{{name}} 獲勝',
   perspective: '視角',
   publicView: '公開視角',
   step: '第 {{n}} / {{total}} 步',
