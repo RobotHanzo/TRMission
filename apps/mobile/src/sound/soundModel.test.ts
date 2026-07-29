@@ -9,7 +9,7 @@ const snap = (over: Partial<GameSnapshot>): GameSnapshot =>
   ({ you: { playerId: 'me' }, phase: Phase.AWAIT_ACTION, ...over }) as unknown as GameSnapshot;
 
 describe('cuesFromEvents', () => {
-  it('maps draws/turn/station/route with the self flag', () => {
+  it('maps draws/turn/station/route/repair with the self flag', () => {
     const s = snap({});
     const hits = cuesFromEvents(s, [
       ev('cardDrawnBlind', { playerId: 'me' }),
@@ -18,6 +18,7 @@ describe('cuesFromEvents', () => {
       ev('turnStarted', { playerId: 'p2' }),
       ev('stationBuilt', { playerId: 'p2' }),
       ev('routeClaimed', { playerId: 'me' }),
+      ev('brokenRailRepaired', { playerId: 'p2' }),
     ]);
     expect(hits).toEqual([
       { cue: 'cardDraw', isSelf: true },
@@ -25,6 +26,7 @@ describe('cuesFromEvents', () => {
       { cue: 'yourTurn', isSelf: true }, // opponent turnStarted yields nothing
       { cue: 'stationBuilt', isSelf: false },
       { cue: 'railwayBuilt', isSelf: true },
+      { cue: 'railRepaired', isSelf: false },
     ]);
   });
 

@@ -12,6 +12,7 @@ import gameOverWin from '../../assets/sounds/game-over-win.mp3';
 import gameOverNormal from '../../assets/sounds/game-over-normal.mp3';
 import stationBuilt from '../../assets/sounds/station-built.mp3';
 import railwayBuilt from '../../assets/sounds/railway-built.mp3';
+import railRepaired from '../../assets/sounds/rail-repaired.mp3';
 import eventStart from '../../assets/sounds/event-start.mp3';
 import chatMessage from '../../assets/sounds/chat-message.mp3';
 import countdownWarning from '../../assets/sounds/countdown-warning.mp3';
@@ -28,6 +29,7 @@ export type Cue =
   | 'gameOverNormal'
   | 'stationBuilt'
   | 'railwayBuilt'
+  | 'railRepaired'
   | 'eventStart'
   | 'chatMessage'
   | 'countdownWarning'
@@ -51,6 +53,7 @@ export const CUES: Record<Cue, CueDef> = {
   gameOverNormal: { gain: 0.9, throttleMs: 1000 },
   stationBuilt: { gain: 0.9, throttleMs: 70 },
   railwayBuilt: { gain: 0.9, throttleMs: 70 },
+  railRepaired: { gain: 0.9, throttleMs: 200 },
   eventStart: { gain: 1.0, throttleMs: 300 },
   chatMessage: { gain: 0.7, throttleMs: 200 },
   // Per-turn countdown (issue #13): a tick each of the final seconds, a distinct tone when it lapses.
@@ -70,6 +73,7 @@ export const CUE_ASSETS: Record<Cue, number> = {
   gameOverNormal,
   stationBuilt,
   railwayBuilt,
+  railRepaired,
   eventStart,
   chatMessage,
   countdownWarning,

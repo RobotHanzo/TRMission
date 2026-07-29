@@ -22,6 +22,7 @@ reproducible from the original Mixkit download).
 | `game-over-normal.mp3` | Game over — you didn't win              | Orchestral violin jingle                 | 2280 | —                                        |
 | `station-built.mp3`    | Station built                           | Metal hammer hit                         | 833  | ✅ trim + ×3 + pitch-down/bass (heavier) |
 | `railway-built.mp3`    | Railway claimed                         | Wood hard hit                            | 2182 | ✅ trim + ×3                             |
+| `rail-repaired.mp3`    | Broken rail repaired                    | Wrench metal noises                      | 853  | ✅ 3 segments trimmed + sequenced        |
 | `event-start.mp3`      | Random event start banner               | Game level completed                     | 2059 | —                                        |
 | `chat-message.mp3`     | Chat message received                   | Message pop alert                        | 2354 | —                                        |
 
@@ -75,6 +76,19 @@ ffmpeg -i 833.mp3 -f lavfi -t 0.18 -i anullsrc=r=44100:cl=mono \
 ffmpeg -i 2182.mp3 -f lavfi -t 0.10 -i anullsrc=r=44100:cl=mono \
  -filter_complex "[0:a]aformat=channel_layouts=mono,aresample=44100,$LEAD,$TAIL,asplit=3[h1][h2][h3];[1:a]aformat=channel_layouts=mono,aresample=44100,asplit=2[g1][g2];[h1][g1][h2][g2][h3]concat=n=5:v=0:a=1[out]" \
  -map "[out]" -codec:a libmp3lame -q:a 4 railway-built.mp3
+```
+
+**rail-repaired.mp3** — from Mixkit 853, which is a loose recording of several wrench actions. Three
+of them are cut out and trimmed separately, then sequenced 70 ms apart into one "crank–crank–settle"
+gesture (the spanner counterpart to station-built's hammer and railway-built's clack):
+
+```
+for spec in "a 0.60 1.08" "b 2.44 2.80" "d 3.90 4.12"; do set -- $spec
+  ffmpeg -ss $2 -to $3 -i 853.mp3 -af "aformat=channel_layouts=mono,aresample=44100,$LEAD,$TAIL" w$1.wav
+done
+ffmpeg -i wa.wav -i wb.wav -i wd.wav -f lavfi -t 0.07 -i anullsrc=r=44100:cl=mono \
+ -filter_complex "[3:a]aformat=channel_layouts=mono,aresample=44100,asplit=2[g1][g2];[0:a][g1][1:a][g2][2:a]concat=n=5:v=0:a=1,volume=6dB,alimiter=limit=0.92[out]" \
+ -map "[out]" -ac 1 -ar 44100 -codec:a libmp3lame -q:a 4 rail-repaired.mp3
 ```
 
 ## Synthesized cues (original, no third-party sample)
