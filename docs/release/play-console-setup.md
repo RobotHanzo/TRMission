@@ -59,6 +59,17 @@ rather than improvising in the Console:
   Both stores must name the same set; a mismatch is a review flag. Ours is the advertising id the
   Mobile Ads SDK reads — Google declares the rest of its own collection.
   Deletion URL: `https://<production origin>/account/delete`.
+
+  **`docs/release/play-data-safety.csv` is that list already translated into Play's own taxonomy**
+  — all 38 data types with the Yes rows filled in (collected / shared / ephemeral / required /
+  purposes) and a `what_it_is_in_the_app` column naming the code behind each. Play's importer wants
+  the header row from the template you download in the Console (Data safety → Import from CSV), and
+  it will reject the trailing source column, so reconcile the header and drop that column before
+  uploading — or just read the values off it while clicking through the form. The three
+  app-level answers the CSV does not carry: **encrypted in transit — yes** (HTTPS/WSS only, refresh
+  token in the OS keystore), **users can request deletion — yes** (URL above), **independent
+  security review — no**, **Play Families Policy — not committed** (the app is not designed for
+  children, and declaring otherwise pulls AdMob into the Families certified-SDK list).
 - **Ads**: declare **contains ads** (the app serves AdMob banners + one interstitial — see
   `apps/mobile/src/ads/CLAUDE.md`). This also puts the "Contains ads" badge on the store listing.
   **Government app / COVID-19 app / financial features / news app**: all no.

@@ -1,0 +1,39 @@
+data_category,data_type,collected,collection_purposes,shared,sharing_purposes,processed_ephemerally,collection_optional,what_it_is_in_the_app
+Location,Approximate location,Yes,Advertising or marketing,Yes,Advertising or marketing,No,Required,"Google states the Mobile Ads SDK estimates general location from the IP address. The app itself never requests a location permission and holds no location data. Re-check developers.google.com/admob/android/privacy/play-data-disclosure at submission."
+Location,Precise location,No,,No,,,,Never collected — no location permission is declared.
+Personal info,Name,No,,No,,,,"Display names are declared as user-generated content, not legal names."
+Personal info,Email address,Yes,"App functionality, Account management",No,,No,Optional,"UserDoc.email — password sign-up, Google/Discord OAuth, Apple relay address. Guest accounts have none, which is what makes this optional."
+Personal info,User IDs,Yes,"App functionality, Account management, Fraud prevention security and compliance",No,,No,Required,"UserDoc._id, displayName, OAuth subject ids (oauth.google/discord/apple), userDevices keyed to userId."
+Personal info,Address,No,,No,,,,Never collected.
+Personal info,Phone number,No,,No,,,,Never collected.
+Personal info,Race and ethnicity,No,,No,,,,Never collected.
+Personal info,Political or religious beliefs,No,,No,,,,Never collected.
+Personal info,Sexual orientation,No,,No,,,,Never collected.
+Personal info,Other info,Yes,Fraud prevention security and compliance,No,,No,Required,"UserDoc.lastLoginIp — the client IP of the most recent successful sign-in, kept for abuse and security. Play has no IP data type; this is the honest home and keeps the declaration in lockstep with Apple's Other Data row."
+Financial info,User payment info,No,,No,,,,No in-app purchases anywhere in the dependency tree.
+Financial info,Purchase history,No,,No,,,,No in-app purchases.
+Financial info,Credit score,No,,No,,,,Never collected.
+Financial info,Other financial info,No,,No,,,,Never collected.
+Health and fitness,Health info,No,,No,,,,Never collected.
+Health and fitness,Fitness info,No,,No,,,,Never collected.
+Messages,Emails,No,,No,,,,Never collected.
+Messages,SMS or MMS,No,,No,,,,Never collected.
+Messages,Other in-app messages,Yes,App functionality,No,,No,Optional,"In-game chat — free text plus preset ids — persisted on the game record. Lobby chat is preset-capped and never outlives the room. Optional because a player need never send one."
+Photos and videos,Photos,No,,No,,,,"No image picker; avatars are a URL carried over from the OAuth provider, never an uploaded file."
+Photos and videos,Videos,No,,No,,,,Never collected.
+Audio files,Voice or sound recordings,No,,No,,,,No microphone permission.
+Audio files,Music files,No,,No,,,,Never collected.
+Audio files,Other audio files,No,,No,,,,Never collected.
+Files and docs,Files and docs,No,,No,,,,Never collected.
+Calendar,Calendar events,No,,No,,,,Never collected.
+Contacts,Contacts,No,,No,,,,Never collected.
+App activity,App interactions,Yes,"App functionality, Advertising or marketing, Analytics",Yes,"Advertising or marketing, Analytics",No,Required,"AdMob ad impressions/clicks, plus Sentry's react-navigation screen transitions. This is the row the AdMob SDK drives — hence shared."
+App activity,In-app search history,No,,No,,,,Never collected.
+App activity,Installed apps,No,,No,,,,Never collected.
+App activity,Other user-generated content,Yes,"App functionality, Fraud prevention security and compliance",No,,No,Optional,"Display names, authored custom maps, and abuse-report free text (max 1000 chars, moderation.schemas.ts)."
+App activity,Other actions,Yes,App functionality,No,,No,Required,"Gameplay: finished-game records (seats, scores, deterministic action logs), leaderboard and rating rows, tutorial completion, seen feature intros."
+Web browsing,Web browsing history,No,,No,,,,Never collected.
+App info and performance,Crash logs,Yes,App functionality,Yes,App functionality,No,Required,"Sentry (DSN-gated — a build with no DSN never initialises the SDK) plus the Mobile Ads SDK's own crash logs. Scrubbed through @trm/shared telemetry.ts before egress."
+App info and performance,Diagnostics,Yes,App functionality,Yes,App functionality,No,Required,"Sentry tracing spans, breadcrumbs and tags; the local crashCapture record a user can share from Settings -> About. Same scrubber."
+App info and performance,Other app performance data,No,,No,,,,"Play Vitals is Google's own collection and needs no declaration here."
+Device or other IDs,Device or other IDs,Yes,"Advertising or marketing, Analytics, App functionality",Yes,"Advertising or marketing, Analytics",No,Required,"The Android advertising ID read by the Google Mobile Ads SDK (AD_ID is deliberately not blocked — app.config.ts), and the FCM device push token stored as userDevices._id against the account."
