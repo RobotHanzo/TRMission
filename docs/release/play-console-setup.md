@@ -64,16 +64,17 @@ rather than improvising in the Console:
   whole list — the two overview questions, account creation and deletion, all 38 data types and the
   per-type usage blocks — already answered in Play's import format, ready to upload at **Data
   safety → Import from CSV**. It is generated, not authored: `play-data-safety.mjs` holds the
-  decision table and stamps it onto a CSV exported from the Console, so the row set and order stay
-  whatever Play currently emits.
+  decision table and stamps it onto `data_safety_sample.csv` — Google's own sample, committed
+  alongside — so the row set, the order and every byte outside the answer column are Google's.
 
   ```bash
-  # Play Console → App content → Data safety → Export to CSV (an empty one is fine), then:
-  node docs/release/play-data-safety.mjs ~/Downloads/data_safety_export.csv
+  node docs/release/play-data-safety.mjs                 # regenerate from the committed sample
+  node docs/release/play-data-safety.mjs some-export.csv # …or from a fresh Console export
   ```
 
-  Re-export and re-run before submitting: the script refuses to write if Play has added or renamed
-  a question, which is the whole point of regenerating rather than uploading a stale file.
+  Re-run before submitting, passing a fresh export if Play has changed the form: the script refuses
+  to write if a question it answers has been renamed or removed, or if an answer would need a quoted
+  cell (Google's file never quotes an answer, so neither do we).
   **`play-data-safety.md` is why each answer is what it is** — the mapping back to the code that
   collects each type, plus the four answers that are judgement calls rather than facts. Read it
   before changing a cell.

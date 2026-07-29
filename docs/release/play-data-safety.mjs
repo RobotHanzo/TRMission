@@ -4,13 +4,20 @@
  * (App content → Data safety → Import from CSV).
  *
  * Play's importer wants ITS OWN row set, in its own order, keyed by machine-readable question and
- * response ids. So this does not author a CSV: it takes an export downloaded from the Console
- * (Data safety → Export to CSV — even an empty one) and stamps the ANSWERS below onto the
- * `Response value` column, leaving every other cell byte-identical. Re-download the export and
- * re-run whenever Play adds a question; a question this table says nothing about keeps whatever
- * the export had, and unknown ids in the table are reported rather than silently dropped.
+ * response ids. So this does not author a CSV: it takes Google's own file and stamps the ANSWERS
+ * below onto the `Response value` column, leaving every other byte untouched.
  *
- *   node docs/release/play-data-safety.mjs [path-to-export.csv]
+ *   node docs/release/play-data-safety.mjs [path-to-input.csv]
+ *
+ * The default input is `data_safety_sample.csv` — Google's sample, committed next to this script so
+ * a regeneration needs nothing outside the repo. An export of our own answers (Play Console → Data
+ * safety → Export to CSV) has the identical row set and works just as well; pass it when Play adds
+ * a question, and re-commit it as the new input.
+ *
+ * Two properties are ASSERTED before anything is written, because a file the importer rejects is
+ * worse than no file: the input must round-trip through this script's own CSV reader/writer, and
+ * the output must not introduce a single quoted cell that the input did not already have (every
+ * answer below is therefore free of commas and quotes — see `assertNoNewQuoting`).
  *
  * WHY each answer is what it is — the mapping from these ids back to the code that collects the
  * data — is `play-data-safety.md`. Change one, change the other, and keep both in lockstep with
@@ -22,7 +29,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const DEFAULT_EXPORT = 'C:/Users/natha/Downloads/data_safety_export.csv';
+const DEFAULT_INPUT = resolve(HERE, 'data_safety_sample.csv');
 const OUT = resolve(HERE, 'play-data-safety.csv');
 const DELETION_URL = 'https://trmission.robothanzo.dev/account/delete';
 
@@ -40,8 +47,10 @@ const APP_LEVEL = {
   'PSL_SUPPORTED_ACCOUNT_CREATION_METHODS:PSL_ACM_USER_ID_PASSWORD': 'true',
   'PSL_SUPPORTED_ACCOUNT_CREATION_METHODS:PSL_ACM_OAUTH': 'true',
   'PSL_SUPPORTED_ACCOUNT_CREATION_METHODS:PSL_ACM_OTHER': 'true',
+  // Free text is deliberately comma-free and quote-free so the emitted cell needs no quoting —
+  // Google's own file never quotes a Response value, and `assertNoNewQuoting` keeps it that way.
   PSL_ACM_SPECIFY:
-    'Anonymous guest accounts, created automatically with no credentials so the game can be played without signing up.',
+    'Anonymous guest accounts created automatically with no credentials so the game can be played without signing up.',
 
   'PSL_SUPPORT_DATA_DELETION_BY_USER:DATA_DELETION_YES': 'true',
   PSL_ACCOUNT_DELETION_URL: DELETION_URL,
@@ -52,7 +61,7 @@ const APP_LEVEL = {
   PSL_HAS_OUTSIDE_APP_ACCOUNTS: 'true',
   'PSL_OUTSIDE_APP_ACCOUNT_TYPES:PSL_OUTSIDE_APP_ACCOUNT_TYPE_OTHER': 'true',
   PSL_OUTSIDE_APP_ACCOUNT_TYPE_SPECIFY:
-    'Sign-in with an existing Google, Apple or Discord account, or with a TRMission account created on the browser version of the same game.',
+    'Sign-in with an existing Google / Apple / Discord account or with a TRMission account created on the browser version of the same game.',
 
   // Deliberately blank (all OPTIONAL, none apply): PSL_DATA_COLLECTION_COMPLIES_FAMILY_POLICY —
   // the app is not designed for children and declaring otherwise pulls AdMob into the Families
@@ -182,16 +191,36 @@ const writeCsv = (rows) =>
     .map((r) => r.map((c) => (/[",]/.test(c) ? `"${c.replace(/"/g, '""')}"` : c)).join(','))
     .join('\r\n');
 
+/**
+ * Every line of the output must differ from the input ONLY inside the third cell, and must not have
+ * gained a quote doing it. Google's file never quotes a Response value, so a quoted one is the one
+ * shape we cannot prove their importer accepts — refuse to emit it rather than find out at upload.
+ */
+function assertNoNewQuoting(src, before, after) {
+  const inputLines = before.split('\r\n');
+  const quotes = (line) => (line.match(/"/g) ?? []).length;
+  const bad = after
+    .split('\r\n')
+    .map((line, i) => ({ line, n: i + 1, gained: quotes(line) > quotes(inputLines[i]) }))
+    .filter((r) => r.gained);
+  if (bad.length) {
+    throw new Error(
+      `these output lines quote a cell that ${src} did not — remove commas and quotes from the ` +
+        `answers that produced them:\n  ${bad.map((r) => `${r.n}: ${r.line}`).join('\n  ')}`,
+    );
+  }
+}
+
 // --- main --------------------------------------------------------------------------------------
 
 function main() {
-  const src = process.argv[2] ?? DEFAULT_EXPORT;
+  const src = process.argv[2] ?? DEFAULT_INPUT;
   const raw = readFileSync(src, 'utf8');
   const rows = parseCsv(raw);
 
   if (writeCsv(rows) !== raw) {
     throw new Error(
-      `${src} does not round-trip through this script's CSV reader/writer — Play changed its export ` +
+      `${src} does not round-trip through this script's CSV reader/writer — Play changed its ` +
         `format, so the writer must be re-checked before the output can be trusted.`,
     );
   }
@@ -211,16 +240,20 @@ function main() {
     row[2] = value;
   }
 
-  // A key the export has no row for means Play renamed or dropped a question — never silent.
+  // A key the input has no row for means Play renamed or dropped a question — never silent.
   const orphans = Object.keys(answers).filter((k) => !used.has(k));
   if (orphans.length) {
     throw new Error(`answers reference ids absent from ${src}:\n  ${orphans.join('\n  ')}`);
   }
 
-  writeFileSync(OUT, writeCsv(rows), 'utf8');
+  const out = writeCsv(rows);
+  assertNoNewQuoting(src, raw, out);
+  writeFileSync(OUT, out, 'utf8');
+
   const declared = body.filter((r) => r[0].startsWith('PSL_DATA_TYPES_') && r[2] === 'true');
   console.log(`wrote ${OUT}`);
-  console.log(`  ${body.length} rows, ${changed} response values changed`);
+  console.log(`  from ${src}`);
+  console.log(`  ${body.length} rows, ${changed} response values changed, 0 cells newly quoted`);
   console.log(`  ${declared.length} data types declared: ${declared.map((r) => r[1]).join(', ')}`);
 }
 

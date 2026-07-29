@@ -6,13 +6,23 @@ reasoning. `play-data-safety.mjs` is what generates the CSV — edit the decisio
 CSV, and re-run:
 
 ```bash
-node docs/release/play-data-safety.mjs [path-to-export.csv]   # default: ~/Downloads/data_safety_export.csv
+node docs/release/play-data-safety.mjs [path-to-input.csv]   # default: data_safety_sample.csv
 ```
 
-The input is an export downloaded from **Play Console → App content → Data safety → Export to CSV**
-(an empty one is fine). The script asserts the export round-trips through its own reader/writer
-before writing anything, and refuses to run if the table names a question the export doesn't have —
-so a Play format change fails loud instead of producing a file that imports wrong.
+The input is **`data_safety_sample.csv` — Google's own sample, committed next to the script**, so a
+regeneration needs nothing outside the repo. An export of our real answers (Play Console → App
+content → Data safety → Export to CSV) has an identical row set and works just as well; pass it when
+Play adds a question, and commit it as the new input.
+
+Three properties are asserted before anything is written, because a file the importer rejects is
+worse than no file at all:
+
+- the input round-trips through the script's own CSV reader/writer;
+- the table names no question the input lacks (a rename or removal fails loud);
+- **the output introduces no quoted cell the input did not already have.** Google's file never
+  quotes a `Response value`, so that is the one shape we cannot prove their importer accepts. Every
+  free-text answer here is therefore written without commas or quotes, and the generated file is
+  byte-identical to the sample on all 783 lines except an unquoted third cell.
 
 Keep this in lockstep with `app-store-connect-setup.md` §11 (Apple's table) and
 `apps/web/src/screens/PrivacyScreen.tsx` (the published policy). A store-to-store mismatch is a
