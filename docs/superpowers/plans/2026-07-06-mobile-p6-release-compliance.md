@@ -2282,6 +2282,12 @@ Capture from real devices/simulators in BOTH locales, from real games (bots make
 
 - [ ] **Step 4: Privacy nutrition label (Apple) + Data safety form (Play)**
 
+> **Superseded.** The table below was correct for P6 but predates AdMob (issue #50) and Sentry
+> (issue #44), which added ad identifiers, ad/product-interaction usage data, coarse location and
+> diagnostics — and made "used for tracking" a **yes**. The live declaration is
+> `docs/release/app-store-connect-setup.md` §11 ("App Privacy questionnaire — declare exactly
+> this"); use that one at submission time.
+
 Declare exactly this — no more, no less (matches what the server stores; see `apps/server/src/auth/user.repo.ts`, `src/push/device.repo.ts`, `src/persistence/`):
 
 | Data                                                    | Collected?                     | Linked to identity | Purpose                            | Shared with third parties |

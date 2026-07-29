@@ -49,11 +49,15 @@ rather than improvising in the Console:
   User-Generated Content** (custom maps). Expected outcome: Everyone / PEGI 3 with an interaction
   disclosure.
 - **Target audience**: not primarily designed for children; standard age range.
-- **Data safety form**: the table in Task 9 Step 4 (email, display name, avatar URL, user id, push
-  token, game history, chat/UGC) **plus the AdMob additions** (issue #50): declare
-  **Device or other IDs** — collected, not shared by us, purpose **Advertising or marketing**, not
-  optional — and **App interactions** for the same purpose. The Google Mobile Ads SDK declares the
-  rest of its own collection; ours is the advertising id it reads.
+- **Data safety form**: mirror `docs/release/app-store-connect-setup.md` §11 ("App Privacy
+  questionnaire — declare exactly this"), which is the single up-to-date list — email, display
+  name, avatar URL, user id, push token, game history, chat/UGC, **plus** the AdMob additions
+  (issue #50: **Device or other IDs** and **App interactions**, purpose **Advertising or
+  marketing**, not optional; **Approximate location** if you follow Google's own disclosure, which
+  says the SDK estimates general location from the IP) and the Sentry additions (issue #44:
+  **Crash logs**, **Diagnostics** — collected, shared with Sentry, purpose **App functionality**).
+  Both stores must name the same set; a mismatch is a review flag. Ours is the advertising id the
+  Mobile Ads SDK reads — Google declares the rest of its own collection.
   Deletion URL: `https://<production origin>/account/delete`.
 - **Ads**: declare **contains ads** (the app serves AdMob banners + one interstitial — see
   `apps/mobile/src/ads/CLAUDE.md`). This also puts the "Contains ads" badge on the store listing.

@@ -203,16 +203,10 @@ keywords,privacy_url,support_url}.txt` are already committed. Enter them once by
   report/block moderation surface already shipped; enable the Communication Safety disclosure if
   prompted. Ads are capped to `MaxAdContentRating.G` in code (`src/ads/ads.ts`) so ad content can
   never outrank the app's own rating.
-- **App Privacy (the "nutrition label")**: same data table as Play's Data Safety form (Task 9
-  Step 4) — email, display name, avatar URL, user id, push token, game history, chat/UGC — **plus
-  the AdMob additions** (issue #50): **Identifiers → Device ID** and **Usage Data → Product
-  Interaction**, both for **Third-Party Advertising**, and both flagged **used for tracking**.
-  Answer **yes** to "Does this app use data for tracking?" — that questionnaire, not the privacy
-  manifest, is what the store listing shows. The manifest's matching disclosure is the Device ID
-  entry flagged `NSPrivacyCollectedDataTypeTracking: true`; its top-level `NSPrivacyTracking` flag
-  is deliberately `false` (next bullet). Google's own disclosure table for the Mobile Ads SDK is at
-  developers.google.com/admob/ios/privacy/data-disclosure — check it at submission time rather than
-  trusting this line.
+- **App Privacy (the "nutrition label")**: the full table is the subsection below — it supersedes
+  the one in `docs/superpowers/plans/2026-07-06-mobile-p6-release-compliance.md` Task 9 Step 4,
+  which predates AdMob (issue #50) and Sentry (issue #44) and still says ad identifiers,
+  analytics and tracking are not collected.
 - **ATT**: the app requests App Tracking Transparency (prompt copy is the plugin's
   `userTrackingUsageDescription` in `app.config.ts`). Reviewers do test that the prompt appears and
   that denying it doesn't break the app — it doesn't: consent-gated ads simply go non-personalized.
@@ -228,6 +222,54 @@ keywords,privacy_url,support_url}.txt` are already committed. Enter them once by
 - **EU DSA**: submit the **non-trader** declaration (same as Play).
 - Support/moderation contact: same real monitored mailbox as the Play listing and
   `apps/web/src/screens/PrivacyScreen.tsx`.
+
+### App Privacy questionnaire — declare exactly this
+
+Two top-level answers: **yes**, the app and its partners collect data; **yes**, data is used for
+tracking (AdMob reads the IDFA once ATT is granted — `apps/mobile/src/ads/ads.ts`).
+
+Then, per data type, ASC asks purposes / linked to identity / used for tracking:
+
+| ASC data type                       | What in the app                                                                                                                                      | Purposes                               | Linked | Tracking |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- | ------ | -------- |
+| Contact Info → Email Address        | `UserDoc.email` — password sign-up, Google/Discord OAuth, Apple relay address (guests have none, but "sometimes" ⇒ declare)                          | App Functionality                      | Yes    | No       |
+| Identifiers → User ID               | `UserDoc._id`, `displayName` (Apple's User ID covers "screen name, handle"), OAuth subject ids                                                       | App Functionality                      | Yes    | No       |
+| Identifiers → Device ID             | IDFA via AdMob **and** the FCM/APNs push token (`userDevices._id`, keyed to `userId`)                                                                | Third-Party Advertising, App Function. | Yes    | **Yes**  |
+| Usage Data → Product Interaction    | Finished-game records (seats, scores, action logs), leaderboard stats, tutorial completion, Sentry navigation spans — **plus** AdMob ad interactions | App Function., Third-Party Advertising | Yes    | **Yes**  |
+| Usage Data → Advertising Data       | AdMob — which ads were served/clicked                                                                                                                | Third-Party Advertising                | No     | **Yes**  |
+| User Content → Other User Content   | Chat free text + preset ids on finished games, display names as UGC, custom maps, abuse-report text                                                  | App Functionality                      | Yes    | No       |
+| Diagnostics → Crash Data            | Sentry (DSN-gated) + Mobile Ads SDK crash logs                                                                                                       | App Functionality                      | Yes    | No       |
+| Diagnostics → Performance Data      | Sentry tracing + Mobile Ads SDK                                                                                                                      | App Functionality                      | Yes    | No       |
+| Diagnostics → Other Diagnostic Data | Sentry breadcrumbs/tags, `crashCapture.ts` records shared from Settings                                                                              | App Functionality                      | Yes    | No       |
+| Location → Coarse Location          | Google states the Mobile Ads SDK uses the IP address to estimate a device's general location; the app itself never asks for location permission      | Third-Party Advertising                | No     | **Yes**  |
+| Other Data → Other Data Types       | `UserDoc.lastLoginIp` — sign-in IP kept for abuse/security. Apple has no IP data type; this is the honest home                                       | App Functionality                      | Yes    | No       |
+
+Leave everything else unchecked — Health, Financial Info (no IAP anywhere in the dep tree), Precise
+Location, Contacts, Photos/Videos (no image picker; avatars are the OAuth provider's URL), Audio,
+Browsing/Search History, Purchases, Sensitive Info, Contact Info → Name/Phone/Address.
+
+Two answers that are decisions, not checkboxes — both already reflected in `app.config.ts`:
+
+- **Device ID is _linked_** because the push token is stored against the account, even though the
+  IDFA on its own is not. The manifest carries **two** `NSPrivacyCollectedDataTypeDeviceID` entries
+  for exactly this (repeating a type with different flags is how Apple's format expresses it).
+- **Diagnostics are _linked_** because `src/app/sentry.ts` calls `Sentry.setUser({ id })`. Apple's
+  test is association with the account through any identifier — `sendDefaultPii: false` narrows
+  what is linked, not whether it is. Dropping that call is the only route back to Linked=false, and
+  the manifest must move with it.
+
+Both live in the iOS privacy manifest, so changing either moves the **OTA fingerprint** — it ships
+with a fresh native build on both stores, never as an update.
+
+The manifest is deliberately narrower than this table: it declares the SDK-driven types (device id,
+diagnostics) and the required-reason APIs, while the first-party account/UGC types are declared only
+in the questionnaire, which is what the store listing renders. Google's own disclosure table for the
+Mobile Ads SDK is at developers.google.com/admob/ios/privacy/data-disclosure — re-check it at
+submission time rather than trusting the AdMob rows above.
+
+Play's Data safety form must name the **same** set (`docs/release/play-console-setup.md`); a
+mismatch between the two stores is a review flag. `apps/web/src/screens/PrivacyScreen.tsx` is the
+third copy — keep all three in lockstep whenever collection changes.
 
 ## 12. TestFlight
 

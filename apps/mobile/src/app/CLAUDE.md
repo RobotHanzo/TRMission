@@ -39,12 +39,16 @@ on the RNW web harness.
   screen, which on a hidden-information game includes the player's hand, and the Skia board is a
   single native view whose masking has not been verified on a device. Verify masking on a real
   device before raising either rate.
-- The iOS privacy manifest declares crash/performance/other-diagnostic collection (not linked to
-  identity, not tracking) — keep it in step if the SDK's collection changes.
-- **Mobile stays id-only, unlike web/admin.** The shared denylist was narrowed in 2026-07 so
-  identifiers (email, IP) reach Sentry, and web/admin now attach `{ id, email, username }` with
-  `sendDefaultPii: true`. This surface deliberately did **not** follow: it still sets
-  `sendDefaultPii: false` and `Sentry.setUser({ id })`, because linking diagnostics to identity
-  means flipping `NSPrivacyCollectedDataTypeLinked` and declaring Email Address in `app.config.ts`
-  — which changes the OTA fingerprint, so it needs a fresh native build on both stores. Do the
-  manifest edit and the SDK change in the same release or neither.
+- The iOS privacy manifest declares crash/performance/other-diagnostic collection as **linked to
+  identity, not tracking** — keep it in step if the SDK's collection changes, and keep App Store
+  Connect's questionnaire saying the same (`docs/release/app-store-connect-setup.md` §11).
+- **Mobile stays id-only, unlike web/admin — but id-only is still _linked_.** The shared denylist
+  was narrowed in 2026-07 so identifiers (email, IP) reach Sentry, and web/admin now attach
+  `{ id, email, username }` with `sendDefaultPii: true`. This surface deliberately did **not**
+  follow: it sets `sendDefaultPii: false` and `Sentry.setUser({ id })`. That keeps emails and IPs
+  off events, which narrows WHAT is linked — it does not make the data unlinked. Apple's test is
+  association with the user's account through ANY identifier, and a server-minted account id is
+  one, so `NSPrivacyCollectedDataTypeLinked: true` is the honest declaration for a build that calls
+  `setSentryUser`. Going back to `false` means dropping the `setUser` call; do the manifest edit and
+  the SDK change in the same release or neither — it moves the OTA fingerprint, so either way it
+  needs a fresh native build on both stores.

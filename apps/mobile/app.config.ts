@@ -220,11 +220,16 @@ const config: ExpoConfig = {
     // Apple privacy manifest (ITMS-91053): the required-reason APIs this app's dependency graph
     // touches — AsyncStorage/UserDefaults (CA92.1), file timestamps (expo-updates/sqlite/
     // file-system, C617.1), free disk space (E174.1), system boot time (uptime clocks, 35F9.1).
-    // App Store Connect's App Privacy questionnaire (accounts, UGC, push tokens, advertising) is
-    // filled separately per docs/release/*.
-    // Sentry (issue #44) collects crash, performance and other diagnostic data — declared below.
-    // Those three are app-functionality-only and NOT linked to identity (the only identifier
-    // attached is the server-minted account id, and `sendDefaultPii: false` keeps IPs off events).
+    // App Store Connect's App Privacy questionnaire is filled separately and must name the SAME
+    // data set — the full table (accounts, UGC, push tokens, advertising, diagnostics) is
+    // docs/release/app-store-connect-setup.md §11. The types below are the subset the manifest
+    // covers; the first-party account/UGC types live only in the questionnaire.
+    // Sentry (issue #44) collects crash, performance and other diagnostic data — declared below,
+    // app-functionality-only and **linked to identity**: `src/app/sentry.ts` attaches the
+    // server-minted account id via `Sentry.setUser({ id })`, and Apple's "linked" test is
+    // association with the user's account through ANY identifier, not just PII. `sendDefaultPii:
+    // false` keeps emails/IPs off events, which narrows WHAT is linked, not WHETHER it is.
+    // Dropping the `setUser` call is the only way back to Linked=false — do both or neither.
     //
     // AdMob (issue #50) is why the device id is declared below: personalized ads use the IDFA
     // across apps, which is tracking as ATT defines it, so the app requests ATT (see
@@ -261,20 +266,33 @@ const config: ExpoConfig = {
           ],
         },
         {
+          // The FCM/APNs push token, which is ALSO a device-level id under Apple's DeviceID
+          // definition ("the device's advertising identifier, or other device-level ID"). It is a
+          // separate entry rather than extra purposes on the one above because its flags differ:
+          // the server stores it against the account (`userDevices._id` keyed to `userId`, see
+          // apps/server/src/push/device.repo.ts) so it IS linked, and it is never used for
+          // tracking. NSPrivacyCollectedDataTypes is an array — repeating a data type with
+          // different Linked/Tracking flags is how Apple's format expresses exactly this.
+          NSPrivacyCollectedDataType: 'NSPrivacyCollectedDataTypeDeviceID',
+          NSPrivacyCollectedDataTypeLinked: true,
+          NSPrivacyCollectedDataTypeTracking: false,
+          NSPrivacyCollectedDataTypePurposes: ['NSPrivacyCollectedDataTypePurposeAppFunctionality'],
+        },
+        {
           NSPrivacyCollectedDataType: 'NSPrivacyCollectedDataTypeCrashData',
-          NSPrivacyCollectedDataTypeLinked: false,
+          NSPrivacyCollectedDataTypeLinked: true,
           NSPrivacyCollectedDataTypeTracking: false,
           NSPrivacyCollectedDataTypePurposes: ['NSPrivacyCollectedDataTypePurposeAppFunctionality'],
         },
         {
           NSPrivacyCollectedDataType: 'NSPrivacyCollectedDataTypePerformanceData',
-          NSPrivacyCollectedDataTypeLinked: false,
+          NSPrivacyCollectedDataTypeLinked: true,
           NSPrivacyCollectedDataTypeTracking: false,
           NSPrivacyCollectedDataTypePurposes: ['NSPrivacyCollectedDataTypePurposeAppFunctionality'],
         },
         {
           NSPrivacyCollectedDataType: 'NSPrivacyCollectedDataTypeOtherDiagnosticData',
-          NSPrivacyCollectedDataTypeLinked: false,
+          NSPrivacyCollectedDataTypeLinked: true,
           NSPrivacyCollectedDataTypeTracking: false,
           NSPrivacyCollectedDataTypePurposes: ['NSPrivacyCollectedDataTypePurposeAppFunctionality'],
         },

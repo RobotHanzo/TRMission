@@ -88,9 +88,12 @@ export function initSentry(): boolean {
  * Attach (or clear) the signed-in account id — the id only, never a display name or email.
  *
  * Web and admin attach `{ id, email, username }` (and `sendDefaultPii: true`); this surface stays
- * id-only on purpose. The iOS privacy manifest in `app.config.ts` declares diagnostics as NOT
- * linked to identity, and changing that declaration changes the OTA fingerprint — so raising this
- * means shipping a fresh native build on both stores in the same release. See apps/mobile/CLAUDE.md.
+ * id-only on purpose — but id-only is still LINKED under Apple's definition (association with the
+ * account through any identifier), so the iOS privacy manifest declares the three diagnostic types
+ * with `NSPrivacyCollectedDataTypeLinked: true` and App Store Connect's questionnaire answers the
+ * same. Clearing this call is the only thing that would make Linked=false honest again; if you do
+ * that, flip the manifest in the same change — and note it moves the OTA fingerprint, so it ships
+ * with a fresh native build on both stores. See apps/mobile/CLAUDE.md.
  */
 export function setSentryUser(userId: string | null): void {
   if (!isLive()) return;
