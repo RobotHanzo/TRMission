@@ -28,6 +28,52 @@ const NIGHT_NAVY = '#314d92';
 const SKY_AMBER = '#f0a528';
 const CLOSED_WASH = '#b9bdc2';
 
+/** A chip pinned to a route's midpoint: filled disc, white rim, short label — web `.evt-chip`
+ *  (the route's own `perp` nudge keeps it on the drawn track of a double pair). */
+function RouteChip({
+  m,
+  fill,
+  label,
+  labelColor = '#fff',
+  inv,
+}: {
+  m: RouteRenderModel;
+  fill: string;
+  label: string;
+  labelColor?: string;
+  inv: number;
+}) {
+  return (
+    <Group transform={[{ translateX: m.perp.x * inv }, { translateY: m.perp.y * inv }]}>
+      <Circle cx={m.mid.x} cy={m.mid.y} r={2.6 * inv} color={fill} />
+      <Circle
+        cx={m.mid.x}
+        cy={m.mid.y}
+        r={2.6 * inv}
+        style="stroke"
+        strokeWidth={0.32 * inv}
+        color="#fff"
+      />
+      <BoardText
+        text={label}
+        x={m.mid.x}
+        y={m.mid.y - 1.7 * inv}
+        size={2.8 * inv}
+        color={labelColor}
+        maxWidth={10 * inv}
+      />
+    </Group>
+  );
+}
+
+/** A repaired broken rail still inside its exclusivity window: the repairer's first-claim mark,
+ *  held until the route opens to everyone (web Board.tsx `.broken-exclusive-chip`). It lives with
+ *  the other route chips but renders from MapSceneSkia, NOT from this layer — `brokenCarriages` is
+ *  authored map content, so a repaired rail exists even in a game with random events off. */
+export function BrokenExclusiveChip({ m, inv }: { m: RouteRenderModel; inv: number }) {
+  return <RouteChip m={m} fill={HOTSPOT_AMBER} label="🔧" inv={inv} />;
+}
+
 /** A round city/route badge: filled disc, white rim, short white label — web `.evt-city-badge`.
  *  `dx`/`dy` pick the quadrant (±2.7 × inv, hugging the marker at any zoom). */
 function Badge({
@@ -214,30 +260,7 @@ export function EventOverlayLayer({
         [...reopenRoutes].map((rid) => {
           const m = modelById.get(rid);
           if (!m || owned?.get(rid)) return null;
-          return (
-            <Group
-              key={`reopen:${rid}`}
-              transform={[{ translateX: m.perp.x * inv }, { translateY: m.perp.y * inv }]}
-            >
-              <Circle cx={m.mid.x} cy={m.mid.y} r={2.6 * inv} color={OK_GREEN} />
-              <Circle
-                cx={m.mid.x}
-                cy={m.mid.y}
-                r={2.6 * inv}
-                style="stroke"
-                strokeWidth={0.32 * inv}
-                color="#fff"
-              />
-              <BoardText
-                text="+2"
-                x={m.mid.x}
-                y={m.mid.y - 1.7 * inv}
-                size={2.8 * inv}
-                color="#fff"
-                maxWidth={10 * inv}
-              />
-            </Group>
-          );
+          return <RouteChip key={`reopen:${rid}`} m={m} fill={OK_GREEN} label="+2" inv={inv} />;
         })}
 
       {/* ── city-anchored links & rings ── */}

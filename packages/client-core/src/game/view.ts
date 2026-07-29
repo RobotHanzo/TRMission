@@ -41,6 +41,23 @@ export function brokenRailMap(snap: GameSnapshot): Map<string, BrokenRailInfo> {
   return m;
 }
 
+/**
+ * Repaired broken rails that still carry the repairer's first-claim mark: the exclusivity window
+ * is open and nobody has claimed the route yet. Both boards render a 🔧 chip on these (web
+ * `.broken-exclusive-chip`, mobile `BrokenExclusiveChip`); the value keeps the repair record so a
+ * surface can name the repairer.
+ */
+export function brokenExclusiveRails(
+  broken: ReadonlyMap<string, BrokenRailInfo>,
+  owned: ReadonlyMap<string, OwnershipInfo>,
+): Map<string, BrokenRailInfo> {
+  const m = new Map<string, BrokenRailInfo>();
+  for (const [routeId, info] of broken) {
+    if (info.exclusiveTurnEnds > 0 && !owned.has(routeId)) m.set(routeId, info);
+  }
+  return m;
+}
+
 /** Whether `playerId` may claim this broken-rail route right now (repaired + window rules). */
 export const canClaimBrokenRail = (
   info: BrokenRailInfo | undefined,

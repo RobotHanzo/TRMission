@@ -35,7 +35,7 @@ import {
 import { seatColor } from '../theme/colors';
 import type { BoardEventOverlays } from '../game/events';
 import type { RasterSpec, ZoomBucket } from './camera';
-import { EventOverlayLayer } from './EventOverlayLayer';
+import { BrokenExclusiveChip, EventOverlayLayer } from './EventOverlayLayer';
 import { GeographyLayer, type BoardView } from './GeographyLayer';
 import { RouteLayer } from './RouteLayer';
 import { CityLayer } from './CityLayer';
@@ -101,6 +101,10 @@ export interface MapSceneSkiaProps {
   /** Broken-rail routes that have been repaired (from the snapshot): they render as normal
    *  track again. Omitted (the tutorial specimens) ⇒ every broken route shows its break. */
   repairedRoutes?: ReadonlySet<string> | undefined;
+  /** Repaired broken rails whose exclusivity window is still open (and still unclaimed): each
+   *  carries the repairer's 🔧 first-claim mark. Independent of `events` — a broken rail is
+   *  authored map content, not a random event. */
+  brokenExclusiveRoutes?: ReadonlySet<string> | undefined;
 
   /* ── labels ── */
   cityLabel?: ((city: SceneCity) => string) | undefined;
@@ -228,6 +232,7 @@ export function MapSceneSkia({
   colorBlind,
   showFerryLocos,
   repairedRoutes,
+  brokenExclusiveRoutes,
   cityLabel,
   cityTier,
   bucket,
@@ -358,6 +363,17 @@ export function MapSceneSkia({
           palette={palette}
         />
       )}
+      {/* Repaired broken rail, exclusivity window still open: the repairer's 🔧 first-claim mark
+          (web Board.tsx's `.broken-exclusive-chip`). Live JSX like the event chips — the window
+          ticks down every turn — and deliberately NOT under the `events` gate, since a broken rail
+          is authored content. Dropped at the `far` tier with the other dense route chips. */}
+      {bucket !== 'far' &&
+        brokenExclusiveRoutes &&
+        [...brokenExclusiveRoutes].map((rid) => {
+          const m = modelById.get(rid);
+          if (!m) return null;
+          return <BrokenExclusiveChip key={`broken-exclusive:${rid}`} m={m} inv={inv} />;
+        })}
       {/* Claim glow: the just-claimed route blooms in the owner's seat colour then settles (web
           `.route.just-claimed`, anim-glow-bloom 1.2s). Live JSX — deliberately OUTSIDE the cached
           Picture, so arming/clearing a glow animates without re-recording the static scene. */}

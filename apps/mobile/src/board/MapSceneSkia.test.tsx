@@ -92,6 +92,29 @@ describe('MapSceneSkia', () => {
     expect(() => render(<Scene moving />)).not.toThrow();
   });
 
+  // The repairer's 🔧 first-claim chip renders from the scene itself, NOT the events layer — a
+  // broken rail is authored content, so it must still appear with random events off.
+  it('renders the repaired broken-rail exclusivity chip with no events slice', () => {
+    const broken = TAIWAN_CONTENT.routes[0]!;
+    const scene = (bucket: 'far' | 'local') => (
+      <MapSceneSkia
+        cities={TAIWAN_CONTENT.cities}
+        routes={TAIWAN_CONTENT.routes}
+        geometry={geometry}
+        hubs={hubs}
+        geography={null}
+        view={TAIWAN_BASE_VIEW}
+        repairedRoutes={new Set([broken.id])}
+        brokenExclusiveRoutes={new Set([broken.id])}
+        bucket={bucket}
+        inv={0.3}
+        marker={1.1}
+      />
+    );
+    expect(() => render(scene('local'))).not.toThrow();
+    expect(() => render(scene('far'))).not.toThrow(); // dropped at the far tier, still safe
+  });
+
   it('renders the full random-events overlay set without crashing', () => {
     const [r1, r2, r3, r4] = TAIWAN_CONTENT.routes;
     const [c1, c2, c3, c4, c5, c6] = TAIWAN_CONTENT.cities;

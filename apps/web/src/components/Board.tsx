@@ -19,7 +19,13 @@ import type { GameSnapshot, GameEvent } from '@trm/proto';
 import { CITIES, ROUTES, cityById, routeById, cityName, cityTier } from '../game/content';
 import { boardEventOverlays } from '../game/events';
 import { ROUTE_GEOMETRY, HUB_CITIES } from '../game/routeGeometry';
-import { ownershipMap, brokenRailMap, canClaimBrokenRail, myId } from '../game/view';
+import {
+  ownershipMap,
+  brokenRailMap,
+  brokenExclusiveRails,
+  canClaimBrokenRail,
+  myId,
+} from '../game/view';
 import { zoomBucket } from '../game/lod';
 import {
   transformToView,
@@ -530,6 +536,12 @@ export function Board({
   const owned = useMemo(() => ownershipMap(snapshot), [snapshot]);
   const brokenRails = useMemo(() => brokenRailMap(snapshot), [snapshot]);
   const repairedRoutes = useMemo(() => new Set(brokenRails.keys()), [brokenRails]);
+  // Repaired rails still inside the repairer's exclusivity window (and still unclaimed) — the 🔧
+  // chip below; shared with the mobile board through client-core.
+  const brokenExclusive = useMemo(
+    () => brokenExclusiveRails(brokenRails, owned),
+    [brokenRails, owned],
+  );
   const viewerId = myId(snapshot);
   const stationCities = useMemo(() => {
     const seats = new Map(snapshot.players.map((p) => [p.id, p.seat]));
@@ -774,8 +786,8 @@ export function Board({
                 {/* Repaired broken rail with a live exclusivity window: mark the repairer's
                     first-claim right until it opens to everyone. */}
                 {(() => {
-                  const info = brokenRails.get(r.id);
-                  if (!info || info.exclusiveTurnEnds <= 0 || owned.get(r.id)) return null;
+                  const info = brokenExclusive.get(r.id);
+                  if (!info) return null;
                   return (
                     <g className="evt-chip broken-exclusive-chip" pointerEvents="none">
                       <circle cx={g.mid.x} cy={g.mid.y} pointerEvents="auto">

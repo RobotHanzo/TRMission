@@ -11,7 +11,13 @@ import { MAP_PALETTE_DARK, MAP_PALETTE_LIGHT } from '@trm/map-data';
 import { CITIES, ROUTES, cityById, cityName, routeById } from '../game/content';
 import { boardEventOverlays } from '../game/events';
 import { HUB_CITIES, ROUTE_GEOMETRY } from '../game/routeGeometry';
-import { brokenRailMap, canClaimBrokenRail, myId, ownershipMap } from '../game/view';
+import {
+  brokenExclusiveRails,
+  brokenRailMap,
+  canClaimBrokenRail,
+  myId,
+  ownershipMap,
+} from '../game/view';
 import { cityTier } from '../game/lod';
 import { ACTIVE_BASE_VIEW, ACTIVE_GEOGRAPHY } from '../game/catalog';
 import { getSocket } from '../net/connection';
@@ -324,6 +330,13 @@ function BoardInner({
   const owned = useMemo(() => ownershipMap(snapshot), [snapshot]);
   const brokenRails = useMemo(() => brokenRailMap(snapshot), [snapshot]);
   const repairedRoutes = useMemo(() => new Set(brokenRails.keys()), [brokenRails]);
+  // A repaired rail whose exclusivity window is still open (and still unclaimed) wears the
+  // repairer's 🔧 first-claim mark until it opens to everyone (same client-core derivation the
+  // web Board's chip reads).
+  const brokenExclusiveRoutes = useMemo(
+    () => new Set(brokenExclusiveRails(brokenRails, owned).keys()),
+    [brokenRails, owned],
+  );
   const stationCities = useMemo(() => {
     const seats = new Map(snapshot.players.map((p) => [p.id, p.seat]));
     return new Map(snapshot.stations.map((s) => [s.cityId, seats.get(s.playerId) ?? 0]));
@@ -532,6 +545,7 @@ function BoardInner({
           highlightCities={highlightCities}
           colorBlind={colorBlind}
           repairedRoutes={repairedRoutes}
+          brokenExclusiveRoutes={brokenExclusiveRoutes}
           cityLabel={(c) => cityName(c.id, locale)}
           cityTier={cityTier}
           bucket={cam.lod.bucket}
