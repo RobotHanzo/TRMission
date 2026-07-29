@@ -37,6 +37,19 @@ export function teamByPlayer(snap: GameSnapshot): Map<string, number> {
   return m;
 }
 
+/**
+ * seat index → team id — the BOARD's ownership palette in a team game (empty in a free-for-all).
+ * Every seat-coloured ownership mark on the map (rail cars, roadbed, stations, claim glows and
+ * sweeps) resolves through this via `ownerColor`, so a side's whole network reads as one colour.
+ * The surrounding chrome (player cards, avatars, chat) keeps the per-seat colour — that is what
+ * still tells two partners apart.
+ */
+export function teamBySeat(snap: GameSnapshot): Map<number, number> {
+  const m = new Map<number, number>();
+  for (const p of snap.players) if (p.team >= 0) m.set(p.seat, p.team);
+  return m;
+}
+
 /** Are these two players on the same side? False in a free-for-all unless they are the same. */
 export function sameTeam(snap: GameSnapshot, a: string, b: string): boolean {
   if (a === b) return true;

@@ -53,12 +53,19 @@ describe('MapSceneSkia', () => {
           owned={
             new Map([
               [firstRoute.id, { ownerSeat: 0 }],
-              // Team-owned: team-coloured cars over a seat-coloured roadbed (RouteLayer's split).
-              [thirdRoute.id, { ownerSeat: 2, ownerTeam: 1 }],
+              [thirdRoute.id, { ownerSeat: 2 }],
               [secondRoute.id, { locked: true }],
             ])
           }
           stations={new Map([[firstCity.id, 1]])}
+          // Team game: seats 0 and 1 are partners, so their rails AND stations paint one colour.
+          teamBySeat={
+            new Map([
+              [0, 0],
+              [1, 0],
+              [2, 1],
+            ])
+          }
           glowingRoutes={new Map([[firstRoute.id, 0]])}
           glowingStations={new Map([[firstCity.id, 1]])}
           highlightCities={new Set([firstCity.id])}

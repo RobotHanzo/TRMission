@@ -30,7 +30,8 @@ export interface RouteShapeProps {
   ferryLocos: number;
   /** Train-length (car count) — drives the loco block's placement. */
   length: number;
-  /** Car / pip fill: the route colour (unclaimed), the owner's seat colour, or muted grey (locked). */
+  /** Car / pip fill: the route colour (unclaimed), the owner's colour (their seat's, or their
+   *  TEAM's in a team game — see MapScene's `paint`), or muted grey (locked). */
   fill: string;
   /** Dimming for a locked (unclaimable double sibling) route. */
   carOpacity?: number;

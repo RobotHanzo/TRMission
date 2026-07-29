@@ -40,7 +40,8 @@ import { frameHome } from '../game/frameHome';
 import { homeBounds } from '@trm/client-core/game/boardModel';
 import { ACTIVE_BASE_VIEW, ACTIVE_GEOGRAPHY } from '../game/catalog';
 import { MapScene } from './MapScene';
-import { seatColor } from '../theme/colors';
+import { teamBySeat } from '@trm/client-core/game/teams';
+import { ownerColor } from '../theme/colors';
 import { useUi, type Locale } from '../store/ui';
 import { useGame, useGameStore } from '../store/game';
 import { useAnimationsStore } from '../store/animations';
@@ -561,6 +562,9 @@ export function Board({
 }: BoardProps) {
   const { t } = useTranslation();
   const owned = useMemo(() => ownershipMap(snapshot), [snapshot]);
+  // A team game's board palette: every ownership mark below (rails, roadbed, stations, glows,
+  // sweeps) paints the owner's TEAM colour. Empty in a free-for-all ⇒ per-seat colours.
+  const teamSeats = useMemo(() => teamBySeat(snapshot), [snapshot]);
   const brokenRails = useMemo(() => brokenRailMap(snapshot), [snapshot]);
   const repairedRoutes = useMemo(() => new Set(brokenRails.keys()), [brokenRails]);
   // Repaired rails still inside the repairer's exclusivity window (and still unclaimed) — the 🔧
@@ -730,6 +734,7 @@ export function Board({
             view={ACTIVE_BASE_VIEW}
             owned={owned}
             stations={stationCities}
+            teamBySeat={teamSeats}
             glowingRoutes={startedGlowRoutes}
             glowingStations={glowingStations}
             highlightCities={highlightCities}
@@ -973,7 +978,7 @@ export function Board({
               );
             })}
 
-            {/* Ticket-completion sweep: seat-colour glow drawn start→end along the owned path. */}
+            {/* Ticket-completion sweep: owner-colour glow drawn start→end along the owned path. */}
             {sweeps.map((sw) => (
               <g key={sw.id} className="sweep-layer" pointerEvents="none">
                 {sw.path.map((rid, i) => {
@@ -986,7 +991,10 @@ export function Board({
                       d={sg.path}
                       pathLength={1}
                       style={
-                        { '--seat': seatColor(sw.seat), '--delay': `${i * 0.32}s` } as CSSProperties
+                        {
+                          '--seat': ownerColor(sw.seat, teamSeats),
+                          '--delay': `${i * 0.32}s`,
+                        } as CSSProperties
                       }
                     />
                   );
@@ -994,7 +1002,7 @@ export function Board({
               </g>
             ))}
 
-            {/* Longest-trail review: a persistent seat-colour sweep along the player's longest route. */}
+            {/* Longest-trail review: a persistent owner-colour sweep along the player's longest route. */}
             {routeReveal && (
               <g className="sweep-layer reveal-layer" pointerEvents="none">
                 {routeReveal.path.map((rid, i) => {
@@ -1008,7 +1016,7 @@ export function Board({
                       pathLength={1}
                       style={
                         {
-                          '--seat': seatColor(routeReveal.seat),
+                          '--seat': ownerColor(routeReveal.seat, teamSeats),
                           '--delay': `${i * 0.12}s`,
                         } as CSSProperties
                       }

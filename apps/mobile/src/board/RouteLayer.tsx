@@ -26,7 +26,7 @@ import {
   LIVERY_COLORS,
   type MapPalette,
 } from '@trm/map-data';
-import { CARD_COLOR_TOKENS, GRAY_TOKEN, seatColor, teamColor } from '../theme/colors';
+import { CARD_COLOR_TOKENS, GRAY_TOKEN, ownerColor } from '../theme/colors';
 import { BoardText } from './skiaText';
 import { ferryLocoBlock, type RouteRenderModel } from './scenePaths';
 import type { RouteOwnership } from './MapSceneSkia';
@@ -73,6 +73,9 @@ function mixHex(a: string, b: string, t: number): string {
 export interface RouteLayerProps {
   model: readonly RouteRenderModel[];
   owned?: ReadonlyMap<string, RouteOwnership> | undefined;
+  /** seat → team (client-core `teamBySeat`): a claimed route paints its owner's TEAM colour in a
+   *  team game — cars AND roadbed — so a side's network reads as one. Omitted ⇒ per-seat. */
+  teamBySeat?: ReadonlyMap<number, number> | undefined;
   colorBlind?: boolean | undefined;
   /** Draw required-loco rainbow pips on unclaimed ferries (default true). */
   showFerryLocos?: boolean | undefined;
@@ -89,6 +92,7 @@ export interface RouteLayerProps {
 export function RouteLayer({
   model,
   owned,
+  teamBySeat,
   colorBlind,
   showFerryLocos = true,
   repairedRoutes,
@@ -100,23 +104,18 @@ export function RouteLayer({
       {model.map((m) => {
         const o = owned?.get(m.id);
         const isOwned = !!o;
-        // Unclaimed → route colour; claimed → the owner's colour (in a TEAM game their team's, so
-        // a side's network reads as one); locked → muted grey.
+        // Unclaimed → route colour; claimed → the owner's colour (their TEAM's in a team game,
+        // via `teamBySeat`); locked → muted grey.
         const fill =
-          o?.ownerTeam !== undefined
-            ? teamColor(o.ownerTeam)
-            : o?.ownerSeat !== undefined
-              ? seatColor(o.ownerSeat)
-              : o?.locked
-                ? LOCKED_GREY
-                : colorOf(m.color);
-        const carOpacity = o?.locked ? 0.45 : 1;
-        // A claimed route washes its roadbed with 50% of the owner's seat colour — the PLAYER's
-        // own colour even in a team game, under the team-coloured cars; others stay paper.
-        const bedColor =
           o?.ownerSeat !== undefined
-            ? mixHex(seatColor(o.ownerSeat), PALETTE.surface, 0.5)
-            : PALETTE.surface;
+            ? ownerColor(o.ownerSeat, teamBySeat)
+            : o?.locked
+              ? LOCKED_GREY
+              : colorOf(m.color);
+        const carOpacity = o?.locked ? 0.45 : 1;
+        // A claimed route washes its roadbed with 50% of that same owner colour; others stay paper.
+        const bedColor =
+          o?.ownerSeat !== undefined ? mixHex(fill, PALETTE.surface, 0.5) : PALETTE.surface;
         const bedW = (isOwned ? D.bedOwnedW : D.bedW) * inv;
         const slotStrokeW = (isOwned ? D.slotOwnedStrokeW : D.slotStrokeW) * inv;
         const slotH = D.slotH * inv;

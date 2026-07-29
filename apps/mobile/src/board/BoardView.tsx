@@ -12,6 +12,7 @@ import { CITIES, ROUTES, cityById, cityName, routeById } from '../game/content';
 import { boardEventOverlays } from '../game/events';
 import { HUB_CITIES, ROUTE_GEOMETRY } from '../game/routeGeometry';
 import { brokenExclusiveRails, brokenRailMap, ownershipMap } from '../game/view';
+import { teamBySeat } from '@trm/client-core/game/teams';
 import { cityTier } from '../game/lod';
 import { ACTIVE_BASE_VIEW, ACTIVE_GEOGRAPHY } from '../game/catalog';
 import { getSocket } from '../net/connection';
@@ -322,6 +323,9 @@ function BoardInner({
   const palette = dark ? MAP_PALETTE_DARK : MAP_PALETTE_LIGHT;
   // ── Derivations from the snapshot (ports Board.tsx's pure useMemos) ──
   const owned = useMemo(() => ownershipMap(snapshot), [snapshot]);
+  // A team game's board palette: every ownership mark (rails, roadbed, stations, glows, sweeps)
+  // paints the owner's TEAM colour. Empty in a free-for-all ⇒ per-seat colours (web Board parity).
+  const teamSeats = useMemo(() => teamBySeat(snapshot), [snapshot]);
   const brokenRails = useMemo(() => brokenRailMap(snapshot), [snapshot]);
   const repairedRoutes = useMemo(() => new Set(brokenRails.keys()), [brokenRails]);
   // A repaired rail whose exclusivity window is still open (and still unclaimed) wears the
@@ -528,6 +532,7 @@ function BoardInner({
           view={ACTIVE_BASE_VIEW}
           owned={owned}
           stations={stationCities}
+          teamBySeat={teamSeats}
           glowingRoutes={startedGlowRoutes}
           glowingStations={glowingStations}
           highlightCities={highlightCities}

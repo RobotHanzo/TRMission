@@ -87,3 +87,15 @@ export const CONFETTI_INTERVAL_MS = 1800;
 
 /** A seat index's display colour (wraps past 6 seats defensively). */
 export const seatColor = (seat: number): string => SEAT_COLORS[seat % 6] ?? '#888';
+
+/**
+ * The colour a seat's mark takes ON THE BOARD: their TEAM's in a team game, their own otherwise.
+ * Pass the snapshot's `teamBySeat` map (`@trm/client-core/game/teams`); omitted or empty — a
+ * free-for-all, the tutorial specimens, the login backdrop — it is exactly `seatColor`.
+ * Both boards route every ownership mark (rails, roadbed, stations, glows, sweeps) through this
+ * one resolver, so web and mobile cannot disagree about whose colour a piece of track is.
+ */
+export const ownerColor = (seat: number, teamBySeat?: ReadonlyMap<number, number>): string => {
+  const team = teamBySeat?.get(seat);
+  return team !== undefined ? teamColor(team) : seatColor(seat);
+};

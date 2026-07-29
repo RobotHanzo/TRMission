@@ -8,7 +8,7 @@ import type { CSSProperties, MouseEvent, PointerEvent, ReactNode, Ref } from 're
 import type { MapGeography, RouteGeometry } from '@trm/map-data';
 import { mapCssVars } from '@trm/map-data';
 import type { View } from '../game/geography';
-import { CARD_COLOR_TOKENS, GRAY_TOKEN, seatColor, teamColor } from '../theme/colors';
+import { CARD_COLOR_TOKENS, GRAY_TOKEN, ownerColor } from '../theme/colors';
 import { Geography, CustomGeography } from './Geography';
 import { RouteShape, FerryLocoGradientDef } from './RouteShape';
 
@@ -35,9 +35,6 @@ export interface SceneRoute {
 /** A route's claim state (from the snapshot): owned by a seat, or locked (double sibling). */
 export interface RouteOwnership {
   readonly ownerSeat?: number | undefined;
-  /** Team games only: the owner's team. The cars take the TEAM's colour; the roadbed under them
-   *  stays the owner's own seat colour (see `fill` / `--seat` below). */
-  readonly ownerTeam?: number | undefined;
   readonly locked?: boolean | undefined;
 }
 
@@ -66,6 +63,10 @@ export interface MapSceneProps<C extends SceneCity, R extends SceneRoute> {
   owned?: ReadonlyMap<string, RouteOwnership> | undefined;
   /** cityId → seat of the player whose station stands there. */
   stations?: ReadonlyMap<string, number> | undefined;
+  /** seat → team (client-core `teamBySeat`) — a TEAM game's board palette. Every ownership mark
+   *  (rails, roadbed, stations, claim glows) paints the owner's TEAM colour, so a side's network
+   *  reads as one. Omitted/empty (free-for-all, specimens, backdrop) → per-seat colours. */
+  teamBySeat?: ReadonlyMap<number, number> | undefined;
   /** routeId → seat: routes currently running their claim glow. */
   glowingRoutes?: ReadonlyMap<string, number> | undefined;
   /** cityId → seat: stations currently running their just-built ring. */
@@ -147,6 +148,7 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
   view,
   owned,
   stations,
+  teamBySeat,
   glowingRoutes,
   glowingStations,
   highlightCities,
@@ -179,6 +181,9 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
   children,
 }: MapSceneProps<C, R>) {
   const viewBox = `${view.x} ${view.y} ${view.w} ${view.h}`;
+  // Every ownership mark on this scene paints through here: a seat's own colour normally, its
+  // TEAM's in a team game (see the `teamBySeat` prop).
+  const paint = (seat: number): string => ownerColor(seat, teamBySeat);
   // The shared dimension tokens ride on the root, so every game.css rule below resolves them.
   const rootStyle: CSSProperties = { ...(mapCssVars() as CSSProperties), ...style };
   return (
@@ -207,16 +212,14 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
         const claimable =
           !!canClaim && !o && !!onRouteClick && (claimFilter ? claimFilter(r) : true);
         const clickable = claimable || (!!alwaysHitRoutes && !!onRouteClick);
-        // Unclaimed → route colour; claimed → the owner's colour (in a TEAM game their team's, so
-        // a side's network reads as one); locked → muted grey.
+        // Unclaimed → route colour; claimed → the owner's colour (their TEAM's in a team game);
+        // locked → muted grey.
         const fill =
-          o?.ownerTeam !== undefined
-            ? teamColor(o.ownerTeam)
-            : o?.ownerSeat !== undefined
-              ? seatColor(o.ownerSeat)
-              : o?.locked
-                ? '#9aa0a6'
-                : colorOf(r.color);
+          o?.ownerSeat !== undefined
+            ? paint(o.ownerSeat)
+            : o?.locked
+              ? '#9aa0a6'
+              : colorOf(r.color);
         const carOpacity = o?.locked ? 0.45 : 1;
         const isFerry = (r.ferryLocos ?? 0) > 0;
         const kind = r.isTunnel ? ' tunnel' : isFerry ? ' ferry' : '';
@@ -235,9 +238,8 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
           kind +
           (brokenNow ? ' broken' : '') +
           extra;
-        // The owner's seat colour, exposed to CSS so a claimed route tints its whole roadbed
-        // (the "background") to its owner — and the glow bloom reuses the same `--seat`. This
-        // stays the PLAYER's colour even in a team game, where the cars above it go team-coloured.
+        // The owner's colour, exposed to CSS so a claimed route tints its whole roadbed (the
+        // "background") to its owner — and the glow bloom reuses the same `--seat`.
         const seatCss = glowSeat ?? o?.ownerSeat;
         // Double-route siblings split apart by a perpendicular nudge that counter-scales with
         // the track weight (--inv-scale), so the twin tracks stay snug at any zoom.
@@ -247,7 +249,7 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
                 transform: `translate(calc(${g.perp.x.toFixed(3)}px * var(--inv-scale)), calc(${g.perp.y.toFixed(3)}px * var(--inv-scale)))`,
               }
             : null),
-          ...(seatCss !== undefined ? ({ '--seat': seatColor(seatCss) } as CSSProperties) : null),
+          ...(seatCss !== undefined ? ({ '--seat': paint(seatCss) } as CSSProperties) : null),
         };
         const pick = onRouteClick
           ? (e: MouseEvent) => {
@@ -367,14 +369,14 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
                 <rect
                   className={justBuilt ? 'station-hub just-built' : 'station-hub'}
                   transform={`translate(${c.x} ${c.y})`}
-                  style={{ fill: seatColor(stationSeat) }}
+                  style={{ fill: paint(stationSeat) }}
                 />
               ) : (
                 <circle
                   className={justBuilt ? 'station just-built' : 'station'}
                   cx={c.x}
                   cy={c.y}
-                  style={{ fill: seatColor(stationSeat) }}
+                  style={{ fill: paint(stationSeat) }}
                 />
               ))}
             {justBuilt && (
@@ -383,7 +385,7 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
                 cx={c.x}
                 cy={c.y}
                 r={0.5}
-                style={{ '--seat': seatColor(builtSeat) } as CSSProperties}
+                style={{ '--seat': paint(builtSeat) } as CSSProperties}
               />
             )}
             {renderCityOverlay?.(c)}

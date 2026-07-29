@@ -1,12 +1,9 @@
 import { Phase, type GameSnapshot } from '@trm/proto';
-import { teamByPlayer } from './teams';
 
 export interface OwnershipInfo {
+  /** The owner's seat. What COLOUR that paints on the board is `ownerColor`'s call, not this
+   *  map's: in a team game every seat resolves to its team's colour (`teamBySeat`). */
   ownerSeat?: number;
-  /** The owner's team id — only in a TEAM game. Both boards paint a claimed route's CARS in the
-   *  team colour (a side's network reads as one) while the roadbed keeps `ownerSeat`, so you can
-   *  still see which partner laid the track. Absent in a free-for-all. */
-  ownerTeam?: number;
   locked?: boolean;
 }
 
@@ -15,16 +12,11 @@ export const seatByPlayer = (snap: GameSnapshot): Map<string, number> =>
 
 export function ownershipMap(snap: GameSnapshot): Map<string, OwnershipInfo> {
   const seats = seatByPlayer(snap);
-  const teams = teamByPlayer(snap);
   const m = new Map<string, OwnershipInfo>();
   for (const o of snap.ownership) {
-    if (o.cell.case === 'ownerPlayerId') {
-      const team = teams.get(o.cell.value);
-      m.set(o.routeId, {
-        ownerSeat: seats.get(o.cell.value) ?? 0,
-        ...(team !== undefined ? { ownerTeam: team } : {}),
-      });
-    } else if (o.cell.case === 'locked') m.set(o.routeId, { locked: true });
+    if (o.cell.case === 'ownerPlayerId')
+      m.set(o.routeId, { ownerSeat: seats.get(o.cell.value) ?? 0 });
+    else if (o.cell.case === 'locked') m.set(o.routeId, { locked: true });
   }
   return m;
 }

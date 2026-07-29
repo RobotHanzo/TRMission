@@ -1,13 +1,14 @@
 // City + station markers — a Skia port of the MapScene city branch (apps/web/src/components/
 // MapScene.tsx). Hub junctions read as a wider slot; ordinary stops are round dots. A player's
-// station sits inside the marker in their seat colour; an offered-ticket endpoint gets a soft
+// station sits inside the marker in their owner colour (their team's in a team game — see
+// `ownerColor`/`teamBySeat`, the same resolver the rails use); an offered-ticket endpoint gets a soft
 // halo. Markers size off `marker` (web --marker-scale), so they GROW as you zoom in (easier to
 // aim at) while still shrinking on the whole-island view. (The just-built station pop is a LIVE
 // overlay in MapSceneSkia — this layer is recorded into the cached static Picture and must stay
 // animation-free.)
 import { Circle, Group, RoundedRect } from '@shopify/react-native-skia';
 import { MAP_DIMS, MAP_PALETTE_LIGHT, type MapPalette } from '@trm/map-data';
-import { seatColor } from '../theme/colors';
+import { ownerColor } from '../theme/colors';
 import type { SceneCity } from './MapSceneSkia';
 
 const D = MAP_DIMS;
@@ -16,6 +17,9 @@ export interface CityLayerProps {
   cities: readonly SceneCity[];
   hubs: ReadonlySet<string>;
   stations?: ReadonlyMap<string, number> | undefined;
+  /** seat → team (client-core `teamBySeat`): a station takes its owner's TEAM colour in a team
+   *  game, like the rails around it. Omitted ⇒ per-seat colours. */
+  teamBySeat?: ReadonlyMap<number, number> | undefined;
   highlightCities?: ReadonlySet<string> | undefined;
   /** Marker growth (web --marker-scale). */
   marker: number;
@@ -27,6 +31,7 @@ export function CityLayer({
   cities,
   hubs,
   stations,
+  teamBySeat,
   highlightCities,
   marker,
   palette: P = MAP_PALETTE_LIGHT,
@@ -37,6 +42,7 @@ export function CityLayer({
         const isHub = hubs.has(c.id);
         const stationSeat = stations?.get(c.id);
         const hasStation = stationSeat !== undefined;
+        const stationFill = hasStation ? ownerColor(stationSeat, teamBySeat) : P.surface;
         const isTarget = highlightCities?.has(c.id) ?? false;
         const r = (c.isIsland ? D.islandR : D.cityR) * marker;
         const dotStroke = c.isIsland ? P.blue : P.ink;
@@ -90,11 +96,11 @@ export function CityLayer({
                   width={1.5 * marker}
                   height={0.9 * marker}
                   r={0.4 * marker}
-                  color={seatColor(stationSeat)}
+                  color={stationFill}
                 />
               ) : (
                 <>
-                  <Circle cx={c.x} cy={c.y} r={0.7 * marker} color={seatColor(stationSeat)} />
+                  <Circle cx={c.x} cy={c.y} r={0.7 * marker} color={stationFill} />
                   <Circle
                     cx={c.x}
                     cy={c.y}

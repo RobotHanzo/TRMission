@@ -479,9 +479,9 @@
   }
 }
 /* A claimed route paints its roadbed (the "background" under the cars) with a wash of the owner's
-   seat colour, so the whole corridor reads as theirs at a glance; the solid cars still pop on top.
-   `--seat` is set on the route group by the renderer; unowned routes never match this. In a TEAM
-   game the cars go team-coloured and this wash is what still names the partner who laid them. */
+   colour, so the whole corridor reads as theirs at a glance; the solid cars still pop on top.
+   `--seat` is set on the route group by the renderer — the owner's seat colour, or their TEAM's in
+   a team game (MapScene's `paint`) — and unowned routes never match this rule. */
 .route.owned .bed {
   stroke-width: calc(var(--m-bed-owned-w) * 1px * var(--inv-scale));
   stroke: color-mix(in srgb, var(--seat, var(--tr-surface)) 50%, var(--tr-surface));

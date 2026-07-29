@@ -32,7 +32,7 @@ import {
   type MapPalette,
   type RouteGeometry,
 } from '@trm/map-data';
-import { seatColor } from '../theme/colors';
+import { ownerColor } from '../theme/colors';
 import type { BoardEventOverlays } from '../game/events';
 import type { RasterSpec, ZoomBucket } from './camera';
 import { BrokenExclusiveChip, EventOverlayLayer } from './EventOverlayLayer';
@@ -76,9 +76,6 @@ export interface SceneRoute {
 /** A route's claim state (from the snapshot): owned by a seat, or locked (double sibling). */
 export interface RouteOwnership {
   readonly ownerSeat?: number | undefined;
-  /** Team games only: the owner's team. The cars take the TEAM's colour; the roadbed under them
-   *  stays the owner's own seat colour (RouteLayer). */
-  readonly ownerTeam?: number | undefined;
   readonly locked?: boolean | undefined;
 }
 
@@ -96,6 +93,10 @@ export interface MapSceneSkiaProps {
   /* ── game state (all optional — omitted renders the plain base-colour network) ── */
   owned?: ReadonlyMap<string, RouteOwnership> | undefined;
   stations?: ReadonlyMap<string, number> | undefined;
+  /** seat → team (client-core `teamBySeat`) — a TEAM game's board palette. Every ownership mark
+   *  (rails, roadbed, stations, claim glows, sweeps) paints the owner's TEAM colour, so a side's
+   *  network reads as one. Omitted/empty (free-for-all, specimens) → per-seat colours. */
+  teamBySeat?: ReadonlyMap<number, number> | undefined;
   glowingRoutes?: ReadonlyMap<string, number> | undefined;
   glowingStations?: ReadonlyMap<string, number> | undefined;
   highlightCities?: ReadonlySet<string> | undefined;
@@ -156,6 +157,7 @@ interface MapSceneStaticProps {
   view: BoardView;
   owned?: ReadonlyMap<string, RouteOwnership> | undefined;
   stations?: ReadonlyMap<string, number> | undefined;
+  teamBySeat?: ReadonlyMap<number, number> | undefined;
   highlightCities?: ReadonlySet<string> | undefined;
   colorBlind?: boolean | undefined;
   showFerryLocos?: boolean | undefined;
@@ -176,6 +178,7 @@ function MapSceneStatic({
   view,
   owned,
   stations,
+  teamBySeat,
   highlightCities,
   colorBlind,
   showFerryLocos,
@@ -193,6 +196,7 @@ function MapSceneStatic({
       <RouteLayer
         model={model}
         owned={owned}
+        teamBySeat={teamBySeat}
         colorBlind={colorBlind}
         showFerryLocos={showFerryLocos}
         repairedRoutes={repairedRoutes}
@@ -203,6 +207,7 @@ function MapSceneStatic({
         cities={cities}
         hubs={hubs}
         stations={stations}
+        teamBySeat={teamBySeat}
         highlightCities={highlightCities}
         marker={marker}
         palette={palette}
@@ -229,6 +234,7 @@ export function MapSceneSkia({
   view,
   owned,
   stations,
+  teamBySeat,
   glowingRoutes,
   glowingStations,
   highlightCities,
@@ -263,6 +269,7 @@ export function MapSceneSkia({
         view={view}
         owned={owned}
         stations={stations}
+        teamBySeat={teamBySeat}
         highlightCities={highlightCities}
         colorBlind={colorBlind}
         showFerryLocos={showFerryLocos}
@@ -283,6 +290,7 @@ export function MapSceneSkia({
       view,
       owned,
       stations,
+      teamBySeat,
       highlightCities,
       colorBlind,
       showFerryLocos,
@@ -377,7 +385,7 @@ export function MapSceneSkia({
           if (!m) return null;
           return <BrokenExclusiveChip key={`broken-exclusive:${rid}`} m={m} inv={inv} />;
         })}
-      {/* Claim glow: the just-claimed route blooms in the owner's seat colour then settles (web
+      {/* Claim glow: the just-claimed route blooms in the owner's colour then settles (web
           `.route.just-claimed`, anim-glow-bloom 1.2s). Live JSX — deliberately OUTSIDE the cached
           Picture, so arming/clearing a glow animates without re-recording the static scene. */}
       {glowingRoutes &&
@@ -391,14 +399,14 @@ export function MapSceneSkia({
             >
               <GlowBloom
                 path={m.bed}
-                color={seatColor(seat)}
+                color={ownerColor(seat, teamBySeat)}
                 width={MAP_DIMS.bedOwnedW * 2.4 * inv}
                 reduced={!!reducedMotion}
               />
             </Group>
           );
         })}
-      {/* Station build: a radiating seat-colour ring pops out of the city, then a sustained halo
+      {/* Station build: a radiating owner-colour ring pops out of the city, then a sustained halo
           holds until the store clears it (web anim-station-pop + .station-ring, 0.9s). */}
       {glowingStations &&
         [...glowingStations].map(([cid, seat]) => {
@@ -411,12 +419,12 @@ export function MapSceneSkia({
               cy={c.y}
               baseR={MAP_DIMS.cityR * marker}
               strokeW={0.3 * marker}
-              color={seatColor(seat)}
+              color={ownerColor(seat, teamBySeat)}
               reduced={!!reducedMotion}
             />
           );
         })}
-      {/* Ticket-completion sweep: seat-colour glow drawn start→end along the owned path, one
+      {/* Ticket-completion sweep: owner-colour glow drawn start→end along the owned path, one
           segment after another (ports the web's --delay: i*0.32s stagger). Removal timers live in
           the Board (path.length*320 + 900ms). */}
       {sweeps?.map((sw) => (
@@ -428,7 +436,7 @@ export function MapSceneSkia({
               <SweepSegment
                 key={`${sw.id}:${rid}`}
                 path={m.bed}
-                color={seatColor(sw.seat)}
+                color={ownerColor(sw.seat, teamBySeat)}
                 width={5 * inv}
                 delayMs={i * 320}
                 reduced={!!reducedMotion}
@@ -437,7 +445,7 @@ export function MapSceneSkia({
           })}
         </Group>
       ))}
-      {/* Longest-trail review: a persistent seat-colour sweep along the player's longest route
+      {/* Longest-trail review: a persistent owner-colour sweep along the player's longest route
           (cleared by the scoreboard, not a timer). */}
       {routeReveal && (
         <Group>
@@ -448,7 +456,7 @@ export function MapSceneSkia({
               <SweepSegment
                 key={rid}
                 path={m.bed}
-                color={seatColor(routeReveal.seat)}
+                color={ownerColor(routeReveal.seat, teamBySeat)}
                 width={5 * inv}
                 delayMs={i * 120}
                 reduced={!!reducedMotion}
@@ -461,7 +469,7 @@ export function MapSceneSkia({
   );
 }
 
-/** One sweep segment: the route's bed path stroked in the seat colour, trim-animated 0→1 after its
+/** One sweep segment: the route's bed path stroked in the owner colour, trim-animated 0→1 after its
  *  stagger delay (the Skia `end` prop drives the draw-on; reduced motion renders it fully drawn). */
 function SweepSegment({
   path,

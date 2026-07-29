@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import type { GameSnapshot } from '@trm/proto';
-import { liveTeamTally, viewerWon, winnerIds } from '../src/game/teams';
+import { liveTeamTally, teamBySeat, viewerWon, winnerIds } from '../src/game/teams';
 import { ownershipMap } from '../src/game/view';
+import { SEAT_COLORS, TEAM_COLORS, ownerColor } from '../src/theme/colors';
 
 const snap = (finalScores: unknown, me: string | null = 'me'): GameSnapshot =>
   ({
@@ -163,8 +164,8 @@ describe('liveTeamTally', () => {
   });
 });
 
-// A claimed route carries BOTH colours in a team game: the cars go team-coloured (one network per
-// side) while the roadbed keeps the owner's seat, naming which partner laid the track.
+// Everything a seat owns ON THE BOARD (rails, roadbed, stations, glows) goes team-coloured in a
+// team game: the map below is the single resolver both boards paint through.
 const board = (players: { id: string; seat: number; team: number }[]): GameSnapshot =>
   ({
     players,
@@ -174,25 +175,37 @@ const board = (players: { id: string; seat: number; team: number }[]): GameSnaps
     ],
   }) as unknown as GameSnapshot;
 
-describe('ownershipMap', () => {
-  it("carries the owner's team alongside their seat in a team game", () => {
-    const out = ownershipMap(
-      board([
-        { id: 'me', seat: 0, team: 0 },
-        { id: 'mate', seat: 3, team: 0 },
-      ]),
-    );
-    expect(out.get('r1')).toEqual({ ownerSeat: 3, ownerTeam: 0 });
-    expect(out.get('r2')).toEqual({ locked: true });
+const TEAM_SEATS = [
+  { id: 'me', seat: 0, team: 0 },
+  { id: 'mate', seat: 3, team: 0 },
+  { id: 'p3', seat: 1, team: 1 },
+];
+
+describe('teamBySeat / ownerColor', () => {
+  it('paints both partners in their team colour and the other side in theirs', () => {
+    const seats = teamBySeat(board(TEAM_SEATS));
+    expect([...seats]).toEqual([
+      [0, 0],
+      [3, 0],
+      [1, 1],
+    ]);
+    expect(ownerColor(0, seats)).toBe(TEAM_COLORS[0]);
+    expect(ownerColor(3, seats)).toBe(TEAM_COLORS[0]); // partner: the SAME colour as seat 0
+    expect(ownerColor(1, seats)).toBe(TEAM_COLORS[1]);
   });
 
-  it('leaves the team absent in a free-for-all, so the cars stay the seat colour', () => {
-    const out = ownershipMap(
-      board([
-        { id: 'me', seat: 0, team: -1 },
-        { id: 'mate', seat: 3, team: -1 },
-      ]),
-    );
+  it('is empty in a free-for-all, where ownerColor is exactly seatColor', () => {
+    const seats = teamBySeat(board(TEAM_SEATS.map((p) => ({ ...p, team: -1 }))));
+    expect(seats.size).toBe(0);
+    expect(ownerColor(3, seats)).toBe(SEAT_COLORS[3]);
+    expect(ownerColor(3)).toBe(SEAT_COLORS[3]); // no map at all (specimens, backdrop)
+  });
+});
+
+describe('ownershipMap', () => {
+  it('maps a claimed route to its owner seat, and a locked sibling to locked', () => {
+    const out = ownershipMap(board(TEAM_SEATS));
     expect(out.get('r1')).toEqual({ ownerSeat: 3 });
+    expect(out.get('r2')).toEqual({ locked: true });
   });
 });
