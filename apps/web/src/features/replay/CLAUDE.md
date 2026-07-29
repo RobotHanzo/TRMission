@@ -13,6 +13,11 @@ also isolates the log store), rendered by the standard `GameStage sandbox`. Pers
 re-projects the same step for another seat; seeks rebuild silently (no animations), forward steps
 animate.
 
+The engine `GameConfig` is rebuilt by `@trm/client-core`'s **`replayGameConfig`** — one mapper for
+all three surfaces (here, mobile, `AdminReplayScreen`). A config key it forgets doesn't fail on
+load: genesis renders, then the first recorded action is rejected and the screen reports
+"not replayable" (issue #75, `teamCount`). Add new keys there, never inline in a screen.
+
 ## The transport (`ReplayTransport.tsx`)
 
 The scrubber is a route strip: `@trm/client-core`'s `buildReplayTimeline` groups the action log

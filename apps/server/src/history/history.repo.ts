@@ -3,12 +3,14 @@ import type { Collection, Db } from 'mongodb';
 import { boardForContentHash, winnersOf } from '@trm/engine';
 import type { Action } from '@trm/engine';
 import { MONGO_DB } from '../db/tokens';
-import type {
-  GameDoc,
-  GameEventDoc,
-  MatchHistoryDoc,
-  ReplayVisibility,
-  StoredConfig,
+import {
+  repairStoredConfig,
+  type GameDoc,
+  type GameEventDoc,
+  type GameSnapshotDoc,
+  type MatchHistoryDoc,
+  type ReplayVisibility,
+  type StoredConfig,
 } from '../persistence/types';
 import type { UserDoc } from '../auth/user.repo';
 import type { BotProfile } from '@trm/bots';
@@ -69,6 +71,7 @@ export class HistoryRepo {
   private readonly col: Collection<MatchHistoryDoc>;
   private readonly games: Collection<GameDoc>;
   private readonly events: Collection<GameEventDoc>;
+  private readonly snapshots: Collection<GameSnapshotDoc>;
   private readonly users: Collection<UserDoc>;
   private readonly mapContents: Collection<MapContentDoc>;
 
@@ -76,6 +79,7 @@ export class HistoryRepo {
     this.col = db.collection<MatchHistoryDoc>('matchHistory');
     this.games = db.collection<GameDoc>('games');
     this.events = db.collection<GameEventDoc>('gameEvents');
+    this.snapshots = db.collection<GameSnapshotDoc>('gameSnapshots');
     this.users = db.collection<UserDoc>('users');
     this.mapContents = db.collection<MapContentDoc>('mapContents');
   }
@@ -253,6 +257,21 @@ export class HistoryRepo {
   }
 
   /**
+   * The config a client rebuilds its local engine from. Games started before `teamCount` was
+   * persisted (issue #75) carry a config that reconstructs a FREE-FOR-ALL genesis — a different
+   * RNG stream, so their recorded log is rejected at the first step. One snapshot of the game
+   * repairs it (`state.teams` exists only in a team game); newer docs skip the query entirely.
+   */
+  private async replayConfig(game: GameDoc): Promise<StoredConfig> {
+    if (game.config.teamCount !== undefined) return game.config;
+    const snap = await this.snapshots.findOne(
+      { gameId: game._id },
+      { projection: { 'state.teams': 1 } },
+    );
+    return repairStoredConfig(game.config, snap?.state);
+  }
+
+  /**
    * Full replay payload: stored config + the ordered action log. `status: 'COMPLETED'` is the
    * hard gate — a LIVE game's action log encodes hidden information (payments, kept tickets,
    * deck order via the seed) and must never leave the server. Shipping a FINISHED game's log
@@ -264,7 +283,7 @@ export class HistoryRepo {
     const events = await this.events.find({ gameId }).sort({ seq: 1 }).toArray();
     const last = events[events.length - 1];
     return {
-      config: game.config,
+      config: await this.replayConfig(game),
       engineVersion: game.engineVersion,
       schemaVersion: game.schemaVersion,
       bots: game.bots ?? [],
@@ -292,7 +311,7 @@ export class HistoryRepo {
     const last = events[events.length - 1];
     const archive = await this.col.findOne({ _id: gameId });
     return {
-      config: game.config,
+      config: await this.replayConfig(game),
       engineVersion: game.engineVersion,
       schemaVersion: game.schemaVersion,
       bots: game.bots ?? [],

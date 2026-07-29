@@ -181,12 +181,17 @@ export type ReplayVisibility = 'private' | 'link';
  *  the lazy replay feature narrows them to engine `Action[]`. */
 export interface ReplayPayload {
   gameId: string;
+  /** Rebuild the engine config with `replayGameConfig` (`@trm/client-core/replay/config`) — every
+   *  key here changes the genesis, so a client mapping them by hand drifts as they are added. */
   config: {
     seed: string | number;
     players: { id: string; seat: number }[];
     contentHash: string;
     ruleParams?: Record<string, unknown>;
     shuffleTurnOrder?: boolean;
+    /** Team game (engine ≥ v12), absent ⇒ free-for-all; must be applied when rebuilding the
+     *  GameConfig or the replay draws a free-for-all genesis and rejects action 1 (issue #75). */
+    teamCount?: number;
     /** Widened-RNG-key flag (CWE-331, engine ≥ v13); must be applied when rebuilding the
      *  GameConfig or a v13 replay recomputes the narrow stream and diverges. */
     wideSeed?: boolean;

@@ -14,6 +14,11 @@ export interface StoredConfig {
   contentHash: string;
   ruleParams?: Partial<RuleParams>;
   shuffleTurnOrder?: boolean;
+  /** Team game: how many teams shared this table (engine ≥ v12); absent ⇒ free-for-all. MUST
+   *  round-trip: a team genesis rotates the turn order (one `nextInt`) where a free-for-all
+   *  shuffles it, so dropping this recomputes a different deck and every replayed action is
+   *  rejected at step 1 (issue #75). */
+  teamCount?: number;
   /** Widened-RNG-key flag (CWE-331, engine ≥ v13). MUST round-trip: `initGame` reads it via the
    *  restored config, so dropping it would recompute the narrow stream and fail digest recovery. */
   wideSeed?: boolean;
@@ -203,6 +208,7 @@ export function configToStored(c: GameConfig): StoredConfig {
     contentHash: c.contentHash,
     ...(c.ruleParams ? { ruleParams: c.ruleParams } : {}),
     ...(c.shuffleTurnOrder !== undefined ? { shuffleTurnOrder: c.shuffleTurnOrder } : {}),
+    ...(c.teamCount !== undefined ? { teamCount: c.teamCount } : {}),
     ...(c.wideSeed !== undefined ? { wideSeed: c.wideSeed } : {}),
   };
 }
@@ -214,6 +220,23 @@ export function storedToConfig(s: StoredConfig): GameConfig {
     contentHash: s.contentHash,
     ...(s.ruleParams ? { ruleParams: s.ruleParams } : {}),
     ...(s.shuffleTurnOrder !== undefined ? { shuffleTurnOrder: s.shuffleTurnOrder } : {}),
+    ...(s.teamCount !== undefined && s.teamCount > 0 ? { teamCount: s.teamCount } : {}),
     ...(s.wideSeed !== undefined ? { wideSeed: s.wideSeed } : {}),
   };
+}
+
+/**
+ * Backfill `teamCount` onto a config written before it was persisted (issue #75): those docs
+ * rebuild as a free-for-all, which draws a different genesis and rejects the recorded log.
+ * The persisted STATE always knows — `teams` exists only in a game configured with `teamCount`,
+ * and every snapshot of that game carries it — so any snapshot repairs the config on read.
+ * Games written since carry the key themselves and are returned untouched.
+ */
+export function repairStoredConfig(
+  config: StoredConfig,
+  state: Pick<GameState, 'teams'> | null | undefined,
+): StoredConfig {
+  if (config.teamCount !== undefined) return config;
+  const teamCount = state?.teams?.length ?? 0;
+  return teamCount > 0 ? { ...config, teamCount } : config;
 }

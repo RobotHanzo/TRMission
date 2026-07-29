@@ -44,6 +44,10 @@ export const ReplayPayloadSchema = z.object({
     contentHash: z.string(),
     ruleParams: z.record(z.string(), z.unknown()).optional(),
     shuffleTurnOrder: z.boolean().optional(),
+    // Team game (engine ≥ v12). Must survive to the client: a team genesis rotates the turn
+    // order where a free-for-all shuffles it, so without it the local replay draws a different
+    // deck and rejects the very first recorded action (issue #75).
+    teamCount: z.number().optional(),
     // Widened-RNG-key flag (CWE-331, engine ≥ v13). Must survive to the client or a wide game's
     // local replay would recompute the narrow stream and diverge from the recorded log.
     wideSeed: z.boolean().optional(),

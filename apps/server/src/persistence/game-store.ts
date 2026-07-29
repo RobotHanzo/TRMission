@@ -10,6 +10,7 @@ import type { BotProfile } from '@trm/bots';
 import {
   configToStored,
   storedToConfig,
+  repairStoredConfig,
   GameNotLiveError,
   type GameStorePort,
   type RecoveryData,
@@ -247,7 +248,9 @@ export class MongoGameStore implements GameStorePort {
         : [];
 
     return {
-      config: storedToConfig(game.config),
+      // The snapshot repairs a pre-#75 team config: `restore` overwrites the genesis it builds
+      // from this, but `history()` re-inits from it to backfill a reconnect's action log.
+      config: storedToConfig(repairStoredConfig(game.config, snap?.state)),
       snapshot: snap ? { seq: snap.seq, state: snap.state } : null,
       tail: tail.map((e) => ({ seq: e.seq, action: e.action, stateDigest: e.stateDigest })),
       preSnapshotActions,

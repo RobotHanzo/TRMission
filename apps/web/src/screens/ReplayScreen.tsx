@@ -6,7 +6,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { buildBoard } from '@trm/engine';
 import type { Action, Board, GameConfig } from '@trm/engine';
-import { asPlayerId, type RuleParams, type SeatIndex } from '@trm/shared';
+import { asPlayerId } from '@trm/shared';
+import { replayGameConfig } from '@trm/client-core/replay/config';
 import {
   api,
   ApiError,
@@ -80,23 +81,13 @@ export default function ReplayScreen() {
           setLoad({ kind: 'error', msgKey: 'history.unknownMap' });
           return;
         }
-        const config: GameConfig = {
-          seed: payload.config.seed,
-          players: payload.config.players.map((p) => ({
-            id: asPlayerId(p.id),
-            seat: p.seat as SeatIndex,
-          })),
-          contentHash: payload.config.contentHash,
-          ...(payload.config.ruleParams
-            ? { ruleParams: payload.config.ruleParams as Partial<RuleParams> }
-            : {}),
-          ...(payload.config.shuffleTurnOrder !== undefined
-            ? { shuffleTurnOrder: payload.config.shuffleTurnOrder }
-            : {}),
-          // CWE-331: apply the widened-RNG-key flag so a v13 replay reproduces the wide stream.
-          ...(payload.config.wideSeed !== undefined ? { wideSeed: payload.config.wideSeed } : {}),
-        };
-        setLoad({ kind: 'ready', payload, board, config, actions: payload.actions as Action[] });
+        setLoad({
+          kind: 'ready',
+          payload,
+          board,
+          config: replayGameConfig(payload.config),
+          actions: payload.actions as Action[],
+        });
       })
       .catch((e: unknown) => {
         if (!cancelled)
