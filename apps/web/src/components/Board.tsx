@@ -13,6 +13,7 @@ import {
   TransformComponent,
   useControls,
   useTransformEffect,
+  type ReactZoomPanPinchContentRef,
 } from 'react-zoom-pan-pinch';
 import { Plus, Minus, LocateFixed, Maximize, Minimize, Eye, EyeOff } from 'lucide-react';
 import type { GameSnapshot, GameEvent } from '@trm/proto';
@@ -66,6 +67,22 @@ interface BoardProps {
 }
 
 /**
+ * `useControls()` rebuilds its object (and every method on it, `setTransform` included) on EVERY
+ * render — only the instance behind it is stable. So a camera effect that lists `controls` or
+ * `setTransform` in its dependency array re-runs on every render of the board, and the board
+ * re-renders constantly in a live game (each snapshot, each relayed camera frame at ~12 Hz, each
+ * glow/sweep store tick). For `HomeFramer` that meant re-arming and re-framing home — the player's
+ * zoom silently snapping back mid-game. Hold the controls in a ref and depend on the ref: effects
+ * then fire on their real inputs and nothing else.
+ */
+function useStableControls(): RefObject<ReactZoomPanPinchContentRef> {
+  const controls = useControls();
+  const ref = useRef(controls);
+  ref.current = controls;
+  return ref;
+}
+
+/**
  * Reflects the live zoom onto the viewport: `data-zoom` drives label/badge level-of-detail.
  * `--inv-scale` (≈ 1/scale) counter-scales the labels and track weight so they keep a roughly
  * constant on-screen size as the geography zooms (instead of ballooning, Google-Maps style).
@@ -96,9 +113,13 @@ function ZoomTracker({ targetRef }: { targetRef: RefObject<HTMLDivElement | null
  * same story. So: re-frame whenever the viewport or the board svg changes size, and disarm for good
  * the moment the transform moves for any other reason (a gesture, camera-follow, a tutorial
  * spotlight) — this must never fight whoever is driving the camera.
+ *
+ * The arm/disarm state lives in the effect body, so the effect must run EXACTLY ONCE per mount:
+ * a re-run re-arms it and re-frames home, throwing away wherever the player had zoomed to. Hence
+ * the stable controls ref (see `useStableControls`) — both of its deps are now refs.
  */
 function HomeFramer({ viewportRef }: { viewportRef: RefObject<HTMLDivElement | null> }) {
-  const controls = useControls();
+  const controlsRef = useStableControls();
   const live = useRef<BoardTransform>({ positionX: 0, positionY: 0, scale: 1 });
   useTransformEffect((ref) => {
     live.current = {
@@ -125,7 +146,7 @@ function HomeFramer({ viewportRef }: { viewportRef: RefObject<HTMLDivElement | n
         armed = false;
         return;
       }
-      frameHome(controls, 0, homeBounds(CITIES, ACTIVE_BASE_VIEW));
+      frameHome(controlsRef.current, 0, homeBounds(CITIES, ACTIVE_BASE_VIEW));
       applied = { ...live.current };
     };
     frame();
@@ -134,7 +155,7 @@ function HomeFramer({ viewportRef }: { viewportRef: RefObject<HTMLDivElement | n
     const svg = el.querySelector('svg.board');
     if (svg) ro.observe(svg);
     return () => ro.disconnect();
-  }, [controls, viewportRef]);
+  }, [controlsRef, viewportRef]);
   return null;
 }
 
@@ -206,7 +227,7 @@ function CameraSync({
   snapshot: GameSnapshot;
   viewportRef: RefObject<HTMLDivElement | null>;
 }) {
-  const { setTransform } = useControls();
+  const controlsRef = useStableControls();
   const followActing = useUi((s) => s.followActing);
   const actingCamera = useGameStore((s) => s.actingCamera);
   const recentEvents = useGameStore((s) => s.recentEvents);
@@ -261,8 +282,8 @@ function CameraSync({
     const proj = viewportProjection(viewportRef.current);
     if (!proj || w <= 0 || h <= 0) return;
     const t = viewToTransform(actingCamera.view, proj, w, h);
-    setTransform(t.positionX, t.positionY, t.scale, 150, 'easeOut');
-  }, [followActing, myTurn, currentIsBot, current, actingCamera, setTransform, viewportRef]);
+    controlsRef.current.setTransform(t.positionX, t.positionY, t.scale, 150, 'easeOut');
+  }, [followActing, myTurn, currentIsBot, current, actingCamera, controlsRef, viewportRef]);
 
   // ── Follow a BOT actor: glide to the POI of each NEW spatial action ──
   const lastPoiKey = useRef<string | null>(null);
@@ -279,8 +300,8 @@ function CameraSync({
     if (!proj || w <= 0 || h <= 0) return;
     lastPoiKey.current = poi.key;
     const t = viewToTransform({ cx: poi.x, cy: poi.y, span: BOT_FOLLOW_SPAN }, proj, w, h);
-    setTransform(t.positionX, t.positionY, t.scale, 600, 'easeOut');
-  }, [followActing, myTurn, currentIsBot, current, recentEvents, setTransform, viewportRef]);
+    controlsRef.current.setTransform(t.positionX, t.positionY, t.scale, 600, 'easeOut');
+  }, [followActing, myTurn, currentIsBot, current, recentEvents, controlsRef, viewportRef]);
 
   return null;
 }
@@ -350,7 +371,7 @@ function RouteGlowGate({
  * re-fits whenever the revealed path changes and is otherwise inert.
  */
 function RevealFramer({ viewportRef }: { viewportRef: RefObject<HTMLDivElement | null> }) {
-  const { setTransform } = useControls();
+  const controlsRef = useStableControls();
   const reveal = useAnimationsStore((s) => s.routeReveal);
   useEffect(() => {
     if (!reveal || reveal.path.length === 0) return;
@@ -377,8 +398,8 @@ function RevealFramer({ viewportRef }: { viewportRef: RefObject<HTMLDivElement |
     if (!proj || w <= 0 || h <= 0) return;
     const span = Math.min(100, Math.max(22, Math.max(maxX - minX, maxY - minY) + 16));
     const t = viewToTransform({ cx: (minX + maxX) / 2, cy: (minY + maxY) / 2, span }, proj, w, h);
-    setTransform(t.positionX, t.positionY, t.scale, 500, 'easeOut');
-  }, [reveal, setTransform, viewportRef]);
+    controlsRef.current.setTransform(t.positionX, t.positionY, t.scale, 500, 'easeOut');
+  }, [reveal, controlsRef, viewportRef]);
   return null;
 }
 
@@ -395,7 +416,7 @@ function SpotlightFramer({
   viewportRef: RefObject<HTMLDivElement | null>;
   target: BoardFrameTarget | null | undefined;
 }) {
-  const { setTransform } = useControls();
+  const controlsRef = useStableControls();
   const reduced = useReducedMotion();
   const eventSpotlight = useAnimationsStore((s) => s.eventSpotlight);
   const effective = target ?? eventSpotlight;
@@ -428,8 +449,14 @@ function SpotlightFramer({
     if (!proj || w <= 0 || h <= 0) return;
     const span = Math.min(100, Math.max(22, Math.max(maxX - minX, maxY - minY) + 16));
     const t = viewToTransform({ cx: (minX + maxX) / 2, cy: (minY + maxY) / 2, span }, proj, w, h);
-    setTransform(t.positionX, t.positionY, t.scale, frameDurationMs(effective, reduced), 'easeOut');
-  }, [key, effective, reduced]);
+    controlsRef.current.setTransform(
+      t.positionX,
+      t.positionY,
+      t.scale,
+      frameDurationMs(effective, reduced),
+      'easeOut',
+    );
+  }, [key, effective, reduced, controlsRef, viewportRef]);
   return null;
 }
 

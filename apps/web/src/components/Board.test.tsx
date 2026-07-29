@@ -1,9 +1,14 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { act, render, screen } from '@testing-library/react';
 import { create } from '@bufbuild/protobuf';
 import { GameSnapshotSchema } from '@trm/proto';
 import { Board } from './Board';
+import { frameHome } from '../game/frameHome';
 import { useAnimations } from '../store/animations';
+
+// The home framing is the one thing that must NOT re-run on a re-render (see the re-frame test
+// below); spy on it rather than on the pan/zoom transform, which jsdom can't measure anyway.
+vi.mock('../game/frameHome', () => ({ frameHome: vi.fn() }));
 
 const snap = create(GameSnapshotSchema, {
   stateVersion: 1,
@@ -23,7 +28,10 @@ const snap = create(GameSnapshotSchema, {
 });
 
 describe('Board', () => {
-  beforeEach(() => useAnimations.getState().reset());
+  beforeEach(() => {
+    useAnimations.getState().reset();
+    vi.mocked(frameHome).mockClear();
+  });
 
   it('renders the Taiwan map with the full route graph and localized city names', () => {
     const { container } = render(
@@ -154,6 +162,46 @@ describe('Board', () => {
     );
     expect(container.querySelectorAll('[data-route-id]').length).toBeGreaterThan(60);
     expect(container.querySelector('[data-city-id="taipei"]')).toBeTruthy();
+  });
+
+  it('does not re-frame home on a re-render (a snapshot update must not reset the zoom)', () => {
+    const { rerender } = render(
+      <Board
+        snapshot={snap}
+        locale="zh-Hant"
+        colorBlind={false}
+        canClaim={false}
+        canBuildStation={false}
+        onPickRoute={() => {}}
+        onPickCity={() => {}}
+      />,
+    );
+    const afterMount = vi.mocked(frameHome).mock.calls.length;
+    expect(afterMount).toBeGreaterThan(0); // it DOES frame once, on mount
+
+    // Everything a live game churns through: a new snapshot, and an animations-store tick.
+    const next = create(GameSnapshotSchema, {
+      stateVersion: 2,
+      players: snap.players,
+      ownership: [],
+      stations: [],
+    });
+    rerender(
+      <Board
+        snapshot={next}
+        locale="zh-Hant"
+        colorBlind={false}
+        canClaim={false}
+        canBuildStation={false}
+        onPickRoute={() => {}}
+        onPickCity={() => {}}
+      />,
+    );
+    act(() => useAnimations.getState().pushIntent({ kind: 'glowRoute', routeId: 'R3', seat: 0 }));
+
+    // `useControls()` hands out a fresh object every render; if HomeFramer depends on it, each of
+    // those re-arms the framer and snaps the player's camera back home mid-game.
+    expect(vi.mocked(frameHome).mock.calls.length).toBe(afterMount);
   });
 
   it('does not crash when an events-panel spotlight target is pending in the animations store', () => {
