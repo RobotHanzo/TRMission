@@ -79,6 +79,8 @@ export class AdminErrorBoundary extends Component<Props, State> {
   }
 }
 
+// Literal copies of the dark theme's tokens (tokens.css) — the crash screen must render
+// with no stylesheet, so it cannot read the variables. Keep them in step by hand.
 const styles: Record<string, React.CSSProperties> = {
   root: {
     minHeight: '100vh',
@@ -89,34 +91,35 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 12,
     padding: 32,
     textAlign: 'center',
-    background: '#101823',
-    color: '#ffffff',
-    fontFamily: 'system-ui, -apple-system, "Noto Sans TC", sans-serif',
+    background: '#0a0f14',
+    color: '#e6edf3',
+    fontFamily: 'system-ui, "Segoe UI", "Noto Sans TC", "PingFang TC", sans-serif',
   },
-  title: { fontSize: 22, fontWeight: 700, margin: 0 },
-  body: { fontSize: 15, lineHeight: 1.5, color: '#b7c3d4', margin: 0, maxWidth: 460 },
+  title: { fontSize: 21, fontWeight: 650, letterSpacing: '-0.012em', margin: 0 },
+  body: { fontSize: 14, lineHeight: 1.6, color: '#8b99a7', margin: 0, maxWidth: 460 },
   actions: { display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', marginTop: 8 },
   primary: {
-    borderRadius: 999,
-    border: 'none',
+    borderRadius: 4,
+    border: '1px solid #4ea8f0',
     padding: '12px 24px',
     minHeight: 44,
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: 600,
-    color: '#ffffff',
-    background: '#2f6fed',
+    color: '#06121c',
+    background: '#4ea8f0',
+    boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.16)',
     cursor: 'pointer',
   },
   secondary: {
-    borderRadius: 999,
-    border: '1px solid #3a4a60',
+    borderRadius: 4,
+    border: '1px solid #2a3a49',
     padding: '12px 24px',
     minHeight: 44,
-    fontSize: 15,
-    fontWeight: 600,
-    color: '#b7c3d4',
-    background: 'transparent',
+    fontSize: 14,
+    fontWeight: 500,
+    color: '#8b99a7',
+    background: '#18212b',
     cursor: 'pointer',
   },
-  reference: { fontSize: 12, color: '#7d8ca3', marginTop: 4 },
+  reference: { fontSize: 12, color: '#5f6d7b', marginTop: 4 },
 };

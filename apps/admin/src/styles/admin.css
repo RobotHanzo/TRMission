@@ -1,5 +1,11 @@
 /* 行控中心 shell + component styles. Everything consumes tokens.css so both themes
- * come for free. Layout: left rail (collapsible) + top status strip + fluid content. */
+ * come for free. Layout: left rail (the route diagram) + top status strip + fluid content.
+ *
+ * Two devices carry the whole design; everything else stays quiet so they read:
+ *   1. THE RAIL IS THE LINE. Each nav item is a station node on a running line;
+ *      the current view is the lit node. No pills, no fills — position is the state.
+ *   2. LAMPS AND NAMEPLATES. Status is a small square indicator plate with a lit dot
+ *      (SignalBadge); every section label is stencilled and cut by a hairline. */
 
 * {
   box-sizing: border-box;
@@ -19,6 +25,40 @@ body {
   font-size: 13px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--oc-accent-bg);
+  color: var(--oc-ink);
+}
+
+/* Thin, panel-coloured scrollbars — a dense console should not be framed in
+ * platform-grey gutters. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--oc-line) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--oc-line);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--oc-ink-dim);
+  background-clip: content-box;
 }
 
 button {
@@ -30,15 +70,44 @@ button {
   padding: 0;
 }
 
+/* Fields are recessed into the panel: darker than the surface they sit on,
+ * with the hairline reading as the cut edge. */
 input,
 select,
 textarea {
   font: inherit;
+  font-size: 12.5px;
   color: var(--oc-ink);
-  background: var(--oc-surface);
+  background: var(--oc-surface-2);
   border: 1px solid var(--oc-line);
   border-radius: var(--oc-radius-sm);
-  padding: 6px 10px;
+  padding: 5px 9px;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--oc-ink-dim);
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: var(--oc-ink-dim);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--oc-accent);
+  background: var(--oc-surface);
+}
+
+input[type='checkbox'] {
+  accent-color: var(--oc-accent);
 }
 
 input:focus-visible,
@@ -47,7 +116,7 @@ button:focus-visible,
 a:focus-visible,
 [tabindex]:focus-visible {
   outline: 2px solid var(--oc-accent);
-  outline-offset: 1px;
+  outline-offset: 2px;
 }
 
 a {
@@ -55,10 +124,18 @@ a {
   text-decoration: none;
 }
 
+a:hover {
+  text-decoration: underline;
+}
+
+/* The instrument voice: tabular so columns of figures align, slashed zero so a
+ * hash or an id can be read aloud without ambiguity. */
 code,
 .oc-mono {
   font-family: var(--oc-font-mono);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: slashed-zero tabular-nums;
+  font-size: 12px;
+  letter-spacing: -0.01em;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -73,9 +150,11 @@ code,
 /* ---- shell ------------------------------------------------------------------------ */
 
 .oc-shell {
+  --oc-rail-w: 216px;
+  --oc-line-x: 20px; /* where the running line sits inside the rail */
   display: grid;
-  grid-template-columns: 208px 1fr;
-  grid-template-rows: 44px 1fr;
+  grid-template-columns: var(--oc-rail-w) 1fr;
+  grid-template-rows: 48px 1fr;
   grid-template-areas:
     'rail strip'
     'rail main';
@@ -83,10 +162,10 @@ code,
 }
 
 .oc-shell.rail-collapsed {
-  grid-template-columns: 56px 1fr;
+  --oc-rail-w: 56px;
 }
 
-/* ---- left rail ---------------------------------------------------------------------- */
+/* ---- left rail: the route diagram ---------------------------------------------------- */
 
 .oc-rail {
   grid-area: rail;
@@ -94,16 +173,15 @@ code,
   border-right: 1px solid var(--oc-line);
   display: flex;
   flex-direction: column;
-  padding: var(--oc-space-3) var(--oc-space-2);
-  gap: var(--oc-space-1);
+  padding: var(--oc-space-3) var(--oc-space-2) var(--oc-space-4);
   overflow: hidden;
 }
 
 .oc-brand {
   display: flex;
   align-items: center;
-  gap: var(--oc-space-2);
-  padding: var(--oc-space-2);
+  gap: 9px;
+  padding: var(--oc-space-2) var(--oc-space-2) var(--oc-space-3);
   margin-bottom: var(--oc-space-3);
   color: var(--oc-ink);
   white-space: nowrap;
@@ -120,31 +198,75 @@ code,
 }
 
 .oc-brand .name {
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: 650;
+  font-size: 13.5px;
+  letter-spacing: -0.01em;
 }
 
 .oc-brand .sub {
   display: block;
-  font-size: 10px;
-  color: var(--oc-ink-soft);
-  letter-spacing: 0.08em;
+  margin-top: 1px;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--oc-ink-dim);
+  letter-spacing: var(--oc-track-label);
   text-transform: uppercase;
 }
 
 .oc-nav-item {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: var(--oc-space-2);
-  padding: 8px 10px;
+  gap: 9px;
+  padding: 8px 10px 8px calc(var(--oc-line-x) + 14px);
   border-radius: var(--oc-radius-sm);
   color: var(--oc-ink-soft);
+  font-size: 13px;
   white-space: nowrap;
   transition:
-    background 150ms ease,
-    color 150ms ease;
+    background 140ms ease,
+    color 140ms ease;
   width: 100%;
   text-align: left;
+}
+
+/* The running line: one segment per station, so the line covers exactly the nav
+ * and needs no absolute measuring. It fades in above the first stop and out below
+ * the last — the diagram is a window onto a line that carries on past the panel. */
+.oc-rail > .oc-nav-item::before {
+  content: '';
+  position: absolute;
+  left: var(--oc-line-x);
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--oc-line);
+}
+
+.oc-rail > .oc-nav-item:first-of-type::before {
+  background: linear-gradient(to bottom, transparent, var(--oc-line) 55%);
+}
+
+.oc-rail > .oc-nav-item:last-of-type::before {
+  background: linear-gradient(to bottom, var(--oc-line) 45%, transparent);
+}
+
+/* The station node, drawn over the line in the rail's own colour. */
+.oc-rail > .oc-nav-item::after {
+  content: '';
+  position: absolute;
+  left: calc(var(--oc-line-x) - 3px);
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  margin-top: -3.5px;
+  border-radius: 50%;
+  background: var(--oc-surface);
+  border: 1.5px solid var(--oc-line);
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    box-shadow 140ms ease;
 }
 
 .oc-nav-item:hover {
@@ -152,22 +274,70 @@ code,
   color: var(--oc-ink);
 }
 
+.oc-rail > .oc-nav-item:hover::after {
+  border-color: var(--oc-ink-soft);
+}
+
+/* The occupied block: the node is lit and the line through it is energised. */
 .oc-nav-item.active {
-  background: var(--oc-accent-bg);
   color: var(--oc-accent);
+  font-weight: 600;
+}
+
+.oc-rail > .oc-nav-item.active::before {
+  background: var(--oc-accent-line);
+}
+
+.oc-rail > .oc-nav-item.active::after {
+  background: var(--oc-accent);
+  border-color: var(--oc-accent);
+  box-shadow:
+    0 0 0 3px var(--oc-accent-bg),
+    var(--oc-lamp-glow) rgba(78, 168, 240, var(--oc-lamp-glow-alpha));
 }
 
 .oc-nav-item svg {
   flex: none;
+  opacity: 0.85;
 }
 
+.oc-nav-item.active svg {
+  opacity: 1;
+}
+
+/* The logout control is not a stop on the line. */
+.oc-rail-foot {
+  margin-top: auto;
+  padding-top: var(--oc-space-3);
+  border-top: 1px solid var(--oc-line-soft);
+}
+
+.oc-rail-foot .oc-nav-item {
+  padding-left: 10px;
+}
+
+.oc-rail-foot .oc-nav-item:hover {
+  color: var(--oc-signal-stop);
+}
+
+/* Collapsed to icons there is no room for a diagram — the line and its nodes go. */
 .rail-collapsed .oc-nav-item span,
 .rail-collapsed .oc-brand .text {
   display: none;
 }
 
-.oc-rail-foot {
-  margin-top: auto;
+.rail-collapsed .oc-nav-item {
+  justify-content: center;
+  padding-left: 10px;
+}
+
+.rail-collapsed .oc-rail > .oc-nav-item::before,
+.rail-collapsed .oc-rail > .oc-nav-item::after {
+  display: none;
+}
+
+.rail-collapsed .oc-nav-item.active {
+  background: var(--oc-accent-bg);
 }
 
 /* ---- top strip ---------------------------------------------------------------------- */
@@ -177,10 +347,27 @@ code,
   display: flex;
   align-items: center;
   gap: var(--oc-space-3);
-  padding: 0 var(--oc-space-4);
+  padding: 0 var(--oc-space-4) 0 var(--oc-space-6);
   background: var(--oc-surface);
   border-bottom: 1px solid var(--oc-line);
   min-width: 0;
+}
+
+/* The strip names the block you are standing in; the marker is the same accent tick
+ * the rail uses for the occupied block. */
+.oc-strip .oc-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--oc-ink-soft);
+}
+
+.oc-strip .oc-eyebrow::before {
+  content: '';
+  width: 2px;
+  height: 11px;
+  border-radius: 1px;
+  background: var(--oc-accent);
 }
 
 .oc-strip .spacer {
@@ -190,11 +377,11 @@ code,
 .oc-chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 3px 8px;
+  gap: 7px;
+  padding: 3px 4px 3px 9px;
   border: 1px solid var(--oc-line);
-  border-radius: 999px;
-  font-size: 11px;
+  border-radius: var(--oc-radius-plate);
+  font-size: 11.5px;
   color: var(--oc-ink-soft);
   white-space: nowrap;
 }
@@ -212,8 +399,8 @@ code,
   border-radius: var(--oc-radius-sm);
   color: var(--oc-ink-soft);
   transition:
-    background 150ms ease,
-    color 150ms ease;
+    background 140ms ease,
+    color 140ms ease;
 }
 
 .oc-icon-btn:hover {
@@ -229,7 +416,7 @@ code,
 .oc-copyable {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   max-width: 100%;
   min-width: 0;
   vertical-align: middle;
@@ -248,8 +435,8 @@ code,
   width: 20px;
   height: 20px;
   border-radius: var(--oc-radius-sm);
-  color: var(--oc-ink-soft);
-  opacity: 0.4;
+  color: var(--oc-ink-dim);
+  opacity: 0.25; /* a ghost at rest — discoverable, but the table still reads as data */
   transition:
     opacity 120ms ease,
     background 120ms ease,
@@ -259,14 +446,16 @@ code,
 .oc-copy-btn:hover,
 .oc-copy-btn:focus-visible {
   opacity: 1;
-  background: var(--oc-line);
+  background: var(--oc-surface-3);
   color: var(--oc-ink);
 }
 
 .oc-table tbody tr:hover .oc-copy-btn,
 .oc-account-row:hover .oc-copy-btn,
-.oc-kv:hover .oc-copy-btn {
-  opacity: 0.75;
+.oc-kv:hover .oc-copy-btn,
+.oc-drawer-body .oc-copy-btn,
+.oc-chip .oc-copy-btn {
+  opacity: 0.7;
 }
 
 .oc-copy-btn.copied,
@@ -277,83 +466,96 @@ code,
   color: var(--oc-signal-clear);
 }
 
-/* ---- signal badges ------------------------------------------------------------------ */
+/* ---- signal badges: indicator plates ---------------------------------------------------- */
 
+/* Squared-off plates, not pills: these are lamps screwed to a panel. The dot is lit
+ * (it glows on the dark theme) but never carries the meaning alone — SignalBadge
+ * always renders a text label beside it. */
 .oc-signal {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 2px 8px;
-  border-radius: 999px;
+  padding: 2px 7px;
+  border-radius: var(--oc-radius-plate);
+  border: 1px solid transparent;
   font-size: 11px;
+  font-weight: 500;
   white-space: nowrap;
 }
 
 .oc-signal .dot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   flex: none;
+  background: currentColor;
+  box-shadow: var(--oc-lamp-glow) currentColor;
 }
 
 .oc-signal.clear {
   background: var(--oc-signal-clear-bg);
+  border-color: var(--oc-signal-clear-bg);
   color: var(--oc-signal-clear);
-}
-.oc-signal.clear .dot {
-  background: var(--oc-signal-clear);
 }
 .oc-signal.caution {
   background: var(--oc-signal-caution-bg);
+  border-color: var(--oc-signal-caution-bg);
   color: var(--oc-signal-caution);
-}
-.oc-signal.caution .dot {
-  background: var(--oc-signal-caution);
 }
 .oc-signal.stop {
   background: var(--oc-signal-stop-bg);
+  border-color: var(--oc-signal-stop-bg);
   color: var(--oc-signal-stop);
-}
-.oc-signal.stop .dot {
-  background: var(--oc-signal-stop);
 }
 .oc-signal.neutral {
   background: var(--oc-surface-2);
-  color: var(--oc-ink-soft);
+  border-color: var(--oc-line);
+  color: var(--oc-ink-dim);
 }
 .oc-signal.neutral .dot {
-  background: var(--oc-ink-soft);
+  box-shadow: none;
 }
 
 /* ---- main content ------------------------------------------------------------------- */
 
+/* The ground is the backing board the instruments are mounted on: ruled at the
+ * spacing scale, barely above the noise floor, and only ever visible in the gutters. */
 .oc-main {
   grid-area: main;
   overflow: auto;
   padding: var(--oc-space-6);
   min-width: 0;
+  background-image:
+    linear-gradient(var(--oc-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--oc-grid) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-position: -1px -1px;
 }
 
 .oc-page-title {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.012em;
   margin: 0 0 var(--oc-space-4);
   display: flex;
   align-items: center;
   gap: var(--oc-space-3);
 }
 
+/* Stencilled panel label — the console's second voice, used for every eyebrow,
+ * column head and section head. Small, wide, never lower-case. */
 .oc-eyebrow {
-  font-size: 11px;
-  letter-spacing: 0.08em;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: var(--oc-track-label);
   text-transform: uppercase;
-  color: var(--oc-ink-soft);
+  color: var(--oc-ink-dim);
 }
 
 .oc-info-hint {
   display: inline-flex;
   align-items: center;
-  color: var(--oc-ink-soft);
+  color: var(--oc-ink-dim);
   cursor: help;
 }
 
@@ -364,54 +566,72 @@ code,
   box-shadow: var(--oc-shadow);
 }
 
-/* ---- departure board (overview hero) ------------------------------------------------ */
+/* ---- the readout board (overview hero) ------------------------------------------------ */
 
+/* A row of gauges: each one an engraved nameplate over a big tabular readout.
+ * The figures are the largest thing in the console and the only ones at this size. */
 .oc-board {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 1px;
   background: var(--oc-line);
   border: 1px solid var(--oc-line);
   border-radius: var(--oc-radius);
   overflow: hidden;
   margin-bottom: var(--oc-space-6);
+  box-shadow: var(--oc-shadow);
 }
 
 .oc-board-cell {
   background: var(--oc-surface);
-  padding: var(--oc-space-4);
   display: flex;
   flex-direction: column;
-  gap: var(--oc-space-1);
+}
+
+.oc-board-cell .oc-eyebrow {
+  padding: 7px var(--oc-space-4);
+  background: var(--oc-surface-2);
+  border-bottom: 1px solid var(--oc-line-soft);
+  color: var(--oc-ink-soft);
 }
 
 .oc-board-cell .value {
   font-family: var(--oc-font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: 30px;
+  font-variant-numeric: slashed-zero tabular-nums;
+  font-size: 34px;
   font-weight: 500;
-  line-height: 1.1;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  padding: var(--oc-space-4) var(--oc-space-4) 0;
   color: var(--oc-ink);
 }
 
+/* Colour only ever marks change or status, so a figure lights up as it ticks over. */
 .oc-board-cell .value.ticking {
-  animation: oc-tick 300ms ease;
+  animation: oc-tick 320ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @keyframes oc-tick {
   0% {
-    transform: translateY(-6px);
-    opacity: 0.2;
+    transform: translateY(-7px);
+    opacity: 0;
+    color: var(--oc-accent);
+  }
+  60% {
+    color: var(--oc-accent);
   }
   100% {
     transform: translateY(0);
     opacity: 1;
+    color: var(--oc-ink);
   }
 }
 
 .oc-board-cell .hint {
   font-size: 11px;
-  color: var(--oc-ink-soft);
+  font-variant-numeric: tabular-nums;
+  color: var(--oc-ink-dim);
+  padding: 7px var(--oc-space-4) var(--oc-space-4);
 }
 
 /* ---- stat tiles / grids -------------------------------------------------------------- */
@@ -419,6 +639,7 @@ code,
 .oc-grid {
   display: grid;
   gap: var(--oc-space-4);
+  align-items: start; /* panels size to their content; no stretched dead space */
 }
 
 .oc-grid.cols-2 {
@@ -429,21 +650,38 @@ code,
   padding: var(--oc-space-4);
 }
 
-.oc-tile h3 {
+/* Section heads are stencil labels cut by a hairline that runs to the panel edge —
+ * the same device in tiles and in drawer sections, so hierarchy reads identically
+ * wherever you are. */
+.oc-tile h3,
+.oc-drawer-body section > h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--oc-space-3);
   margin: 0 0 var(--oc-space-3);
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 600;
-  color: var(--oc-ink-soft);
-  letter-spacing: 0.08em;
+  color: var(--oc-ink-dim);
+  letter-spacing: var(--oc-track-label);
   text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.oc-tile h3::after,
+.oc-drawer-body section > h3::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--oc-line-soft);
 }
 
 .oc-kv {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
+  min-height: 30px;
   padding: 6px 0;
-  border-top: 1px solid var(--oc-line);
+  border-top: 1px solid var(--oc-line-soft);
   gap: var(--oc-space-3);
 }
 
@@ -457,7 +695,10 @@ code,
 
 .oc-kv .v {
   font-family: var(--oc-font-mono);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: slashed-zero tabular-nums;
+  font-size: 12px;
+  letter-spacing: -0.01em;
+  text-align: right;
 }
 
 /* ---- tables -------------------------------------------------------------------------- */
@@ -467,6 +708,7 @@ code,
   border: 1px solid var(--oc-line);
   border-radius: var(--oc-radius);
   background: var(--oc-surface);
+  box-shadow: var(--oc-shadow);
 }
 
 table.oc-table {
@@ -480,37 +722,55 @@ table.oc-table {
   top: 0;
   background: var(--oc-surface-2);
   text-align: left;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--oc-ink-soft);
-  padding: 8px 12px;
+  color: var(--oc-ink-dim);
+  padding: 0 14px;
+  height: 33px;
   white-space: nowrap;
+  border-bottom: 1px solid var(--oc-line);
   z-index: 1;
 }
 
 .oc-table td {
-  padding: 0 12px;
-  height: 40px;
-  border-top: 1px solid var(--oc-line);
+  padding: 0 14px;
+  height: 38px;
+  border-top: 1px solid var(--oc-line-soft);
   white-space: nowrap;
   vertical-align: middle;
+}
+
+.oc-table tbody tr:first-child td {
+  border-top: none;
 }
 
 .oc-table td.num,
 .oc-table th.num {
   text-align: right;
   font-family: var(--oc-font-mono);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: slashed-zero tabular-nums;
+  letter-spacing: -0.01em;
 }
 
+.oc-table th.num {
+  font-family: inherit;
+  letter-spacing: 0.12em;
+}
+
+/* Hovering a row lights its left edge — the same "this one is occupied" language
+ * the rail uses, so the two readings are consistent. */
 .oc-table tbody tr {
   transition: background 120ms ease;
 }
 
 .oc-table tbody tr:hover {
   background: var(--oc-surface-2);
+}
+
+.oc-table tbody tr:hover td:first-child {
+  box-shadow: inset 2px 0 0 var(--oc-accent);
 }
 
 .oc-table tbody tr.clickable {
@@ -532,32 +792,39 @@ table.oc-table {
 }
 
 .oc-toolbar input[type='search'] {
-  min-width: 220px;
+  min-width: 240px;
+  height: 28px;
 }
 
+/* A selector switch: the chosen segment is the one raised out of the recess. */
 .oc-tabs {
   display: inline-flex;
+  background: var(--oc-surface-2);
   border: 1px solid var(--oc-line);
   border-radius: var(--oc-radius-sm);
-  overflow: hidden;
+  padding: 2px;
+  gap: 2px;
 }
 
 .oc-tabs button {
-  padding: 5px 12px;
+  padding: 3px 11px;
+  border-radius: 2px;
   color: var(--oc-ink-soft);
-  border-left: 1px solid var(--oc-line);
+  font-size: 11.5px;
   transition:
-    background 150ms ease,
-    color 150ms ease;
+    background 140ms ease,
+    color 140ms ease;
 }
 
-.oc-tabs button:first-child {
-  border-left: none;
+.oc-tabs button:hover {
+  color: var(--oc-ink);
 }
 
 .oc-tabs button.active {
-  background: var(--oc-accent-bg);
+  background: var(--oc-surface);
   color: var(--oc-accent);
+  font-weight: 600;
+  box-shadow: 0 0 0 1px var(--oc-line);
 }
 
 /* ---- buttons -------------------------------------------------------------------------- */
@@ -565,43 +832,56 @@ table.oc-table {
 .oc-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 6px 12px;
+  height: 28px;
+  padding: 0 12px;
   border-radius: var(--oc-radius-sm);
   border: 1px solid var(--oc-line);
-  background: var(--oc-surface);
+  background: var(--oc-surface-2);
   color: var(--oc-ink);
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
   transition:
-    background 150ms ease,
-    border-color 150ms ease;
+    background 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease;
 }
 
-.oc-btn:hover {
-  background: var(--oc-surface-2);
+.oc-btn:hover:not(:disabled) {
+  background: var(--oc-surface-3);
+  border-color: var(--oc-ink-dim);
 }
 
 .oc-btn.primary {
   background: var(--oc-accent);
   border-color: var(--oc-accent);
   color: var(--oc-accent-ink);
+  font-weight: 600;
+  box-shadow: var(--oc-key-highlight);
 }
 
-.oc-btn.primary:hover {
-  filter: brightness(1.08);
+.oc-btn.primary:hover:not(:disabled) {
+  filter: brightness(1.1);
+  background: var(--oc-accent);
+  border-color: var(--oc-accent);
 }
 
 .oc-btn.danger {
   color: var(--oc-signal-stop);
-  border-color: var(--oc-signal-stop);
-  background: transparent;
-}
-
-.oc-btn.danger:hover {
+  border-color: var(--oc-signal-stop-bg);
   background: var(--oc-signal-stop-bg);
 }
 
+.oc-btn.danger:hover:not(:disabled) {
+  background: var(--oc-signal-stop);
+  border-color: var(--oc-signal-stop);
+  color: #fff;
+}
+
 .oc-btn:disabled {
-  opacity: 0.45;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
@@ -610,8 +890,10 @@ table.oc-table {
 .oc-drawer-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(4, 8, 12, 0.5);
+  backdrop-filter: blur(2px);
   z-index: 10;
+  animation: oc-fade-in 160ms ease;
 }
 
 .oc-drawer {
@@ -619,22 +901,32 @@ table.oc-table {
   top: 0;
   right: 0;
   bottom: 0;
-  width: min(480px, 92vw);
+  width: min(500px, 92vw);
   background: var(--oc-surface);
   border-left: 1px solid var(--oc-line);
+  box-shadow: var(--oc-shadow-overlay);
   z-index: 11;
   display: flex;
   flex-direction: column;
-  animation: oc-drawer-in 180ms ease;
+  animation: oc-drawer-in 200ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @keyframes oc-drawer-in {
   from {
-    transform: translateX(24px);
+    transform: translateX(28px);
     opacity: 0;
   }
   to {
     transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes oc-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
     opacity: 1;
   }
 }
@@ -644,20 +936,25 @@ table.oc-table {
   align-items: center;
   justify-content: space-between;
   gap: var(--oc-space-3);
-  padding: var(--oc-space-4);
+  padding: 0 var(--oc-space-3) 0 var(--oc-space-4);
+  height: 48px;
+  flex: none;
+  background: var(--oc-surface-2);
   border-bottom: 1px solid var(--oc-line);
 }
 
 .oc-drawer-head h2 {
   margin: 0;
-  font-size: 14px;
+  font-size: 13.5px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .oc-drawer-body {
-  padding: var(--oc-space-4);
+  padding: var(--oc-space-4) var(--oc-space-4) var(--oc-space-8);
   overflow: auto;
   flex: 1;
 }
@@ -666,12 +963,8 @@ table.oc-table {
   margin-bottom: var(--oc-space-6);
 }
 
-.oc-drawer-body section > h3 {
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--oc-ink-soft);
-  margin: 0 0 var(--oc-space-2);
+.oc-drawer-body section:last-child {
+  margin-bottom: 0;
 }
 
 /* ---- modal (confirm) ------------------------------------------------------------------ */
@@ -679,37 +972,55 @@ table.oc-table {
 .oc-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(4, 8, 12, 0.58);
+  backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 20;
   padding: var(--oc-space-4);
+  animation: oc-fade-in 140ms ease;
 }
 
 .oc-modal {
   background: var(--oc-surface);
   border: 1px solid var(--oc-line);
   border-radius: var(--oc-radius);
-  width: min(420px, 100%);
-  padding: var(--oc-space-4);
+  box-shadow: var(--oc-shadow-overlay);
+  width: min(440px, 100%);
+  padding: var(--oc-space-6);
+  animation: oc-modal-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes oc-modal-in {
+  from {
+    transform: translateY(8px) scale(0.985);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
 }
 
 .oc-modal h2 {
   margin: 0 0 var(--oc-space-2);
   font-size: 14px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .oc-modal p {
   color: var(--oc-ink-soft);
-  margin: 0 0 var(--oc-space-3);
+  margin: 0 0 var(--oc-space-4);
+  line-height: 1.6;
 }
 
 .oc-modal textarea {
   width: 100%;
   resize: vertical;
-  min-height: 60px;
-  margin-bottom: var(--oc-space-3);
+  min-height: 64px;
+  margin-bottom: var(--oc-space-4);
 }
 
 .oc-modal-actions {
@@ -722,7 +1033,8 @@ table.oc-table {
 
 .oc-account-selector input[type='search'] {
   width: 100%;
-  margin-bottom: var(--oc-space-2);
+  height: 30px;
+  margin-bottom: var(--oc-space-3);
 }
 
 .oc-account-list {
@@ -730,8 +1042,8 @@ table.oc-table {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  margin-bottom: var(--oc-space-3);
+  gap: 1px;
+  margin-bottom: var(--oc-space-4);
 }
 
 /* A row is the pick target itself (role=option), so the copy buttons inside it are plain
@@ -740,18 +1052,20 @@ table.oc-table {
   display: flex;
   align-items: center;
   gap: var(--oc-space-2);
-  padding: 6px 8px;
+  padding: 7px 9px;
   cursor: pointer;
   border-radius: var(--oc-radius-sm);
 }
 
 .oc-account-row:hover {
   background: var(--oc-surface-2);
+  box-shadow: inset 2px 0 0 var(--oc-accent);
 }
 
 .oc-account-row .email {
   margin-left: auto;
   font-size: 11px;
+  color: var(--oc-ink-soft);
 }
 
 /* ---- login / denied ------------------------------------------------------------------- */
@@ -762,11 +1076,18 @@ table.oc-table {
   align-items: center;
   justify-content: center;
   padding: var(--oc-space-4);
+  color: var(--oc-ink-soft);
 }
 
 .oc-gate-card {
-  width: min(360px, 100%);
+  width: min(380px, 100%);
   padding: var(--oc-space-8) var(--oc-space-6);
+  color: var(--oc-ink);
+}
+
+.oc-gate-card h1 {
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 /* ---- map preview ---------------------------------------------------------------------- */
@@ -779,7 +1100,7 @@ table.oc-table {
   color: var(--oc-ink);
   background: var(--oc-bg);
   border: 1px solid var(--oc-line);
-  border-radius: var(--oc-radius);
+  border-radius: var(--oc-radius-sm);
 }
 
 .oc-map-preview .sea {
@@ -803,39 +1124,52 @@ table.oc-table {
 .oc-empty {
   padding: var(--oc-space-8);
   text-align: center;
-  color: var(--oc-ink-soft);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--oc-ink-dim);
 }
 
 .oc-pager {
   display: flex;
   justify-content: center;
   padding: var(--oc-space-3);
+  border-top: 1px solid var(--oc-line-soft);
 }
 
 .oc-muted {
-  color: var(--oc-ink-soft);
+  color: var(--oc-ink-dim);
 }
 
 .oc-role-badge {
   display: inline-flex;
-  padding: 2px 8px;
-  border-radius: 999px;
+  padding: 2px 7px;
+  border-radius: 2px;
   background: var(--oc-accent-bg);
   color: var(--oc-accent);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
+/* An oscilloscope trace, not a chart: the line is the only lit thing in the tile. */
 .oc-spark {
   display: block;
   width: 100%;
-  height: 48px;
+  height: 72px;
+  margin-top: var(--oc-space-2);
+  overflow: visible;
+  filter: drop-shadow(0 0 5px var(--oc-accent-line));
 }
 
-/* Below ~768px the rail collapses to icons and content tightens. */
-@media (max-width: 768px) {
+.oc-spark polyline {
+  stroke-width: 1.75;
+}
+
+/* Below ~900px the rail collapses to icons and content tightens. */
+@media (max-width: 900px) {
   .oc-shell {
-    grid-template-columns: 56px 1fr;
+    --oc-rail-w: 56px;
   }
 
   .oc-shell .oc-nav-item span,
@@ -843,12 +1177,35 @@ table.oc-table {
     display: none;
   }
 
-  .oc-main {
-    padding: var(--oc-space-3);
+  .oc-shell .oc-nav-item {
+    justify-content: center;
+    padding-left: 10px;
   }
 
-  .oc-strip .oc-chip.versions {
+  .oc-shell .oc-rail > .oc-nav-item::before,
+  .oc-shell .oc-rail > .oc-nav-item::after {
     display: none;
+  }
+
+  .oc-shell .oc-nav-item.active {
+    background: var(--oc-accent-bg);
+  }
+
+  .oc-main {
+    padding: var(--oc-space-4) var(--oc-space-3);
+  }
+
+  /* Four gauges wrap to 2×2 rather than leaving an orphan and a dead slot. */
+  .oc-board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .oc-strip {
+    padding-left: var(--oc-space-4);
+  }
+
+  .oc-board-cell .value {
+    font-size: 27px;
   }
 }
 
@@ -868,11 +1225,11 @@ table.oc-table {
 }
 
 .oc-toast-chip {
-  padding: var(--oc-space-2) var(--oc-space-4);
-  border-radius: 999px;
-  font-size: 13px;
+  padding: 7px var(--oc-space-4);
+  border-radius: var(--oc-radius-sm);
+  font-size: 12.5px;
   font-weight: 600;
-  box-shadow: var(--oc-shadow);
+  box-shadow: var(--oc-shadow-overlay);
   color: #fff;
   animation: oc-toast-in 280ms cubic-bezier(0.22, 1, 0.36, 1);
 }

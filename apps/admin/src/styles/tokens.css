@@ -1,33 +1,51 @@
 /*
  * TRMission 行控中心 (Operations Control Center) design tokens.
  *
- * A neutral graphite dispatcher console — dark is the primary theme. The railway
- * shows up in the STATUS LANGUAGE (signal aspects: clear/caution/stop, always
- * paired with a text label) and in the NUMERALS (IBM Plex Mono tabular figures,
- * the instrument-readout voice), not as a theme costume. The accent is the
- * product family's EMU blue, brightened for dark surfaces.
+ * The console is a lit dispatcher panel, not a document: a cold blue-steel dark
+ * ground, hairlines that read as ETCHED rather than as card edges, and no
+ * decorative colour anywhere. Saturation is rationed — the only saturated things
+ * in the whole console are the accent and the three signal aspects, so a lit
+ * colour always means "status", never "style".
+ *
+ * The railway shows up in the STATUS LANGUAGE (signal aspects: clear/caution/stop,
+ * always paired with a text label), in the RAIL (the nav is a route diagram — see
+ * admin.css) and in the NUMERALS (mono, tabular, slashed zero: the instrument
+ * readout voice). The accent is the product family's EMU blue, pushed cyan-ward on
+ * dark so it never reads as the green "clear" aspect.
  */
 :root,
 :root[data-theme='dark'] {
-  --oc-bg: #0f1215;
-  --oc-surface: #16191d;
-  --oc-surface-2: #1c2126;
-  --oc-line: #262c33;
-  --oc-ink: #e7eaed;
-  --oc-ink-soft: #9aa3ad;
-  --oc-accent: #4f9ddf;
-  --oc-accent-ink: #0f1215; /* text on accent-filled controls */
-  --oc-signal-clear: #35c07d;
-  --oc-signal-caution: #e3a63b;
-  --oc-signal-stop: #e05252;
-  /* Subtle tints for row/badge backgrounds derived from the signals. */
-  --oc-signal-clear-bg: rgba(53, 192, 125, 0.12);
-  --oc-signal-caution-bg: rgba(227, 166, 59, 0.12);
-  --oc-signal-stop-bg: rgba(224, 82, 82, 0.12);
-  --oc-accent-bg: rgba(79, 157, 223, 0.14);
+  --oc-bg: #0a0f14;
+  --oc-surface: #111820;
+  --oc-surface-2: #18212b;
+  --oc-surface-3: #1f2b37; /* pressed / hovered controls on a surface-2 field */
+  --oc-line: #2a3a49; /* structural hairline: panel edges, header underlines */
+  --oc-line-soft: #1d2833; /* interior hairline: row dividers inside a panel */
+  --oc-ink: #e6edf3;
+  --oc-ink-soft: #8b99a7;
+  --oc-ink-dim: #5f6d7b; /* stencil labels, hints, disabled values */
+  --oc-accent: #4ea8f0;
+  --oc-accent-ink: #06121c; /* text on accent-filled controls */
+  --oc-signal-clear: #3ec98a;
+  --oc-signal-caution: #eaa93c;
+  --oc-signal-stop: #ef5f5f;
+  /* Tints for indicator plates and row backgrounds, derived from the signals. */
+  --oc-signal-clear-bg: rgba(62, 201, 138, 0.13);
+  --oc-signal-caution-bg: rgba(234, 169, 60, 0.13);
+  --oc-signal-stop-bg: rgba(239, 95, 95, 0.13);
+  --oc-accent-bg: rgba(78, 168, 240, 0.14);
+  --oc-accent-line: rgba(78, 168, 240, 0.42);
+  --oc-grid: rgba(150, 190, 225, 0.045); /* ruling on the backing board */
 
-  --oc-radius: 8px;
-  --oc-radius-sm: 5px;
+  /* Lamps glow on the dark panel and sit flat on the light one. */
+  --oc-lamp-glow: 0 0 7px;
+  --oc-lamp-glow-alpha: 0.55;
+  /* Top highlight on filled controls — reads as a physical key under panel light. */
+  --oc-key-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+
+  --oc-radius: 6px;
+  --oc-radius-sm: 4px;
+  --oc-radius-plate: 3px; /* indicator plates: badges, chips, tags */
   --oc-space-1: 4px;
   --oc-space-2: 8px;
   --oc-space-3: 12px;
@@ -35,30 +53,51 @@
   --oc-space-6: 24px;
   --oc-space-8: 32px;
 
-  /* Elevation in dark = lighter surface + hairline; no shadows. */
+  /* Elevation in dark = lighter surface + hairline; only overlays cast a shadow. */
   --oc-shadow: none;
+  --oc-shadow-overlay: 0 24px 64px rgba(0, 0, 0, 0.6);
 
-  --oc-font: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', system-ui, sans-serif;
-  --oc-font-mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Code', monospace;
+  /* Latin from the platform UI face (Segoe UI Variable / SF), CJK from the CJK
+   * faces behind it — one stack, each script in a face that was drawn for it. */
+  --oc-font:
+    system-ui, 'Segoe UI Variable Text', 'Segoe UI', 'Noto Sans TC', 'PingFang TC',
+    'Microsoft JhengHei', sans-serif;
+  --oc-font-mono: 'IBM Plex Mono', 'Cascadia Mono', ui-monospace, 'SF Mono', Consolas, monospace;
+  /* Stencilled panel labels: small, wide, and never lower-case. */
+  --oc-track-label: 0.14em;
 }
 
+/*
+ * Light is the same panel under daylight: a cool drafting-print ground with white
+ * panels laid on it, hairlines still blue-cast, aspects darkened to hold contrast.
+ */
 :root[data-theme='light'] {
-  --oc-bg: #f6f7f8;
+  --oc-bg: #e9edf1;
   --oc-surface: #ffffff;
-  --oc-surface-2: #eff1f3;
-  --oc-line: #e3e6e9;
-  --oc-ink: #16191d;
-  --oc-ink-soft: #5c646d;
-  --oc-accent: #0f5fa6;
+  --oc-surface-2: #f1f5f8;
+  --oc-surface-3: #e4ebf1;
+  --oc-line: #ccd7e0;
+  --oc-line-soft: #e4eaef;
+  --oc-ink: #0d151d;
+  --oc-ink-soft: #55636f;
+  --oc-ink-dim: #7b8894;
+  --oc-accent: #0b62ad;
   --oc-accent-ink: #ffffff;
-  --oc-signal-clear: #1e8e5a;
-  --oc-signal-caution: #b07514;
-  --oc-signal-stop: #bc3535;
-  --oc-signal-clear-bg: rgba(30, 142, 90, 0.1);
-  --oc-signal-caution-bg: rgba(176, 117, 20, 0.1);
-  --oc-signal-stop-bg: rgba(188, 53, 53, 0.1);
-  --oc-accent-bg: rgba(15, 95, 166, 0.1);
+  --oc-signal-clear: #197f50;
+  --oc-signal-caution: #9c6510;
+  --oc-signal-stop: #b53232;
+  --oc-signal-clear-bg: rgba(25, 127, 80, 0.1);
+  --oc-signal-caution-bg: rgba(156, 101, 16, 0.1);
+  --oc-signal-stop-bg: rgba(181, 50, 50, 0.1);
+  --oc-accent-bg: rgba(11, 98, 173, 0.09);
+  --oc-accent-line: rgba(11, 98, 173, 0.38);
+  --oc-grid: rgba(37, 71, 102, 0.055);
 
-  /* Light theme may use one soft shadow level for raised panels. */
-  --oc-shadow: 0 1px 2px rgba(22, 25, 29, 0.06), 0 4px 12px rgba(22, 25, 29, 0.06);
+  --oc-lamp-glow: 0 0 0;
+  --oc-lamp-glow-alpha: 0;
+  --oc-key-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+
+  /* Panels are paper on a table here, so they carry one soft shadow level. */
+  --oc-shadow: 0 1px 2px rgba(13, 21, 29, 0.05), 0 2px 10px rgba(13, 21, 29, 0.05);
+  --oc-shadow-overlay: 0 24px 64px rgba(13, 21, 29, 0.22);
 }
