@@ -16,6 +16,28 @@
       .p-c29 { fill: #dbdcdc; }
       .p-c37 { fill: #c8c9ca; }
       .p-c42 { fill: #717071; }
+
+      /* Dark mode — night livery, see NIGHT_BODY / PER_CAR in tools/extract.js. */
+      @media (prefers-color-scheme: dark) {
+        .p-c10 { stroke: #4b545d }
+        .p-c27 { fill: #4b545d }
+        .p-c15 { stroke: #566069 }
+        .p-c29 { fill: #566069 }
+        .p-c37 { fill: #505a63 }
+        .p-c42 { fill: #39424a }
+      }
+      :root[data-theme='dark'] .p-c10 { stroke: #4b545d }
+      :root[data-theme='dark'] .p-c27 { fill: #4b545d }
+      :root[data-theme='dark'] .p-c15 { stroke: #566069 }
+      :root[data-theme='dark'] .p-c29 { fill: #566069 }
+      :root[data-theme='dark'] .p-c37 { fill: #505a63 }
+      :root[data-theme='dark'] .p-c42 { fill: #39424a }
+      :root[data-theme='light'] .p-c10 { stroke: #b4b4b5; }
+      :root[data-theme='light'] .p-c27 { fill: #b4b4b5; }
+      :root[data-theme='light'] .p-c15 { stroke: #dbdcdc; }
+      :root[data-theme='light'] .p-c29 { fill: #dbdcdc; }
+      :root[data-theme='light'] .p-c37 { fill: #c8c9ca; }
+      :root[data-theme='light'] .p-c42 { fill: #717071; }
     </style>
     <clipPath id="p-clippath-4">
       <rect class="p-c14" x="394.57" y="432.96" width="170.08" height="56.69" rx="5.67" ry="5.67"/>

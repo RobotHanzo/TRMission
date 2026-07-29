@@ -16,26 +16,32 @@
       .k-c27 { fill: #b4b4b5; }
       .k-c41 { fill: #12222f; }
 
-      /* Dark mode — see DARK_INK in tools/extract.js for why this car is remapped. */
+      /* Dark mode — night livery, see NIGHT_BODY / PER_CAR in tools/extract.js. */
       @media (prefers-color-scheme: dark) {
         .k-c1 { fill: #93a3ae }
         .k-c2 { fill: #54697d }
         .k-c6 { fill: #647d94 }
+        .k-c13 { stroke: #7d858d }
         .k-c11 { stroke: #4d647a }
         .k-c26 { fill: #4d647a }
+        .k-c27 { fill: #7d858d }
         .k-c41 { fill: #465c70 }
       }
       :root[data-theme='dark'] .k-c1 { fill: #93a3ae }
       :root[data-theme='dark'] .k-c2 { fill: #54697d }
       :root[data-theme='dark'] .k-c6 { fill: #647d94 }
+      :root[data-theme='dark'] .k-c13 { stroke: #7d858d }
       :root[data-theme='dark'] .k-c11 { stroke: #4d647a }
       :root[data-theme='dark'] .k-c26 { fill: #4d647a }
+      :root[data-theme='dark'] .k-c27 { fill: #7d858d }
       :root[data-theme='dark'] .k-c41 { fill: #465c70 }
       :root[data-theme='light'] .k-c1 { fill: #64717a; }
       :root[data-theme='light'] .k-c2 { fill: #242e3a; }
       :root[data-theme='light'] .k-c6 { fill: #334454; }
+      :root[data-theme='light'] .k-c13 { stroke: #b4b4b5; }
       :root[data-theme='light'] .k-c11 { stroke: #142536; }
       :root[data-theme='light'] .k-c26 { fill: #142536; }
+      :root[data-theme='light'] .k-c27 { fill: #b4b4b5; }
       :root[data-theme='light'] .k-c41 { fill: #12222f; }
     </style>
     <clipPath id="k-clippath-6">

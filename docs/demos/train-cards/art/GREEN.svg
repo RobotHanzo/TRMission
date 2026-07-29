@@ -8,6 +8,19 @@
       .g-c29 { fill: #dbdcdc; }
       .g-c30 { fill: #6abb64; }
       .g-c32 { fill: #888; }
+
+      /* Dark mode — night livery, see NIGHT_BODY / PER_CAR in tools/extract.js. */
+      @media (prefers-color-scheme: dark) {
+        .g-c27 { fill: #4b545d }
+        .g-c29 { fill: #566069 }
+        .g-c32 { fill: #3f4850 }
+      }
+      :root[data-theme='dark'] .g-c27 { fill: #4b545d }
+      :root[data-theme='dark'] .g-c29 { fill: #566069 }
+      :root[data-theme='dark'] .g-c32 { fill: #3f4850 }
+      :root[data-theme='light'] .g-c27 { fill: #b4b4b5; }
+      :root[data-theme='light'] .g-c29 { fill: #dbdcdc; }
+      :root[data-theme='light'] .g-c32 { fill: #888; }
     </style>
     <clipPath id="g-clippath-1">
       <rect class="g-c14" x="30.24" y="432.96" width="170.08" height="56.69" rx="5.67" ry="5.67"/>

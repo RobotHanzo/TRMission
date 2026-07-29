@@ -48,30 +48,95 @@ function namespaceAll(markup, prefix, ids) {
 const sanitize = (id) => id.replace(/[^A-Za-z0-9_-]/g, '');
 
 /**
- * Per-car dark-mode ink remaps, authored hex → dark hex.
+ * NIGHT LIVERY — the dark-mode repaint, authored hex → dark hex.
  *
- * The sheet is drawn on a near-black page, so eight of the nine vehicles already sit well on
- * a dark card: their dark areas are windows and door bands enclosed by a light body. The open
- * wagon is the exception — its whole body IS the dark navy family, so on a dark card face
- * (~#24272a) it reads as a hole rather than a vehicle. Dark mode lifts that family into a lit
- * steel range, keeping the blue-grey character and every relationship between the inks.
- * Liveries are never touched.
+ * The sheet is drawn on a near-black page, so its bodywork is near-white. Dropped onto a dark
+ * card face (~#24272a) an unmodified body is a glare bomb: ~12:1 against the face, brighter than
+ * anything else in a dark UI. Dark mode walks the whole neutral ramp down into a slate range,
+ * keeping the ORDER of the greys intact — a roof that was darker than its body stays darker — so
+ * every car keeps its modelling and just stops shouting.
+ *
+ * Two things are deliberately left alone:
+ *   · Liveries. The red/orange/yellow/green/blue/purple bands and R20's rainbow ARE the card's
+ *     identity, and they read better than ever once the body around them is no longer white.
+ *   · Windows and door bands. They were the darkest inks and they stay the darkest, which still
+ *     clears ~2:1 against the toned-down body — no need to invert them into lit glazing.
  */
-const DARK_INK = {
+const NIGHT_BODY = {
+  '#ffffff': '#626b76', // bodywork
+  '#efeeef': '#5c656f',
+  '#dbdcdc': '#566069',
+  '#c8c9ca': '#505a63', // roofs, skirts
+  '#b5b4b5': '#4b545d',
+  '#b4b4b5': '#4b545d',
+  '#9e9e9f': '#454e57',
+  '#888888': '#3f4850', // bogies, wheel strokes
+  '#717071': '#39424a',
+  '#717072': '#39424a',
+};
+
+/** Per-car departures from the night livery. */
+const PER_CAR = {
+  // The open wagon inverts the usual problem: its body IS the dark navy family, so on a dark
+  // face it read as a hole rather than a vehicle. Lift that family into a lit steel range
+  // instead of darkening it, and hold its frame above the body — the frame is the only
+  // structure an open wagon has.
   BLACK: {
+    '#b4b4b5': '#7d858d', // frame + end posts, toned but still the lightest thing on the car
     '#12222f': '#465c70', // outer frame / skirt
     '#142536': '#4d647a', // sill + rib strokes
     '#242e3a': '#54697d', // interior back wall
     '#334454': '#647d94', // interior panels
     '#64717a': '#93a3ae', // interior highlight
   },
+
+  // The covered hopper is the black wagon's mirror image. The WHITE card has the LIGHTEST face
+  // in dark mode (~#3b3e41 — its livery wash is near-white), so the shared slate ramp sinks
+  // straight into it. Hold this one car a full step above the ramp; it stays the palest vehicle
+  // of the nine, which is also what its colour is called.
+  WHITE: {
+    '#ffffff': '#8b95a0',
+    '#efeeef': '#848e99',
+    '#dbdcdc': '#7d8792',
+    '#c8c9ca': '#747e89',
+    '#b5b4b5': '#69737e',
+    '#b4b4b5': '#69737e',
+    '#9e9e9f': '#5e6873',
+    '#888888': '#545e69',
+    '#717071': '#4b555f',
+    '#717072': '#4b555f',
+  },
+
+  // R20 keeps its rainbow, but the rainbow is INTERIOR — what actually meets the card face is
+  // the handrail/walkway/frame grey. Sent down the shared ramp that outline landed on top of
+  // the loco card's own face (~#313538) and the vehicle lost its edge, so its structural greys
+  // stay a step up. Only the outline is raised; the rainbow flank is untouched.
+  LOCOMOTIVE: {
+    '#ffffff': '#96a0aa', // the white flank sweep, which reads against the rainbow, not the face
+    '#c8c9ca': '#79838d', // roof + walkway
+    '#b5b4b5': '#6f7983',
+    '#b4b4b5': '#6f7983', // handrails, end frames — the silhouette
+    '#9e9e9f': '#646e78',
+    '#888888': '#5a646e',
+    '#717071': '#515b65',
+    '#717072': '#515b65',
+  },
+};
+
+const expand = (hex) => {
+  const h = hex.replace('#', '').toLowerCase();
+  return '#' + (h.length === 3 ? h.split('').map((c) => c + c).join('') : h);
+};
+const darkInkFor = (key) => {
+  const merged = { ...NIGHT_BODY, ...(PER_CAR[key] ?? {}) };
+  return Object.fromEntries(Object.entries(merged).map(([k, v]) => [expand(k), v]));
 };
 
 /** `.sel { fill: #aaa }` → the dark-mode counterpart, or null when nothing in it is remapped. */
 function darkRule(sel, body, remap) {
   const decls = [];
-  for (const m of body.matchAll(/(fill|stroke)\s*:\s*(#[0-9a-fA-F]{3,6})/g)) {
-    const to = remap[m[2].toLowerCase()];
+  for (const m of body.matchAll(/(fill|stroke)\s*:\s*(#[0-9a-fA-F]{3}|#[0-9a-fA-F]{6})\b/g)) {
+    const to = remap[expand(m[2])];
     if (to) decls.push(`${m[1]}: ${to}`);
   }
   return decls.length ? `${sel} { ${decls.join('; ')} }` : null;
@@ -117,7 +182,7 @@ function build({ style, defs, body, prefix, viewBox, darkInk }) {
   // the right fallback.
   let dark = '';
   if (darkInk) {
-    const remap = Object.fromEntries(Object.entries(darkInk).map(([k, v]) => [k.toLowerCase(), v]));
+    const remap = darkInk;
     const media = [], onDark = [], onLight = [];
     for (const r of rules(style)) {
       const sel = r.sel.filter((s) => [...kept].some((n) => s === `.cls-${n}`));
@@ -130,7 +195,7 @@ function build({ style, defs, body, prefix, viewBox, darkInk }) {
     }
     if (media.length) {
       dark =
-        `\n\n      /* Dark mode — see DARK_INK in tools/extract.js for why this car is remapped. */\n` +
+        `\n\n      /* Dark mode — night livery, see NIGHT_BODY / PER_CAR in tools/extract.js. */\n` +
         `      @media (prefers-color-scheme: dark) {\n      ${media.join('\n      ')}\n      }\n` +
         `      ${onDark.join('\n      ')}\n      ${onLight.join('\n      ')}`;
     }
@@ -186,7 +251,7 @@ const manifest = [];
 for (const t of SHEET) {
   const body = sheetLines.slice(t.a - 1, t.b).join('\n');
   const svg = build({
-    ...sheet, body, prefix: `${t.prefix}-`, darkInk: DARK_INK[t.key],
+    ...sheet, body, prefix: `${t.prefix}-`, darkInk: darkInkFor(t.key),
     viewBox: cropFor(t.key) ?? '0 0 595.28 844.32',
   });
   const file = path.join(OUT, `${t.key}.svg`);
@@ -203,7 +268,7 @@ fs.writeFileSync(
   path.join(OUT, 'YELLOW.svg'),
   build({
     ...y610, body: `<g id="y610">\n${body610}\n</g>`, prefix: 'y-',
-    viewBox: cropFor('YELLOW'), darkInk: DARK_INK.YELLOW,
+    viewBox: cropFor('YELLOW'), darkInk: darkInkFor('YELLOW'),
   }),
 );
 manifest.push({ key: 'YELLOW', id: '610 (阿里山號 replacement)', file: path.join(OUT, 'YELLOW.svg') });

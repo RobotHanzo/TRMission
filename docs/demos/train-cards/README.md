@@ -31,20 +31,36 @@ One SVG per `CardColor`, cropped from the source sheets and normalised to a `176
 all nine vehicles share one scale. Every `cls-N` class and every clipPath/gradient id is prefixed
 per file, so any number of them can be inlined into one document without colliding.
 
-### Dark mode
+### Dark mode — the night livery
 
-The sheet is drawn on a near-black page, so eight of the nine cars already sit well on a dark
-card: their dark areas are windows and door bands enclosed by a light body. **30G1000型敞車 is the
-exception** — its whole body is the dark navy family, so against a dark card face (~`#24272a`) it
-read as a hole rather than a vehicle. `DARK_INK` in `tools/extract.js` lifts that one family into
-a lit steel range, preserving the relationships between the inks; no livery is touched. Pixels
-below 1.6:1 against the dark face: **67% → 0%**, mean contrast 2.39 → 3.91.
+The sheet is drawn on a near-black page, so its bodywork is near-white. Dropped unmodified onto a
+dark card face that body is a glare bomb — around **12:1** against the face, the brightest thing in
+a dark UI. `NIGHT_BODY` in `tools/extract.js` walks the whole neutral ramp down into a slate range
+while **keeping the order of the greys**, so a roof that was darker than its body stays darker and
+every car keeps its modelling.
+
+Two things are deliberately untouched: the **liveries** (the colour bands and R20's rainbow are the
+card's identity, and they read better once the body around them isn't white) and the **windows and
+door bands** (already the darkest inks; they stay darkest and still clear ~2:1 against the
+toned-down body, so there's no need to invert them into lit glazing).
+
+Three cars depart from the shared ramp, via `PER_CAR`:
+
+| Car | Why |
+| --- | --- |
+| `BLACK` 30G1000型敞車 | Its body *is* the dark navy family. On the darkest face (~`#24272a`) it read as a hole, so it is **lifted** into a lit steel range instead, with its frame held above the body — the only structure an open wagon has. |
+| `WHITE` 35N21000型篷斗車 | The mirror case: the WHITE card has the **lightest** face (~`#3b3e41`), so the shared slate sinks into it. Held a step above the ramp; still the palest of the nine. |
+| `LOCOMOTIVE` R20型 | The rainbow is interior — what meets the card face is handrail/walkway/frame grey. That outline alone is raised a step; the rainbow flank is untouched. |
+
+Measured per-pixel against each card's own dark face, all nine end up with **0%** glare (>8:1) and
+**0%** of their *silhouette* — the inked edge that decides whether a vehicle reads as an object —
+below 1.6:1.
 
 The switch lives in each illustration's own `<style>`: `prefers-color-scheme` is the default
 signal, and an explicit `data-theme` on the host document overrides it **in both directions**
 (the `:root[data-theme=…]` selectors outrank the media query's bare class selectors). Opened
 standalone — as a file or through `<img>` — only the media query can apply, which is correct.
-Add a car to `DARK_INK` and re-run `extract.js` to give it the same treatment.
+Light mode always renders the authored artwork untouched.
 
 Sources (kept out of the repo — they live wherever you dropped them):
 

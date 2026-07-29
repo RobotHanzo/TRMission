@@ -16,6 +16,25 @@
       .y-c14 { fill: #3e3b3a; }
       .y-c15 { clip-path: url(#y-clippath); }
       .y-c16 { fill: #b5b4b5; }
+
+      /* Dark mode — night livery, see NIGHT_BODY / PER_CAR in tools/extract.js. */
+      @media (prefers-color-scheme: dark) {
+        .y-c2 { fill: #626b76 }
+        .y-c6 { fill: #505a63 }
+        .y-c9 { fill: #39424a }
+        .y-c10, .y-c11 { fill: #5c656f }
+        .y-c16 { fill: #4b545d }
+      }
+      :root[data-theme='dark'] .y-c2 { fill: #626b76 }
+      :root[data-theme='dark'] .y-c6 { fill: #505a63 }
+      :root[data-theme='dark'] .y-c9 { fill: #39424a }
+      :root[data-theme='dark'] .y-c10, :root[data-theme='dark'] .y-c11 { fill: #5c656f }
+      :root[data-theme='dark'] .y-c16 { fill: #4b545d }
+      :root[data-theme='light'] .y-c2 { fill: #fff; }
+      :root[data-theme='light'] .y-c6 { fill: #c8c9ca; }
+      :root[data-theme='light'] .y-c9 { fill: #717072; }
+      :root[data-theme='light'] .y-c10, :root[data-theme='light'] .y-c11 { fill: #efeeef; }
+      :root[data-theme='light'] .y-c16 { fill: #b5b4b5; }
     </style>
     <clipPath id="y-clippath-1">
       <path class="y-c3" d="M226.77,80.76H56.69v-6.5c0-3.13,2.54-5.67,5.67-5.67h158.74c3.13,0,5.67,2.54,5.67,5.67v6.5Z"/>

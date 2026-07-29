@@ -9,6 +9,19 @@
       .r-c37 { fill: #c8c9ca; }
       .r-c38 { fill: #e50012; }
       .r-c40 { clip-path: url(#r-clippath); }
+
+      /* Dark mode — night livery, see NIGHT_BODY / PER_CAR in tools/extract.js. */
+      @media (prefers-color-scheme: dark) {
+        .r-c19 { fill: #626b76 }
+        .r-c32 { fill: #3f4850 }
+        .r-c37 { fill: #505a63 }
+      }
+      :root[data-theme='dark'] .r-c19 { fill: #626b76 }
+      :root[data-theme='dark'] .r-c32 { fill: #3f4850 }
+      :root[data-theme='dark'] .r-c37 { fill: #505a63 }
+      :root[data-theme='light'] .r-c19 { fill: #fff; }
+      :root[data-theme='light'] .r-c32 { fill: #888; }
+      :root[data-theme='light'] .r-c37 { fill: #c8c9ca; }
     </style>
     <clipPath id="r-clippath">
       <rect class="r-c14" x="30.24" y="108.16" width="170.08" height="56.69" rx="5.67" ry="5.67"/>
