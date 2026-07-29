@@ -29,6 +29,9 @@ export default tseslint.config(
       'apps/mobile/scripts/setup-web.js',
       // plain CommonJS node script run directly by the release/OTA lanes (see issue #62).
       'apps/mobile/scripts/fingerprintEnv.js',
+      // plain node script run by hand before a Play submission to regenerate the Data safety
+      // answers (docs/release/play-data-safety.md).
+      'docs/release/play-data-safety.mjs',
       // Expo config plugins: CommonJS by necessity (Expo `require`s them from app.config.ts's
       // `plugins` array, outside any TS transform). Their logic is covered by *.test.ts instead.
       'apps/mobile/plugins/*.js',

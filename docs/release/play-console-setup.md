@@ -60,16 +60,23 @@ rather than improvising in the Console:
   Mobile Ads SDK reads — Google declares the rest of its own collection.
   Deletion URL: `https://<production origin>/account/delete`.
 
-  **`docs/release/play-data-safety.csv` is that list already translated into Play's own taxonomy**
-  — all 38 data types with the Yes rows filled in (collected / shared / ephemeral / required /
-  purposes) and a `what_it_is_in_the_app` column naming the code behind each. Play's importer wants
-  the header row from the template you download in the Console (Data safety → Import from CSV), and
-  it will reject the trailing source column, so reconcile the header and drop that column before
-  uploading — or just read the values off it while clicking through the form. The three
-  app-level answers the CSV does not carry: **encrypted in transit — yes** (HTTPS/WSS only, refresh
-  token in the OS keystore), **users can request deletion — yes** (URL above), **independent
-  security review — no**, **Play Families Policy — not committed** (the app is not designed for
-  children, and declaring otherwise pulls AdMob into the Families certified-SDK list).
+  **You do not have to fill this form in by hand.** `docs/release/play-data-safety.csv` is that
+  whole list — the two overview questions, account creation and deletion, all 38 data types and the
+  per-type usage blocks — already answered in Play's import format, ready to upload at **Data
+  safety → Import from CSV**. It is generated, not authored: `play-data-safety.mjs` holds the
+  decision table and stamps it onto a CSV exported from the Console, so the row set and order stay
+  whatever Play currently emits.
+
+  ```bash
+  # Play Console → App content → Data safety → Export to CSV (an empty one is fine), then:
+  node docs/release/play-data-safety.mjs ~/Downloads/data_safety_export.csv
+  ```
+
+  Re-export and re-run before submitting: the script refuses to write if Play has added or renamed
+  a question, which is the whole point of regenerating rather than uploading a stale file.
+  **`play-data-safety.md` is why each answer is what it is** — the mapping back to the code that
+  collects each type, plus the four answers that are judgement calls rather than facts. Read it
+  before changing a cell.
 - **Ads**: declare **contains ads** (the app serves AdMob banners + one interstitial — see
   `apps/mobile/src/ads/CLAUDE.md`). This also puts the "Contains ads" badge on the store listing.
   **Government app / COVID-19 app / financial features / news app**: all no.
