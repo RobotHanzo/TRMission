@@ -74,7 +74,10 @@ rather than improvising in the Console:
 
   Re-run before submitting, passing a fresh export if Play has changed the form: the script refuses
   to write if a question it answers has been renamed or removed, or if an answer would need a quoted
-  cell (Google's file never quotes an answer, so neither do we).
+  cell (Google's file never quotes an answer, so neither do we). If the Console answers
+  **"Couldn't upload. Try again."** — a generic error that names no row — upload
+  `play-data-safety-minimal.csv` instead and answer the five account/deletion questions by hand;
+  `play-data-safety.md` has the full fallback order.
   **`play-data-safety.md` is why each answer is what it is** — the mapping back to the code that
   collects each type, plus the four answers that are judgement calls rather than facts. Read it
   before changing a cell.

@@ -31,6 +31,7 @@ import { fileURLToPath } from 'node:url';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DEFAULT_INPUT = resolve(HERE, 'data_safety_sample.csv');
 const OUT = resolve(HERE, 'play-data-safety.csv');
+const MINIMAL_OUT = resolve(HERE, 'play-data-safety-minimal.csv');
 const DELETION_URL = 'https://trmission.robothanzo.dev/account/delete';
 
 // ---------------------------------------------------------------------------------------------
@@ -38,19 +39,36 @@ const DELETION_URL = 'https://trmission.robothanzo.dev/account/delete';
 // for a choice. Anything not listed is left blank — which is the correct answer for every
 // unselected checkbox and for the OPTIONAL badges we do not opt into.
 // ---------------------------------------------------------------------------------------------
-const APP_LEVEL = {
+/**
+ * The two overview booleans. Google's sample answers exactly these at the app level and nothing
+ * else, so this is the part of the form the sample proves is importable.
+ *
+ * Deliberately blank (all OPTIONAL, none apply): PSL_DATA_COLLECTION_COMPLIES_FAMILY_POLICY — the
+ * app is not designed for children and declaring otherwise pulls AdMob into the Families
+ * certified-SDK list; PSL_INDEPENDENTLY_VALIDATED — no MASA review; PSL_UPI_BADGE_OPT_IN — no UPI
+ * payments.
+ */
+const OVERVIEW = {
   PSL_DATA_COLLECTION_COLLECTS_PERSONAL_DATA: 'true',
   // HTTPS + WSS only; the refresh token additionally lives in the OS keystore.
   PSL_DATA_COLLECTION_ENCRYPTED_IN_TRANSIT: 'true',
+};
 
+/**
+ * Account creation, deletion and outside-app sign-in. Google's sample leaves every one of these
+ * blank, so unlike everything else here they are not demonstrated to import — `--minimal` drops
+ * them wholesale, which is the first thing to try if Play refuses the full file. They are five
+ * questions to answer by hand in the Console if it comes to that.
+ *
+ * Free text is kept comma-free, quote-free and short: `assertNoNewQuoting` enforces the first two,
+ * and Play caps these fields (the limit is undocumented, so stay well under 100 characters).
+ */
+const ACCOUNT_QUESTIONS = {
   // Five sign-in methods: guest, email+password, Google, Apple, Discord.
   'PSL_SUPPORTED_ACCOUNT_CREATION_METHODS:PSL_ACM_USER_ID_PASSWORD': 'true',
   'PSL_SUPPORTED_ACCOUNT_CREATION_METHODS:PSL_ACM_OAUTH': 'true',
   'PSL_SUPPORTED_ACCOUNT_CREATION_METHODS:PSL_ACM_OTHER': 'true',
-  // Free text is deliberately comma-free and quote-free so the emitted cell needs no quoting —
-  // Google's own file never quotes a Response value, and `assertNoNewQuoting` keeps it that way.
-  PSL_ACM_SPECIFY:
-    'Anonymous guest accounts created automatically with no credentials so the game can be played without signing up.',
+  PSL_ACM_SPECIFY: 'Anonymous guest accounts created with no credentials',
 
   'PSL_SUPPORT_DATA_DELETION_BY_USER:DATA_DELETION_YES': 'true',
   PSL_ACCOUNT_DELETION_URL: DELETION_URL,
@@ -60,13 +78,7 @@ const APP_LEVEL = {
   // accounts created on the browser version of the same game — both created outside this app.
   PSL_HAS_OUTSIDE_APP_ACCOUNTS: 'true',
   'PSL_OUTSIDE_APP_ACCOUNT_TYPES:PSL_OUTSIDE_APP_ACCOUNT_TYPE_OTHER': 'true',
-  PSL_OUTSIDE_APP_ACCOUNT_TYPE_SPECIFY:
-    'Sign-in with an existing Google / Apple / Discord account or with a TRMission account created on the browser version of the same game.',
-
-  // Deliberately blank (all OPTIONAL, none apply): PSL_DATA_COLLECTION_COMPLIES_FAMILY_POLICY —
-  // the app is not designed for children and declaring otherwise pulls AdMob into the Families
-  // certified-SDK list; PSL_INDEPENDENTLY_VALIDATED — no MASA review; PSL_UPI_BADGE_OPT_IN — no
-  // UPI payments.
+  PSL_OUTSIDE_APP_ACCOUNT_TYPE_SPECIFY: 'Existing Google / Apple / Discord or web account',
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -119,8 +131,8 @@ const TYPE_CHECKLIST = {
 };
 
 /** Expand DECLARED into the flat `question[:response]` → value map the transformer applies. */
-function buildAnswers() {
-  const out = { ...APP_LEVEL };
+function buildAnswers({ minimal }) {
+  const out = { ...OVERVIEW, ...(minimal ? {} : ACCOUNT_QUESTIONS) };
   for (const [type, d] of Object.entries(DECLARED)) {
     out[`${TYPE_CHECKLIST[type]}:${type}`] = 'true';
     const q = `PSL_DATA_USAGE_RESPONSES:${type}`;
@@ -214,7 +226,10 @@ function assertNoNewQuoting(src, before, after) {
 // --- main --------------------------------------------------------------------------------------
 
 function main() {
-  const src = process.argv[2] ?? DEFAULT_INPUT;
+  const argv = process.argv.slice(2);
+  const minimal = argv.includes('--minimal');
+  const src = argv.find((a) => !a.startsWith('--')) ?? DEFAULT_INPUT;
+  const out_ = minimal ? MINIMAL_OUT : OUT;
   const raw = readFileSync(src, 'utf8');
   const rows = parseCsv(raw);
 
@@ -229,7 +244,7 @@ function main() {
     throw new Error(`unexpected header in ${src}: ${header.join(',')}`);
   }
 
-  const answers = buildAnswers();
+  const answers = buildAnswers({ minimal });
   const used = new Set();
   let changed = 0;
   for (const row of body) {
@@ -246,12 +261,12 @@ function main() {
     throw new Error(`answers reference ids absent from ${src}:\n  ${orphans.join('\n  ')}`);
   }
 
-  const out = writeCsv(rows);
-  assertNoNewQuoting(src, raw, out);
-  writeFileSync(OUT, out, 'utf8');
+  const text = writeCsv(rows);
+  assertNoNewQuoting(src, raw, text);
+  writeFileSync(out_, text, 'utf8');
 
   const declared = body.filter((r) => r[0].startsWith('PSL_DATA_TYPES_') && r[2] === 'true');
-  console.log(`wrote ${OUT}`);
+  console.log(`wrote ${out_}${minimal ? '  (--minimal: account questions left blank)' : ''}`);
   console.log(`  from ${src}`);
   console.log(`  ${body.length} rows, ${changed} response values changed, 0 cells newly quoted`);
   console.log(`  ${declared.length} data types declared: ${declared.map((r) => r[1]).join(', ')}`);

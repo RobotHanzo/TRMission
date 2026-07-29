@@ -6,7 +6,8 @@ reasoning. `play-data-safety.mjs` is what generates the CSV — edit the decisio
 CSV, and re-run:
 
 ```bash
-node docs/release/play-data-safety.mjs [path-to-input.csv]   # default: data_safety_sample.csv
+node docs/release/play-data-safety.mjs [path-to-input.csv]              # → play-data-safety.csv
+node docs/release/play-data-safety.mjs [path-to-input.csv] --minimal    # → play-data-safety-minimal.csv
 ```
 
 The input is **`data_safety_sample.csv` — Google's own sample, committed next to the script**, so a
@@ -23,6 +24,25 @@ worse than no file at all:
   quotes a `Response value`, so that is the one shape we cannot prove their importer accepts. Every
   free-text answer here is therefore written without commas or quotes, and the generated file is
   byte-identical to the sample on all 783 lines except an unquoted third cell.
+
+## If Play says "Couldn't upload. Try again."
+
+That is a generic client-side error — it names no row, so it cannot be diagnosed from the file, and
+the file is provably well-formed by the three checks above. Work through these in order:
+
+1. **Upload `play-data-safety-minimal.csv` instead.** It is the same file minus the ten rows
+   covering account creation, data deletion and outside-app sign-in — the only questions Google's
+   sample leaves blank, and therefore the only ones not demonstrated to be importable. If this one
+   succeeds, those five questions are UI-only: answer them by hand (two URLs, three radio groups)
+   and the 782-row bulk is still done for you.
+2. **Retry in a private window with extensions disabled.** The wording is Play Console's generic
+   upload failure rather than a validation message, so an interrupted request or a blocked XHR
+   produces it too.
+3. **Check the file was not opened and re-saved by Excel.** Excel rewrites line endings and can add
+   a BOM; both files are UTF-8, CRLF, no BOM, no trailing newline. Re-run the script to restore.
+
+If none of that works, the next step is bisection — halve the declared data types, regenerate, and
+find the row Play objects to.
 
 Keep this in lockstep with `app-store-connect-setup.md` §11 (Apple's table) and
 `apps/web/src/screens/PrivacyScreen.tsx` (the published policy). A store-to-store mismatch is a
