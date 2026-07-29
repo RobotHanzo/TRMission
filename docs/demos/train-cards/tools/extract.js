@@ -62,18 +62,40 @@ const sanitize = (id) => id.replace(/[^A-Za-z0-9_-]/g, '');
  *   · Windows and door bands. They were the darkest inks and they stay the darkest, which still
  *     clears ~2:1 against the toned-down body — no need to invert them into lit glazing.
  */
-const NIGHT_BODY = {
-  '#ffffff': '#626b76', // bodywork
-  '#efeeef': '#5c656f',
-  '#dbdcdc': '#566069',
-  '#c8c9ca': '#505a63', // roofs, skirts
-  '#b5b4b5': '#4b545d',
-  '#b4b4b5': '#4b545d',
-  '#9e9e9f': '#454e57',
-  '#888888': '#3f4850', // bogies, wheel strokes
-  '#717071': '#39424a',
-  '#717072': '#39424a',
+const parseHex = (hex) => {
+  const h = hex.replace('#', '').toLowerCase();
+  const n = parseInt(h.length === 3 ? [...h].map((c) => c + c).join('') : h, 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 };
+const toHex = (rgb) =>
+  '#' + rgb.map((v) => Math.round(Math.min(255, Math.max(0, v))).toString(16).padStart(2, '0')).join('');
+const mix = (a, b, t) => {
+  const [A, B] = [parseHex(a), parseHex(b)];
+  return toHex(A.map((c, i) => c + (B[i] - c) * t));
+};
+
+/**
+ * The ramp is DIMMED, not repainted — every authored neutral is mixed toward the ground by one
+ * constant. Hand-picking dark values is what makes a night livery look wrong: the authored greys
+ * are neutral (#fff, #efeeef, #dbdcdc, #c8c9ca …) and any hue introduced here reads as a car that
+ * has been recoloured rather than a car seen in low light. Mixing keeps each ink's own hue and
+ * the spacing between them, so the cars still look like themselves.
+ */
+const NIGHT_GROUND = '#1a1d20'; // the app's dark paper — a hair cooler than black, never blue
+const DIM = 0.415; // enough to kill the glare, not so much that a pale car stops reading as pale
+const BODY_NEUTRALS = [
+  '#ffffff', // bodywork
+  '#efeeef',
+  '#dbdcdc',
+  '#c8c9ca', // roofs, skirts
+  '#b5b4b5',
+  '#b4b4b5',
+  '#9e9e9f',
+  '#888888', // bogies, wheel strokes
+  '#717071',
+  '#717072',
+];
+const NIGHT_BODY = Object.fromEntries(BODY_NEUTRALS.map((h) => [h, mix(h, NIGHT_GROUND, DIM)]));
 
 /** Per-car departures from the night livery. */
 const PER_CAR = {
@@ -81,45 +103,16 @@ const PER_CAR = {
   // face it read as a hole rather than a vehicle. Lift that family into a lit steel range
   // instead of darkening it, and hold its frame above the body — the frame is the only
   // structure an open wagon has.
+  // The open wagon is the one car dimming cannot help: its body already IS the dark navy family,
+  // and on the black card's face (~#24272a) it read as a hole rather than a vehicle. Lift that
+  // family into a lit steel range instead. Its frame stays on the shared ramp, which still lands
+  // well above the lifted body — an open wagon is read entirely by its frame.
   BLACK: {
-    '#b4b4b5': '#7d858d', // frame + end posts, toned but still the lightest thing on the car
     '#12222f': '#465c70', // outer frame / skirt
     '#142536': '#4d647a', // sill + rib strokes
     '#242e3a': '#54697d', // interior back wall
     '#334454': '#647d94', // interior panels
     '#64717a': '#93a3ae', // interior highlight
-  },
-
-  // The covered hopper is the black wagon's mirror image. The WHITE card has the LIGHTEST face
-  // in dark mode (~#3b3e41 — its livery wash is near-white), so the shared slate ramp sinks
-  // straight into it. Hold this one car a full step above the ramp; it stays the palest vehicle
-  // of the nine, which is also what its colour is called.
-  WHITE: {
-    '#ffffff': '#8b95a0',
-    '#efeeef': '#848e99',
-    '#dbdcdc': '#7d8792',
-    '#c8c9ca': '#747e89',
-    '#b5b4b5': '#69737e',
-    '#b4b4b5': '#69737e',
-    '#9e9e9f': '#5e6873',
-    '#888888': '#545e69',
-    '#717071': '#4b555f',
-    '#717072': '#4b555f',
-  },
-
-  // R20 keeps its rainbow, but the rainbow is INTERIOR — what actually meets the card face is
-  // the handrail/walkway/frame grey. Sent down the shared ramp that outline landed on top of
-  // the loco card's own face (~#313538) and the vehicle lost its edge, so its structural greys
-  // stay a step up. Only the outline is raised; the rainbow flank is untouched.
-  LOCOMOTIVE: {
-    '#ffffff': '#96a0aa', // the white flank sweep, which reads against the rainbow, not the face
-    '#c8c9ca': '#79838d', // roof + walkway
-    '#b5b4b5': '#6f7983',
-    '#b4b4b5': '#6f7983', // handrails, end frames — the silhouette
-    '#9e9e9f': '#646e78',
-    '#888888': '#5a646e',
-    '#717071': '#515b65',
-    '#717072': '#515b65',
   },
 };
 

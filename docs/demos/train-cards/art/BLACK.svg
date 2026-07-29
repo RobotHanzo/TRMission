@@ -21,19 +21,19 @@
         .k-c1 { fill: #93a3ae }
         .k-c2 { fill: #54697d }
         .k-c6 { fill: #647d94 }
-        .k-c13 { stroke: #7d858d }
+        .k-c13 { stroke: #747577 }
         .k-c11 { stroke: #4d647a }
         .k-c26 { fill: #4d647a }
-        .k-c27 { fill: #7d858d }
+        .k-c27 { fill: #747577 }
         .k-c41 { fill: #465c70 }
       }
       :root[data-theme='dark'] .k-c1 { fill: #93a3ae }
       :root[data-theme='dark'] .k-c2 { fill: #54697d }
       :root[data-theme='dark'] .k-c6 { fill: #647d94 }
-      :root[data-theme='dark'] .k-c13 { stroke: #7d858d }
+      :root[data-theme='dark'] .k-c13 { stroke: #747577 }
       :root[data-theme='dark'] .k-c11 { stroke: #4d647a }
       :root[data-theme='dark'] .k-c26 { fill: #4d647a }
-      :root[data-theme='dark'] .k-c27 { fill: #7d858d }
+      :root[data-theme='dark'] .k-c27 { fill: #747577 }
       :root[data-theme='dark'] .k-c41 { fill: #465c70 }
       :root[data-theme='light'] .k-c1 { fill: #64717a; }
       :root[data-theme='light'] .k-c2 { fill: #242e3a; }

@@ -19,19 +19,19 @@
 
       /* Dark mode — night livery, see NIGHT_BODY / PER_CAR in tools/extract.js. */
       @media (prefers-color-scheme: dark) {
-        .p-c10 { stroke: #4b545d }
-        .p-c27 { fill: #4b545d }
-        .p-c15 { stroke: #566069 }
-        .p-c29 { fill: #566069 }
-        .p-c37 { fill: #505a63 }
-        .p-c42 { fill: #39424a }
+        .p-c10 { stroke: #747577 }
+        .p-c27 { fill: #747577 }
+        .p-c15 { stroke: #8b8d8e }
+        .p-c29 { fill: #8b8d8e }
+        .p-c37 { fill: #808283 }
+        .p-c42 { fill: #4d4e4f }
       }
-      :root[data-theme='dark'] .p-c10 { stroke: #4b545d }
-      :root[data-theme='dark'] .p-c27 { fill: #4b545d }
-      :root[data-theme='dark'] .p-c15 { stroke: #566069 }
-      :root[data-theme='dark'] .p-c29 { fill: #566069 }
-      :root[data-theme='dark'] .p-c37 { fill: #505a63 }
-      :root[data-theme='dark'] .p-c42 { fill: #39424a }
+      :root[data-theme='dark'] .p-c10 { stroke: #747577 }
+      :root[data-theme='dark'] .p-c27 { fill: #747577 }
+      :root[data-theme='dark'] .p-c15 { stroke: #8b8d8e }
+      :root[data-theme='dark'] .p-c29 { fill: #8b8d8e }
+      :root[data-theme='dark'] .p-c37 { fill: #808283 }
+      :root[data-theme='dark'] .p-c42 { fill: #4d4e4f }
       :root[data-theme='light'] .p-c10 { stroke: #b4b4b5; }
       :root[data-theme='light'] .p-c27 { fill: #b4b4b5; }
       :root[data-theme='light'] .p-c15 { stroke: #dbdcdc; }

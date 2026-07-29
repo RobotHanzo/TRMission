@@ -19,17 +19,17 @@
 
       /* Dark mode — night livery, see NIGHT_BODY / PER_CAR in tools/extract.js. */
       @media (prefers-color-scheme: dark) {
-        .y-c2 { fill: #626b76 }
-        .y-c6 { fill: #505a63 }
-        .y-c9 { fill: #39424a }
-        .y-c10, .y-c11 { fill: #5c656f }
-        .y-c16 { fill: #4b545d }
+        .y-c2 { fill: #a0a1a2 }
+        .y-c6 { fill: #808283 }
+        .y-c9 { fill: #4d4e50 }
+        .y-c10, .y-c11 { fill: #979799 }
+        .y-c16 { fill: #757577 }
       }
-      :root[data-theme='dark'] .y-c2 { fill: #626b76 }
-      :root[data-theme='dark'] .y-c6 { fill: #505a63 }
-      :root[data-theme='dark'] .y-c9 { fill: #39424a }
-      :root[data-theme='dark'] .y-c10, :root[data-theme='dark'] .y-c11 { fill: #5c656f }
-      :root[data-theme='dark'] .y-c16 { fill: #4b545d }
+      :root[data-theme='dark'] .y-c2 { fill: #a0a1a2 }
+      :root[data-theme='dark'] .y-c6 { fill: #808283 }
+      :root[data-theme='dark'] .y-c9 { fill: #4d4e50 }
+      :root[data-theme='dark'] .y-c10, :root[data-theme='dark'] .y-c11 { fill: #979799 }
+      :root[data-theme='dark'] .y-c16 { fill: #757577 }
       :root[data-theme='light'] .y-c2 { fill: #fff; }
       :root[data-theme='light'] .y-c6 { fill: #c8c9ca; }
       :root[data-theme='light'] .y-c9 { fill: #717072; }

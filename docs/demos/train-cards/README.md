@@ -35,22 +35,25 @@ per file, so any number of them can be inlined into one document without collidi
 
 The sheet is drawn on a near-black page, so its bodywork is near-white. Dropped unmodified onto a
 dark card face that body is a glare bomb — around **12:1** against the face, the brightest thing in
-a dark UI. `NIGHT_BODY` in `tools/extract.js` walks the whole neutral ramp down into a slate range
-while **keeping the order of the greys**, so a roof that was darker than its body stays darker and
-every car keeps its modelling.
+a dark UI.
+
+The ramp is **dimmed, not repainted**: `NIGHT_BODY` mixes every authored neutral toward
+`NIGHT_GROUND` (`#1a1d20`, a hair cooler than black) by one constant. That matters more than it
+sounds. Hand-picking dark values is what makes a night livery look wrong — the authored greys are
+neutral (`#fff`, `#efeeef`, `#dbdcdc`, `#c8c9ca` …), and any hue introduced here reads as a car
+that has been *recoloured* rather than a car seen in low light. Mixing keeps each ink's own hue and
+the spacing between them, so the cars still look like themselves. Tune `DIM` to taste; nothing else
+needs touching.
 
 Two things are deliberately untouched: the **liveries** (the colour bands and R20's rainbow are the
 card's identity, and they read better once the body around them isn't white) and the **windows and
 door bands** (already the darkest inks; they stay darkest and still clear ~2:1 against the
 toned-down body, so there's no need to invert them into lit glazing).
 
-Three cars depart from the shared ramp, via `PER_CAR`:
-
-| Car | Why |
-| --- | --- |
-| `BLACK` 30G1000型敞車 | Its body *is* the dark navy family. On the darkest face (~`#24272a`) it read as a hole, so it is **lifted** into a lit steel range instead, with its frame held above the body — the only structure an open wagon has. |
-| `WHITE` 35N21000型篷斗車 | The mirror case: the WHITE card has the **lightest** face (~`#3b3e41`), so the shared slate sinks into it. Held a step above the ramp; still the palest of the nine. |
-| `LOCOMOTIVE` R20型 | The rainbow is interior — what meets the card face is handrail/walkway/frame grey. That outline alone is raised a step; the rainbow flank is untouched. |
+One car departs from the ramp, via `PER_CAR`: **`BLACK` 30G1000型敞車**, whose body *is* the dark
+navy family. On the darkest face (~`#24272a`) dimming could only make a hole, so it is **lifted**
+into a lit steel range instead. Its frame stays on the shared ramp, which still lands above the
+lifted body — an open wagon is read entirely by its frame.
 
 Measured per-pixel against each card's own dark face, all nine end up with **0%** glare (>8:1) and
 **0%** of their *silhouette* — the inked edge that decides whether a vehicle reads as an object —

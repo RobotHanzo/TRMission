@@ -10,15 +10,15 @@
 
       /* Dark mode — night livery, see NIGHT_BODY / PER_CAR in tools/extract.js. */
       @media (prefers-color-scheme: dark) {
-        .o-c19 { fill: #626b76 }
-        .o-c32 { fill: #3f4850 }
-        .o-c37 { fill: #505a63 }
-        .o-c42 { fill: #39424a }
+        .o-c19 { fill: #a0a1a2 }
+        .o-c32 { fill: #5a5c5d }
+        .o-c37 { fill: #808283 }
+        .o-c42 { fill: #4d4e4f }
       }
-      :root[data-theme='dark'] .o-c19 { fill: #626b76 }
-      :root[data-theme='dark'] .o-c32 { fill: #3f4850 }
-      :root[data-theme='dark'] .o-c37 { fill: #505a63 }
-      :root[data-theme='dark'] .o-c42 { fill: #39424a }
+      :root[data-theme='dark'] .o-c19 { fill: #a0a1a2 }
+      :root[data-theme='dark'] .o-c32 { fill: #5a5c5d }
+      :root[data-theme='dark'] .o-c37 { fill: #808283 }
+      :root[data-theme='dark'] .o-c42 { fill: #4d4e4f }
       :root[data-theme='light'] .o-c19 { fill: #fff; }
       :root[data-theme='light'] .o-c32 { fill: #888; }
       :root[data-theme='light'] .o-c37 { fill: #c8c9ca; }
