@@ -18,6 +18,7 @@ import { handFromCounts } from '../../game/payments';
 import { useTheme } from '../../theme/useTheme';
 import { useUi } from '../../store/ui';
 import { teamColor } from '../../theme/colors';
+import { registerAnimTarget } from './animTargets';
 import { CardRowScroll } from './CardRowScroll';
 import { TrainCarCard } from './TrainCarCard';
 
@@ -54,28 +55,32 @@ export function TeamPoolPanel({ snapshot, onPush, onTake }: Props): React.JSX.El
         </Text>
       </View>
 
-      {inPool.length === 0 ? (
-        <Text style={[styles.muted, { color: tokens.inkSoft }]}>{t('teamPoolEmpty')}</Text>
-      ) : (
-        <CardRowScroll contentContainerStyle={styles.row}>
-          {inPool.map((c) => {
-            const enabled = canTakeFromPool(snapshot, c);
-            return (
-              <Pressable
-                key={c}
-                accessibilityRole="button"
-                accessibilityLabel={`${t('teamPoolTake')}: ${c}`}
-                accessibilityState={{ disabled: !enabled }}
-                disabled={!enabled}
-                onPress={() => onTake(c)}
-                style={!enabled && styles.disabled}
-              >
-                <TrainCarCard color={c} count={pool.cards[c]} showGlyph={colorBlind} />
-              </Pressable>
-            );
-          })}
-        </CardRowScroll>
-      )}
+      {/* The pool's own row is the card-flight anchor (registered even while empty, so a push has
+          somewhere to land). */}
+      <View ref={(v) => registerAnimTarget('team-pool', v)} collapsable={false}>
+        {inPool.length === 0 ? (
+          <Text style={[styles.muted, { color: tokens.inkSoft }]}>{t('teamPoolEmpty')}</Text>
+        ) : (
+          <CardRowScroll contentContainerStyle={styles.row}>
+            {inPool.map((c) => {
+              const enabled = canTakeFromPool(snapshot, c);
+              return (
+                <Pressable
+                  key={c}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${t('teamPoolTake')}: ${c}`}
+                  accessibilityState={{ disabled: !enabled }}
+                  disabled={!enabled}
+                  onPress={() => onTake(c)}
+                  style={!enabled && styles.disabled}
+                >
+                  <TrainCarCard color={c} count={pool.cards[c]} showGlyph={colorBlind} />
+                </Pressable>
+              );
+            })}
+          </CardRowScroll>
+        )}
+      </View>
 
       <Text style={[styles.muted, { color: tokens.inkSoft }]}>{hint}</Text>
       {spare.length > 0 && (

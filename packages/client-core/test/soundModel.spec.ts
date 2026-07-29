@@ -30,6 +30,17 @@ describe('cuesFromEvents', () => {
     ]);
   });
 
+  it('sounds a team-pool take and push like any other card move', () => {
+    const hits = cuesFromEvents(snap({}), [
+      ev('teamPoolTaken', { playerId: 'me', team: 0 }),
+      ev('teamPoolPushed', { playerId: 'mate', team: 0 }),
+    ]);
+    expect(hits).toEqual([
+      { cue: 'cardDraw', isSelf: true },
+      { cue: 'cardDraw', isSelf: false },
+    ]);
+  });
+
   it('maps a started random event to the eventStart cue at full gain', () => {
     const s = snap({});
     const hits = cuesFromEvents(s, [

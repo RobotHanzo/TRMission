@@ -1,4 +1,4 @@
-// One in-flight card, animated from its source (deck/market slot) to its target (hand/tracker) —
+// One in-flight card, animated from its source (deck/market slot/team pool) to its target —
 // ports the web AnimationLayer's FlightMover onto Reanimated + the measured anim-target registry.
 // A missing target (e.g. the dock tab holding it isn't mounted) or reduced motion finishes the
 // flight immediately, exactly like the web's missing-selector fallback.
@@ -12,6 +12,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { Train } from 'lucide-react-native';
+import type { FlightEnd } from '../../game/animationModel';
 import { useAnimationsStore, type Flight } from '../../store/animations';
 import { useGameStore } from '../../store/game';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
@@ -21,6 +22,20 @@ import { TrainCarCard } from './TrainCarCard';
 // Cards travel at hand-card size (not the tiny deck/slot footprint), so the draw reads clearly.
 const CARD_W = 120;
 const CARD_H = Math.round((CARD_W * 92) / 132);
+
+/** The registry key a flight end anchors to — the web `anchorSelector`'s counterpart. */
+const anchorKey = (end: FlightEnd, me: string | null): string => {
+  switch (end.at) {
+    case 'deck':
+      return 'deck';
+    case 'market':
+      return `market-slot-${end.slot}`;
+    case 'teamPool':
+      return 'team-pool';
+    case 'player':
+      return end.playerId === me ? 'hand' : `player-${end.playerId}`;
+  }
+};
 
 export function FlightMover({ flight }: { flight: Flight }) {
   const removeFlight = useAnimationsStore((s) => s.removeFlight);
@@ -40,8 +55,8 @@ export function FlightMover({ flight }: { flight: Flight }) {
       done.current = true;
       removeFlight(flight.id);
     };
-    const srcKey = flight.slot !== null ? `market-slot-${flight.slot}` : 'deck';
-    const dstKey = flight.toPlayerId === me ? 'hand' : `player-${flight.toPlayerId}`;
+    const srcKey = anchorKey(flight.from, me);
+    const dstKey = anchorKey(flight.to, me);
     // `dock` is the compact-layout fallback: on phones the hand/tracker destination lives in a
     // dock tab that may be inactive (unmounted) mid-draw, so its precise target is gone. The dock
     // itself is always mounted, so the card still flies into the tray region — restoring the draw

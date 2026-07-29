@@ -21,7 +21,13 @@ describe('animations store', () => {
     push({ kind: 'glowRoute', routeId: 'R1', seat: 2 });
     push({ kind: 'glowStation', cityId: 'C1', seat: 3 });
     push({ kind: 'scoreFloat', playerId: 'p1', amount: 5 });
-    push({ kind: 'cardFly', toPlayerId: 'p0', faceUp: true, color: 'RED', slot: 1 });
+    push({
+      kind: 'cardFly',
+      from: { at: 'market', slot: 1 },
+      to: { at: 'player', playerId: 'p0' },
+      faceUp: true,
+      color: 'RED',
+    });
     const s = useAnimations.getState();
     expect(s.glowingRoutes.get('R1')).toBe(2);
     expect(s.glowingStations.get('C1')).toBe(3);

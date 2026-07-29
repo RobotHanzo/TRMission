@@ -46,7 +46,9 @@ export function TeamPoolPanel({ snapshot, onPush, onTake }: Props) {
         <span className="muted">{t('teamPoolCount', { n: pool.count, max: pool.capacity })}</span>
       </header>
 
-      <div className="team-pool-cards">
+      {/* The pool's own row is the card-flight anchor (rendered even while empty, so a push has
+          somewhere to land). */}
+      <div className="team-pool-cards" data-anim="team-pool">
         {pool.count === 0 && <span className="muted">{t('teamPoolEmpty')}</span>}
         {CARD_COLORS.filter((c) => pool.cards[c] > 0).map((color) => {
           const tok = CARD_COLOR_TOKENS[color];

@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+import type { FlightEnd } from '../game/animationModel';
 import { useAnimationsStore, type Flight, type Float, type TicketCue } from '../store/animations';
 import { useGameStore } from '../store/game';
 import { useReducedMotion } from '../hooks/useReducedMotion';
@@ -19,7 +20,22 @@ const rectOf = (selector: string): DOMRect | null =>
 const CARD_W = 120;
 const CARD_H = Math.round((CARD_W * 92) / 132);
 
-/** One in-flight card, animated from its source (deck/market slot) to its target (hand/tracker). */
+/** The element a flight end anchors to. Your own cards live in the hand tray; everyone else's on
+ *  their tracker. A selector that matches nothing (panel not mounted) drops the flight. */
+const anchorSelector = (end: FlightEnd, me: string | null): string => {
+  switch (end.at) {
+    case 'deck':
+      return '[data-anim="deck"]';
+    case 'market':
+      return `[data-anim="market-slot"][data-slot="${end.slot}"]`;
+    case 'teamPool':
+      return '[data-anim="team-pool"]';
+    case 'player':
+      return end.playerId === me ? '[data-anim="hand"]' : `[data-player-id="${end.playerId}"]`;
+  }
+};
+
+/** One in-flight card, animated from its source (deck/market slot/team pool) to its target. */
 function FlightMover({ flight }: { flight: Flight }) {
   const removeFlight = useAnimationsStore((s) => s.removeFlight);
   const me = useGameStore((s) => s.snapshot?.you?.playerId ?? null);
@@ -33,14 +49,8 @@ function FlightMover({ flight }: { flight: Flight }) {
       done.current = true;
       removeFlight(flight.id);
     };
-    const src =
-      flight.slot !== null
-        ? rectOf(`[data-anim="market-slot"][data-slot="${flight.slot}"]`)
-        : rectOf('[data-anim="deck"]');
-    const dst =
-      flight.toPlayerId === me
-        ? rectOf('[data-anim="hand"]')
-        : rectOf(`[data-player-id="${flight.toPlayerId}"]`);
+    const src = rectOf(anchorSelector(flight.from, me));
+    const dst = rectOf(anchorSelector(flight.to, me));
     if (!src || !dst || reduced) {
       finish();
       return;

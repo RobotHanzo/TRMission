@@ -1,7 +1,7 @@
 import { create, useStore, type StateCreator } from 'zustand';
 import { createContext, useContext } from 'react';
 import type { CardColor } from '@trm/shared';
-import type { AnimIntent } from '../game/animationModel';
+import type { AnimIntent, FlightEnd } from '../game/animationModel';
 import type { BoardFrameTarget } from '../game/boardModel';
 
 /**
@@ -12,10 +12,10 @@ import type { BoardFrameTarget } from '../game/boardModel';
 
 export interface Flight {
   id: number;
-  toPlayerId: string;
+  from: FlightEnd;
+  to: FlightEnd;
   faceUp: boolean;
   color: CardColor | null;
-  slot: number | null;
 }
 export interface Float {
   id: number;
@@ -192,10 +192,10 @@ const creator: StateCreator<AnimState> = (set) => ({
               ...s.flights,
               {
                 id: nextId(),
-                toPlayerId: intent.toPlayerId,
+                from: intent.from,
+                to: intent.to,
                 faceUp: intent.faceUp,
                 color: intent.color,
-                slot: intent.slot,
               },
             ],
           };

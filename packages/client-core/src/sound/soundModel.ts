@@ -15,8 +15,12 @@ export function cuesFromEvents(snapshot: GameSnapshot, events: GameEvent[]): Cue
   for (const e of events) {
     const ev = e.event;
     switch (ev.case) {
+      // Every way a card changes hands sounds the same: the deck, the market, and the team pool —
+      // taking from the pool IS a draw, and pushing into it moves a card the same way.
       case 'cardDrawnBlind':
       case 'cardTakenFaceup':
+      case 'teamPoolTaken':
+      case 'teamPoolPushed':
         out.push({ cue: 'cardDraw', isSelf: ev.value.playerId === me });
         break;
       case 'turnStarted':

@@ -37,10 +37,10 @@ describe('intentsFromEvents', () => {
     ]);
     expect(mine).toContainEqual({
       kind: 'cardFly',
-      toPlayerId: 'p0',
+      from: { at: 'deck' },
+      to: { at: 'player', playerId: 'p0' },
       faceUp: false,
       color: 'RED',
-      slot: null,
     });
 
     const opp = intentsFromEvents(snap, [
@@ -48,10 +48,10 @@ describe('intentsFromEvents', () => {
     ]);
     expect(opp).toContainEqual({
       kind: 'cardFly',
-      toPlayerId: 'p1',
+      from: { at: 'deck' },
+      to: { at: 'player', playerId: 'p1' },
       faceUp: false,
       color: null,
-      slot: null,
     });
   });
 
@@ -64,10 +64,10 @@ describe('intentsFromEvents', () => {
     ]);
     expect(out).toContainEqual({
       kind: 'cardFly',
-      toPlayerId: 'p1',
+      from: { at: 'market', slot: 2 },
+      to: { at: 'player', playerId: 'p1' },
       faceUp: true,
       color: 'GREEN',
-      slot: 2,
     });
     expect(out).toContainEqual({ kind: 'marketFlip', slot: 2 });
   });
@@ -79,6 +79,53 @@ describe('intentsFromEvents', () => {
     ]);
     expect(out).toContainEqual({ kind: 'marketCover', slot: 1 });
     expect(out).not.toContainEqual({ kind: 'marketFlip', slot: 1 });
+  });
+
+  it('team pool moves fly in and out of the pool — but only the viewer’s own', () => {
+    const teamSnap = {
+      ...snap,
+      players: [
+        { id: 'p0', seat: 0, team: 0 },
+        { id: 'p1', seat: 1, team: 1 },
+      ],
+    } as unknown as GameSnapshot;
+
+    expect(
+      intentsFromEvents(teamSnap, [
+        event({
+          case: 'teamPoolTaken',
+          value: { playerId: 'p0', team: 0, card: Pb.BLUE } as never,
+        }),
+      ]),
+    ).toContainEqual({
+      kind: 'cardFly',
+      from: { at: 'teamPool' },
+      to: { at: 'player', playerId: 'p0' },
+      faceUp: true,
+      color: 'BLUE',
+    });
+
+    expect(
+      intentsFromEvents(teamSnap, [
+        event({
+          case: 'teamPoolPushed',
+          value: { playerId: 'p0', team: 0, card: Pb.BLACK } as never,
+        }),
+      ]),
+    ).toContainEqual({
+      kind: 'cardFly',
+      from: { at: 'player', playerId: 'p0' },
+      to: { at: 'teamPool' },
+      faceUp: true,
+      color: 'BLACK',
+    });
+
+    // The opposing team's pool is not on screen, so its moves have nowhere to fly.
+    expect(
+      intentsFromEvents(teamSnap, [
+        event({ case: 'teamPoolTaken', value: { playerId: 'p1', team: 1, card: Pb.RED } as never }),
+      ]),
+    ).toEqual([]);
   });
 
   it('TurnStarted → turnCue with isYou set for the local player', () => {
