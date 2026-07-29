@@ -202,10 +202,14 @@ describe('大臺北軌道交通 (Greater Taipei Rail Transit) map content', () =
     expect(resolveContentByHash(TAIPEI_TRANSIT_CONTENT_HASH)).toBe(TAIPEI_TRANSIT_CONTENT);
   });
 
+  // Tripwire: any edit to a stop, route or mission moves this. Re-pinned once, while the map was
+  // still fresh, for the 中正紀念堂 name correction; from here on a content edit ships a *new*
+  // version (bump `meta.version`, freeze v1 under src/archive/, register it) rather than moving
+  // this value, or an already-persisted game can no longer rebuild its board.
   it('pins the v1 content hash', () => {
     expect(hashContent(TAIPEI_TRANSIT_CONTENT)).toBe(TAIPEI_TRANSIT_CONTENT_HASH);
     expect(TAIPEI_TRANSIT_CONTENT_HASH).toBe(
-      '00214d544da8b26e7ab34e855ff5d32cc2e3765d1f437d54d93b4946de8924ab',
+      '73ef79727bd6fe03a5f0f51dd06cd25dfbb601f4a59bafc931c3f92e34d112f6',
     );
   });
 });
