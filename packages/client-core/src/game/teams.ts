@@ -2,6 +2,7 @@ import { Phase, type GameSnapshot, type CardCounts } from '@trm/proto';
 import type { CardColor } from '@trm/shared';
 import { CARD_COLORS } from '@trm/shared';
 import { handFromCounts } from './payments';
+import { playerLiveTotal } from './tickets';
 
 /**
  * Team-game view logic — derived ONCE here and rendered by both clients, so web and mobile can
@@ -133,6 +134,84 @@ export function winnerIds(snap: GameSnapshot): Set<string> {
 export function viewerWon(snap: GameSnapshot): boolean {
   const me = snap.you?.playerId;
   return me !== undefined && winnerIds(snap).has(me);
+}
+
+/**
+ * Below this share a segment is too narrow to hold its team name as well as its score, so both
+ * clients drop the name there and keep the number — the head already names the leader, and the
+ * segment's full readout stays on its tooltip / accessibility label.
+ */
+export const TALLY_NAME_MIN_SHARE = 0.24;
+
+export interface TeamTallyRow {
+  readonly team: number;
+  readonly memberIds: readonly string[];
+  /** Live total: the sum of its members' `playerLiveTotal` (route points + completed tickets). */
+  readonly total: number;
+  /** 0–1 share of every point scored so far. Equal shares while nobody has scored. */
+  readonly share: number;
+  readonly isMine: boolean;
+  /** Sole leader. False for everyone while two or more teams are level at the top. */
+  readonly isLeading: boolean;
+}
+
+export interface TeamTally {
+  /** One row per team that has players, in team-id order — the order the tally renders left→right. */
+  readonly rows: readonly TeamTallyRow[];
+  /** Every point scored so far. 0 before anyone scores, which is what flattens the shares. */
+  readonly grandTotal: number;
+  /** How far the leader is ahead of second place. 0 when the top is level. */
+  readonly lead: number;
+  /** The sole leading team id, or null when the top is level. */
+  readonly leader: number | null;
+}
+
+/**
+ * The live team tally: each side's SHARE of the points scored so far, for the always-full stacked
+ * bar both clients render in the player pane. Shares — not progress — because this game has no
+ * target score to fill toward, so share of the running total is the only quantity such a bar can
+ * honestly show. Mid-game totals, so they come from {@link playerLiveTotal} (the same number the
+ * player rows show) and not from `finalScores`, which only exists once the game is over.
+ *
+ * Returns null in a free-for-all. Membership is read off the public player rows rather than
+ * `snapshot.teams`, so a spectator's snapshot tallies the same as a seated player's.
+ */
+export function liveTeamTally(snap: GameSnapshot): TeamTally | null {
+  if (!isTeamGame(snap)) return null;
+  const byTeam = new Map<number, string[]>();
+  for (const p of snap.players) {
+    if (p.team < 0) continue;
+    const members = byTeam.get(p.team);
+    if (members) members.push(p.id);
+    else byTeam.set(p.team, [p.id]);
+  }
+  if (byTeam.size === 0) return null;
+
+  const mine = myTeam(snap);
+  const totals = [...byTeam.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([team, memberIds]) => ({
+      team,
+      memberIds,
+      total: memberIds.reduce((sum, id) => sum + playerLiveTotal(snap, id), 0),
+    }));
+
+  const grandTotal = totals.reduce((sum, r) => sum + r.total, 0);
+  const ranked = [...totals].sort((a, b) => b.total - a.total);
+  const lead = ranked.length > 1 ? ranked[0]!.total - ranked[1]!.total : 0;
+  const leader = lead > 0 ? ranked[0]!.team : null;
+
+  return {
+    rows: totals.map((r) => ({
+      ...r,
+      share: grandTotal > 0 ? r.total / grandTotal : 1 / totals.length,
+      isMine: mine !== null && r.team === mine,
+      isLeading: leader !== null && r.team === leader,
+    })),
+    grandTotal,
+    lead,
+    leader,
+  };
 }
 
 /** Team totals from the end-game scoreboard, ranked. Empty in a free-for-all. */

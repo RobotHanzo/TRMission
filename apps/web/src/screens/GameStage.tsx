@@ -45,6 +45,7 @@ import { EventsPanel } from '../components/EventsPanel';
 import { CardMarket } from '../components/CardMarket';
 import { PlayerHand } from '../components/PlayerHand';
 import { TeamPoolPanel } from '../components/TeamPoolPanel';
+import { TeamTally } from '../components/TeamTally';
 import { TrainCarCard } from '../components/TrainCarCard';
 import { PlayerTrackers } from '../components/PlayerTrackers';
 import { PlayerCard } from '../components/PlayerCard';
@@ -557,6 +558,9 @@ export function GameStage({
         <span className="tray-hint">{t('inspectHint')}</span>
       </div>
       <TurnCountdown />
+      {/* Team mode only: the rows below add up to two or three sides, so the pane states the
+          split before it lists the players. Renders nothing in a free-for-all. */}
+      <TeamTally snapshot={snapshot} />
       <PlayerTrackers snapshot={snapshot} onInspect={inspectPlayer} inspectedId={inspectedId} />
     </div>
   );

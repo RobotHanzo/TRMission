@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { GameSnapshot } from '@trm/proto';
-import { viewerWon, winnerIds } from '../src/game/teams';
+import { liveTeamTally, viewerWon, winnerIds } from '../src/game/teams';
 import { ownershipMap } from '../src/game/view';
 
 const snap = (finalScores: unknown, me: string | null = 'me'): GameSnapshot =>
@@ -63,6 +63,103 @@ describe('winnerIds', () => {
     const tied = { ...TEAM_FINALS, teamRanking: [{ teams: [0, 1] }] };
     expect([...winnerIds(snap(tied))]).toEqual(['me', 'mate', 'p3', 'p4']);
     expect(winnerIds(snap(undefined)).size).toBe(0);
+  });
+});
+
+// The tally divides the points scored SO FAR, so it reads mid-game player rows (routePoints +
+// completed tickets), never finalScores — which does not exist yet while the game is running.
+const live = (
+  players: { id: string; team: number; routePoints: number }[],
+  teamCount = 2,
+  me: string | null = 'me',
+): GameSnapshot =>
+  ({
+    gameSettings: { teamCount },
+    players: players.map((p) => ({ ...p, seat: 0 })),
+    completedTickets: [],
+    ...(me !== null ? { you: { playerId: me } } : {}),
+  }) as unknown as GameSnapshot;
+
+describe('liveTeamTally', () => {
+  it('divides the bar by each side share of the points scored so far', () => {
+    const tally = liveTeamTally(
+      live([
+        { id: 'me', team: 0, routePoints: 30 },
+        { id: 'mate', team: 0, routePoints: 18 },
+        { id: 'p3', team: 1, routePoints: 25 },
+        { id: 'p4', team: 1, routePoints: 14 },
+      ]),
+    )!;
+    expect(tally.rows.map((r) => [r.team, r.total])).toEqual([
+      [0, 48],
+      [1, 39],
+    ]);
+    expect(tally.grandTotal).toBe(87);
+    // Always full: the shares sum to exactly one, because there is no target score to fill toward.
+    expect(tally.rows.reduce((s, r) => s + r.share, 0)).toBeCloseTo(1);
+    expect(tally.rows[0]!.share).toBeCloseTo(48 / 87);
+    expect(tally.leader).toBe(0);
+    expect(tally.lead).toBe(9);
+    expect(tally.rows.map((r) => r.isLeading)).toEqual([true, false]);
+    expect(tally.rows.map((r) => r.isMine)).toEqual([true, false]);
+  });
+
+  it('is still full, and level, before anyone has scored', () => {
+    const tally = liveTeamTally(
+      live(
+        [
+          { id: 'me', team: 0, routePoints: 0 },
+          { id: 'p3', team: 1, routePoints: 0 },
+          { id: 'p5', team: 2, routePoints: 0 },
+        ],
+        3,
+      ),
+    )!;
+    expect(tally.rows.map((r) => r.share)).toEqual([1 / 3, 1 / 3, 1 / 3]);
+    expect(tally.grandTotal).toBe(0);
+    expect(tally.leader).toBeNull();
+    expect(tally.lead).toBe(0);
+  });
+
+  it('names no leader while the top is level', () => {
+    const tally = liveTeamTally(
+      live([
+        { id: 'me', team: 0, routePoints: 20 },
+        { id: 'p3', team: 1, routePoints: 20 },
+      ]),
+    )!;
+    expect(tally.leader).toBeNull();
+    expect(tally.lead).toBe(0);
+    expect(tally.rows.every((r) => !r.isLeading)).toBe(true);
+  });
+
+  it('orders rows by team id however the seats are ordered', () => {
+    const tally = liveTeamTally(
+      live([
+        { id: 'p3', team: 1, routePoints: 10 },
+        { id: 'me', team: 0, routePoints: 5 },
+      ]),
+    )!;
+    expect(tally.rows.map((r) => r.team)).toEqual([0, 1]);
+    expect(tally.rows[0]!.memberIds).toEqual(['me']);
+  });
+
+  it('tallies the same for a spectator, and is null in a free-for-all', () => {
+    const seats = [
+      { id: 'me', team: 0, routePoints: 12 },
+      { id: 'p3', team: 1, routePoints: 4 },
+    ];
+    const watching = liveTeamTally(live(seats, 2, null))!;
+    expect(watching.rows.map((r) => r.total)).toEqual([12, 4]);
+    expect(watching.rows.every((r) => !r.isMine)).toBe(true);
+    expect(
+      liveTeamTally(
+        live(
+          seats.map((s) => ({ ...s, team: -1 })),
+          0,
+        ),
+      ),
+    ).toBeNull();
   });
 });
 

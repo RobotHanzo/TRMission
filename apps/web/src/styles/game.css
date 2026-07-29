@@ -2896,7 +2896,128 @@ button.ticket-card:hover {
 }
 
 /* ── team mode ─────────────────────────────────────────────────────────────
-   The pool is public information: it renders for every viewer, and its two rows read as
+   The tally row in the player pane: an election-night bar for a game that has no winning score,
+   so it is always full and what it divides is the points scored SO FAR. Timetable idiom, like
+   the rest of the pane — a wide-tracked eyebrow, mono numerals, and a hairline post standing
+   across the line at the halfway mark. */
+.team-tally {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.team-tally-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--tr-space-2);
+  font-size: 0.7rem;
+  line-height: 1;
+}
+.team-tally-eyebrow {
+  color: var(--tr-ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+}
+.team-tally-lead {
+  margin-inline-start: auto;
+  color: var(--tr-ember);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.team-tally-lead.is-level {
+  color: var(--tr-ink-soft);
+  font-weight: 600;
+}
+/* The track shows only where a team's share is zero, so it carries the bar's rounding; the
+   segments round their own outer ends, which leaves the bar free of `overflow: hidden` and lets
+   the post overshoot it. */
+.team-tally-bar {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  height: 22px;
+  border-radius: var(--tr-radius-sm);
+  background: var(--tr-surface-2);
+}
+/* Each side's label sits at its OWN outer end (the leading side reading inward from the left, the
+   rest anchored right), which is both how a tally is read and what keeps every score clear of the
+   halfway line — the boundary a close game parks right under it. The inset comes from the
+   labels' margins, not the segment's padding, so a side still on zero is genuinely zero wide
+   instead of a 10px stub with a half-glyph in it. */
+.team-tally-seg {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--tr-space-1);
+  overflow: hidden;
+  white-space: nowrap;
+  color: #fff;
+  /* A score change is read peripherally here, so the hand-over slides rather than snaps. */
+  transition: width 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+/* is-first/is-last come from the component: the halfway line is a sibling span, so a positional
+   selector would round THAT instead of the bar's outer end. */
+.team-tally-seg.is-first {
+  justify-content: flex-start;
+  border-start-start-radius: var(--tr-radius-sm);
+  border-end-start-radius: var(--tr-radius-sm);
+}
+.team-tally-seg.is-last {
+  border-start-end-radius: var(--tr-radius-sm);
+  border-end-end-radius: var(--tr-radius-sm);
+}
+/* A seam rather than a gap — the bar has to stay one continuous whole to read as a tally. */
+.team-tally-seg + .team-tally-seg {
+  box-shadow: inset 1px 0 0 color-mix(in srgb, var(--tr-surface) 72%, transparent);
+}
+.team-tally-seg-name {
+  margin-inline-start: 5px;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* Your own side reads at full strength while the others sit back — the tally already spends its
+     colour on the teams, so it does not spend a mark here too. */
+  opacity: 0.82;
+}
+.team-tally-seg.is-mine .team-tally-seg-name {
+  opacity: 1;
+  font-weight: 800;
+}
+.team-tally-seg-total {
+  flex: none;
+  margin-inline-end: 5px;
+  font-family: var(--tr-font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+/* The halfway line. With no score to win there is no threshold worth marking except parity — and
+   running past it is exactly what holding the lead looks like. ONE hairline, kept inside the bar:
+   a heavier marker sits on top of the scores, which are the thing being compared. The shares
+   always sum to one, so it is always drawn over a team colour — hence a fixed light hairline
+   rather than a themed one. */
+.team-tally-post {
+  position: absolute;
+  inset-block: 0;
+  left: 50%;
+  width: 1px;
+  margin-inline-start: -0.5px;
+  background: rgba(255, 255, 255, 0.8);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .team-tally-seg {
+    transition: none;
+  }
+}
+
+/* The pool is public information: it renders for every viewer, and its two rows read as
    "what the team has parked" (take) above "what you can spare" (place). */
 .team-pool {
   margin-top: 0.6rem;

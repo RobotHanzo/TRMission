@@ -57,6 +57,7 @@ import { EventPhaseBar, EventTurnActions } from '../components/game/EventActions
 import { CardMarket } from '../components/game/CardMarket';
 import { PlayerHand } from '../components/game/PlayerHand';
 import { TeamPoolPanel } from '../components/game/TeamPoolPanel';
+import { TeamTally } from '../components/game/TeamTally';
 import { PlayerTrackers } from '../components/game/PlayerTrackers';
 import { PlayerCard } from '../components/game/PlayerCard';
 import { TurnCountdown } from '../components/game/TurnCountdown';
@@ -501,6 +502,9 @@ export function GameStage({
           shows only two numbers, and the count is already the number of rows below it. */}
       <TrayHead title={t('dockPlayers')} hint={t('inspectHint')} />
       {withCountdown && <TurnCountdown />}
+      {/* Team mode only: the rows below add up to two or three sides, so the panel states the
+          split before it lists the players. Renders nothing in a free-for-all. */}
+      <TeamTally snapshot={snapshot} />
       <PlayerTrackers snapshot={snapshot} onInspect={inspectPlayer} inspectedId={inspectedId} />
     </GamePanel>
   );
