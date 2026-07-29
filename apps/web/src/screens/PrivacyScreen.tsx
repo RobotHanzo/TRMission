@@ -48,6 +48,12 @@ export function PrivacyScreen() {
           <br />
           User-generated content: custom maps and abuse reports.
         </li>
+        <li>
+          登入紀錄：最近一次成功登入的時間與 IP 位址，用於防範濫用與帳號安全。
+          <br />
+          Sign-in record: the time and IP address of your most recent successful sign-in, kept for
+          abuse prevention and account security.
+        </li>
       </ul>
 
       <h3>Cookie 與追蹤 · Cookies &amp; tracking</h3>
@@ -156,6 +162,54 @@ export function PrivacyScreen() {
         Platform (UMP) consent dialog, and you can reopen and change your choice any time from{' '}
         <strong>Settings → Ad privacy options</strong> in the app. Ad content and placements have{' '}
         <strong>no</strong> access to your hand, tickets, chat, or other game-secret data.
+      </p>
+
+      <h3>錯誤與診斷回報 · Error &amp; diagnostic reporting</h3>
+      <p>
+        當服務發生錯誤或當機時，我們會透過{' '}
+        <a href="https://sentry.io/privacy/" target="_blank" rel="noreferrer">
+          Sentry
+        </a>{' '}
+        收集診斷資料以便找出並修正問題：錯誤訊息與堆疊追蹤、應用程式版本、裝置或瀏覽器資訊、當機前的操作軌跡，以及少量的效能取樣。這些資料會與你的
+        <strong>帳號 ID</strong>
+        關聯，好讓我們判斷同一位玩家是否重複遇到同一個問題。網頁版另會附帶你的電子郵件、顯示名稱與連線
+        IP 位址；行動應用程式<strong>僅</strong>附帶帳號 ID，不含電子郵件或 IP。
+        <br />
+        When something errors or crashes we collect diagnostic data through{' '}
+        <a href="https://sentry.io/privacy/" target="_blank" rel="noreferrer">
+          Sentry
+        </a>{' '}
+        so we can find and fix it: the error message and stack trace, the app version, device or
+        browser information, a trail of the actions leading up to it, and a small sample of
+        performance timings. This is associated with your <strong>account ID</strong> so we can tell
+        whether one player keeps hitting the same bug. The web app additionally attaches your email
+        address, display name and connecting IP address; the mobile apps attach the account ID{' '}
+        <strong>only</strong> — no email, no IP.
+      </p>
+      <p>
+        送出前所有內容都會先經過統一的過濾清單，因此診斷資料<strong>不會</strong>
+        包含你的手牌、任務車票、牌堆順序、隨機種子、密碼或登入權杖。
+        <br />
+        Everything passes through a shared denylist before it leaves the app, so diagnostic data{' '}
+        <strong>never</strong> contains your hand, mission tickets, deck order, random seed,
+        passwords, or sign-in tokens.
+      </p>
+      <p>
+        網頁版在發生錯誤時會保留錯誤前數十秒的畫面重播（Session
+        Replay），協助我們重現問題；手牌與任務卡區塊會被完全遮蔽，不會出現在重播中。未發生錯誤的一般連線預設不錄製，行動應用程式的畫面重播則預設完全關閉。行動應用程式另會將最後一次當機紀錄存在你的裝置上，只有在你主動從「設定」分享時才會送出。
+        <br />
+        On the web, an error also keeps a short screen recording (Session Replay) of the seconds
+        leading up to it so we can reproduce the problem; the hand and mission areas are blocked out
+        entirely and never appear in one. Ordinary error-free sessions are not recorded by default,
+        and screen replay is off entirely in the mobile apps. The mobile apps additionally keep the
+        last crash report on your own device — it is only sent if you choose to share it from
+        Settings.
+      </p>
+      <p>
+        此功能僅在我們為該版本設定 Sentry 時啟用；未設定的版本完全不會傳送任何診斷資料。
+        <br />
+        This only runs when Sentry is configured for a given build; a build without it never sends
+        any diagnostic data at all.
       </p>
 
       <h3>保留與刪除 · Retention &amp; deletion</h3>
