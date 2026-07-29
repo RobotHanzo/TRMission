@@ -1,6 +1,7 @@
-// Hand-authored 1200×630 SVG social cards (GitHub-style). All artwork is original
-// geometric brand styling — route-ribbon motifs echoing the board, never copied art.
-// Text is XML-escaped here; rasterisation happens in OgService via resvg.
+// Hand-authored 1200×630 SVG social cards (GitHub-style), plus the one store graphic that
+// shares their furniture (`featureGraphicSvg`, 1024×500 — rendered to a file, not served).
+// All artwork is original geometric brand styling — route-ribbon motifs echoing the board,
+// never copied art. Text is XML-escaped here; rasterisation happens in OgService via resvg.
 /* eslint no-irregular-whitespace: ["error", { "skipStrings": true, "skipTemplates": true }] --
    the card copy deliberately uses U+3000 ideographic spaces for CJK typography */
 import { fileURLToPath } from 'node:url';
@@ -274,7 +275,10 @@ function brandBannerRotated(cx: number, cy: number, iconSize: number, maxWidth: 
 // =============================================================================
 // 1) SITE CARD  — brand lockup + tagline; also the private/unknown fallback.
 // =============================================================================
-const SITE_ROUTE_MOTIF = `
+/** Route-ribbon geometry only, authored in the 1200×630 card's coordinates. Kept separate from
+ *  the paper wash + orange rule that sit on top of it so `featureGraphicSvg` can scale the
+ *  ribbons uniformly into its own (shorter, wider) canvas and draw its own wash at that size. */
+const ROUTE_MOTIF = `
 <g stroke-linecap="round">
 <polyline points="700,90 820,180 820,320 960,420 1140,420" fill="none" stroke="${SEAT_COLORS[0]}" stroke-width="9"/>
 <polyline points="820,180 1000,130 1150,210" fill="none" stroke="${SEAT_COLORS[1]}" stroke-width="9"/>
@@ -285,7 +289,9 @@ const SITE_ROUTE_MOTIF = `
 <circle cx="820" cy="180" r="14"/><circle cx="820" cy="320" r="14"/><circle cx="960" cy="420" r="14"/>
 <circle cx="1000" cy="130" r="14"/><circle cx="700" cy="470" r="14"/><circle cx="1140" cy="420" r="14"/>
 </g>
-<circle cx="700" cy="90" r="18" fill="${EMBER}"/>
+<circle cx="700" cy="90" r="18" fill="${EMBER}"/>`;
+
+const SITE_ROUTE_MOTIF = `${ROUTE_MOTIF}
 <rect width="560" height="${CARD_H}" fill="${PAPER}" opacity="0.94"/>
 <rect width="12" height="${CARD_H}" fill="${BANNER_ORANGE}"/>`;
 
@@ -299,6 +305,44 @@ ${banner.markup}
 ${text(66, 446, 32, INK_SOFT, '搶佔路線，連接城市', { font: F_SANS })}
 ${text(66, 590, 23, INK_SOFT, 'trmission.robothanzo.dev', { font: F_MONO })}
 `);
+}
+
+// =============================================================================
+// 1b) PLAY FEATURE GRAPHIC — the site card's composition at Google Play's
+//     1024×500. NOT served over HTTP: rasterised to a file by
+//     `scripts/gen-feature-graphic.ts`, committed, uploaded to the Console by hand.
+// =============================================================================
+export const FEATURE_W = 1024;
+export const FEATURE_H = 500;
+
+/**
+ * Google Play's "feature graphic" (Store listing → Graphics), also what a featured placement
+ * uses. Same brand furniture as `siteCardSvg` — paper ground, orange spine, route ribbons,
+ * the BrandBanner lockup, the 搶佔路線，連接城市 tagline — recomposed rather than cropped:
+ * 1024×500 is a wider, shorter frame than 1200×630, so a scale-to-width crop would slice the
+ * bottom line off. The ribbons scale UNIFORMLY (a non-uniform squash would turn the station
+ * dots into ellipses and thin the strokes on one axis only); the text column, its paper wash,
+ * and the spine are re-authored at this canvas's own proportions.
+ *
+ * Play wants the key content away from the edges (surfaces crop it and can overlay a play
+ * button), so the card's small `trmission.robothanzo.dev` footer is dropped and the English
+ * half of the tagline takes the bottom slot instead — one fewer line, all of it legible at the
+ * thumbnail sizes the listing actually renders.
+ */
+export function featureGraphicSvg(): string {
+  const motifScale = FEATURE_W / CARD_W;
+  const banner = brandBanner(58, 148, 116, 410);
+  return `<svg width="${FEATURE_W}" height="${FEATURE_H}" viewBox="0 0 ${FEATURE_W} ${FEATURE_H}" xmlns="http://www.w3.org/2000/svg">
+<rect width="${FEATURE_W}" height="${FEATURE_H}" fill="${PAPER}"/>
+<g transform="scale(${motifScale})">${ROUTE_MOTIF}
+</g>
+<rect width="480" height="${FEATURE_H}" fill="${PAPER}" opacity="0.94"/>
+<rect width="10" height="${FEATURE_H}" fill="${BANNER_ORANGE}"/>
+${text(58, 104, 22, INK_SOFT, '鐵道建設桌遊', { spacing: 3, font: F_SANS })}
+${banner.markup}
+${text(58, 362, 30, INK_SOFT, '搶佔路線，連接城市', { font: F_SANS })}
+${text(58, 400, 18, INK_SOFT, 'CLAIM ROUTES · LINK CITIES', { spacing: 2.4, font: F_MONO })}
+</svg>`;
 }
 
 // =============================================================================

@@ -11,6 +11,7 @@
     "test:watch": "vitest",
     "lint": "eslint src test",
     "preview:og": "node --import @swc-node/register/esm-register scripts/render-og-cards.ts",
+    "gen:feature-graphic": "node --import @swc-node/register/esm-register scripts/gen-feature-graphic.ts",
     "warm-mongo": "node --import @swc-node/register/esm-register scripts/warm-mongo-binary.ts"
   },
   "dependencies": {

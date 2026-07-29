@@ -1,5 +1,14 @@
 # Store screenshot prep (consumed by P6)
 
+## Generated graphics (not screenshots)
+
+- **Play feature graphic** — `apps/web/public/feature-graphic.png`, 1024×500, 24-bit RGB (Play
+  rejects an alpha channel). Generated from the same brand furniture as the generic OG site card:
+  `yarn workspace @trm/server gen:feature-graphic`. Re-run it if that card's tokens/lockup change,
+  then upload by hand in Store listing → Graphics (`fastlane android metadata` skips images).
+- **Store icons** — `apps/web/public/icon.android.png` (512) and `icon.xl.png` (App Store), also
+  uploaded by hand.
+
 ## Required sets
 
 | Store     | Set         | Size/device                         | Notes                               |
