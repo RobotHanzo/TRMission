@@ -3,7 +3,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import { MongoClient, type Db } from 'mongodb';
 import { taiwanBoard, CONTENT_HASH, boardForContentHash } from '@trm/engine';
 import { CONTENT_REGISTRY } from '@trm/map-data';
-import type { GameConfig, PlayerSeed } from '@trm/engine';
+import type { FinalScoreboard, GameConfig, PlayerSeed } from '@trm/engine';
 import { asPlayerId, type PlayerId } from '@trm/shared';
 import type { ServerEnvelope } from '@trm/proto';
 import { ensureIndexes, MongoGameStore } from '../src/persistence/game-store';
@@ -81,6 +81,33 @@ async function driveDirect(
       await store.recordCompletion(gameId, prep.prepared.state);
   }
 }
+
+describe('completion archive', () => {
+  it("records the winning TEAM's members as the winners, not the top individual scorer", async () => {
+    const seats: PlayerSeed[] = [0, 1, 2, 3].map((seat) => ({
+      id: asPlayerId(`p${seat}`),
+      seat: seat as PlayerSeed['seat'],
+    }));
+    const config: GameConfig = { ...configFor('persist-team', seats), teamCount: 2 };
+    const live = new GameSession('g-team', board, config);
+    await store.createGame('g-team', config, live.raw(), live.digest());
+
+    // p1 out-totals the whole table on their own, but their SIDE loses 110-170.
+    const finalScores = {
+      players: [],
+      ranking: [['p1'], ['p0'], ['p2'], ['p3']].map((g) => g.map(asPlayerId)),
+      teams: [
+        { team: 0, members: [asPlayerId('p0'), asPlayerId('p2')], total: 170 },
+        { team: 1, members: [asPlayerId('p1'), asPlayerId('p3')], total: 110 },
+      ],
+      teamRanking: [[0], [1]],
+    } as unknown as FinalScoreboard;
+    await store.recordCompletion('g-team', { ...live.raw(), finalScores });
+
+    const doc = await db.collection('matchHistory').findOne({ _id: 'g-team' as never });
+    expect(doc?.winners).toEqual(['p0', 'p2']);
+  });
+});
 
 describe('event-sourced persistence + recovery (ADR A5/A7)', () => {
   it('recovers a partially-played game to an identical digest, via a checkpoint snapshot', async () => {

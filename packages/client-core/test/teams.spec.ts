@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { GameSnapshot } from '@trm/proto';
-import { viewerWon } from '../src/game/teams';
+import { viewerWon, winnerIds } from '../src/game/teams';
 
 const snap = (finalScores: unknown, me: string | null = 'me'): GameSnapshot =>
   ({
@@ -45,5 +45,22 @@ describe('viewerWon', () => {
   it('is false for a spectator and before the scoreboard exists', () => {
     expect(viewerWon(snap(TEAM_FINALS, null))).toBe(false);
     expect(viewerWon(snap(undefined))).toBe(false);
+  });
+});
+
+describe('winnerIds', () => {
+  it("is the whole first-place TEAM, and excludes the losing side's top scorer", () => {
+    expect([...winnerIds(snap(TEAM_FINALS))]).toEqual(['me', 'mate']);
+  });
+
+  it('is the individual ranking[0] group in a free-for-all', () => {
+    const ffa = { ranking: [{ playerIds: ['me', 'p2'] }, { playerIds: ['p3'] }], teams: [] };
+    expect([...winnerIds(snap(ffa))]).toEqual(['me', 'p2']);
+  });
+
+  it('covers both teams when first place is tied, and is empty with no scoreboard', () => {
+    const tied = { ...TEAM_FINALS, teamRanking: [{ teams: [0, 1] }] };
+    expect([...winnerIds(snap(tied))]).toEqual(['me', 'mate', 'p3', 'p4']);
+    expect(winnerIds(snap(undefined)).size).toBe(0);
   });
 });

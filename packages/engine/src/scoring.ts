@@ -331,6 +331,20 @@ export function computeFinalScores(board: Board, state: GameState): FinalScorebo
   };
 }
 
+/**
+ * Who won. In a team game the result belongs to the TEAM, so this is every member of every
+ * first-place team — including a member whose own total is not the table's highest, and excluding
+ * a top individual scorer whose side lost. A free-for-all reads `ranking[0]`. The single answer
+ * behind the completion archive and every "did they win" surface built on it; the clients' own
+ * `viewerWon` (`@trm/client-core`) is its per-viewer mirror.
+ */
+export function winnersOf(scores: FinalScoreboard): PlayerId[] {
+  const { teams, teamRanking } = scores;
+  if (!teams || !teamRanking) return [...(scores.ranking[0] ?? [])];
+  const first = new Set(teamRanking[0] ?? []);
+  return teams.filter((t) => first.has(t.team)).flatMap((t) => [...t.members]);
+}
+
 /** Team tiebreaker, mirroring {@link rankPlayers}: total desc → tickets desc → holds longest. */
 function rankTeams(finals: readonly TeamFinal[]): number[][] {
   const cmp = (a: TeamFinal, b: TeamFinal): number => {

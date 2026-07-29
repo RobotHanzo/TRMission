@@ -113,18 +113,26 @@ export function canTakeFromPool(snap: GameSnapshot, color: CardColor): boolean {
 }
 
 /**
- * Did the viewer win? In a team game the result belongs to the TEAM: every member of a
- * first-place team won, including one whose own total is not the table's highest — so this reads
- * the team ranking, never the individual one. A free-for-all falls back to `ranking[0]`.
- * False for spectators and before the scoreboard exists.
+ * Everyone who won. In a team game the result belongs to the TEAM: every member of a first-place
+ * team won, including one whose own total is not the table's highest — and the table's top scorer
+ * did NOT win if their side lost. So this reads the team ranking, never the individual one; a
+ * free-for-all falls back to `ranking[0]`. Mirrors the server's `winnersOf` (`@trm/engine`), which
+ * is what the completion archive and history record.
  */
-export function viewerWon(snap: GameSnapshot): boolean {
+export function winnerIds(snap: GameSnapshot): Set<string> {
   const finals = snap.finalScores;
+  if (!finals) return new Set();
+  const teams = finals.teams ?? [];
+  if (teams.length === 0) return new Set(finals.ranking?.[0]?.playerIds ?? []);
+  const first = new Set(finals.teamRanking?.[0]?.teams ?? []);
+  return new Set(teams.filter((t) => first.has(t.team)).flatMap((t) => [...t.memberIds]));
+}
+
+/** Did the viewer win? The per-viewer read of {@link winnerIds} — false for spectators and
+ *  before the scoreboard exists. */
+export function viewerWon(snap: GameSnapshot): boolean {
   const me = snap.you?.playerId;
-  if (!finals || me === undefined) return false;
-  const mine = (finals.teams ?? []).find((t) => t.memberIds.includes(me));
-  if (mine) return (finals.teamRanking?.[0]?.teams ?? []).includes(mine.team);
-  return (finals.ranking?.[0]?.playerIds ?? []).includes(me);
+  return me !== undefined && winnerIds(snap).has(me);
 }
 
 /** Team totals from the end-game scoreboard, ranked. Empty in a free-for-all. */

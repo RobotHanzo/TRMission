@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { Collection, Db } from 'mongodb';
-import { boardForContentHash } from '@trm/engine';
+import { boardForContentHash, winnersOf } from '@trm/engine';
 import type { Action } from '@trm/engine';
 import { MONGO_DB } from '../db/tokens';
 import type {
@@ -110,6 +110,21 @@ export class HistoryRepo {
     return rows.map((r, i) => staticFlags[i] ?? known.has(r.contentHash));
   }
 
+  /**
+   * Winners re-derived from the archived scoreboard rather than read off the denormalised
+   * `winners` field. Identical for a free-for-all, but it HEALS team games archived before
+   * `winners` became team-aware — those stored the top individual scorer, so a winning team's
+   * lower-scoring member showed up as a loser (and a losing team's top scorer as the winner).
+   */
+  private static winnersOfDoc(doc: MatchHistoryDoc): string[] {
+    const scores = doc.finalScores;
+    // An archive whose scoreboard can't answer (partial/legacy shape) keeps what was stored.
+    if (!scores || (!Array.isArray(scores.ranking) && !Array.isArray(scores.teamRanking))) {
+      return doc.winners ?? [];
+    }
+    return winnersOf(scores).map((id) => id as string);
+  }
+
   /** Display names for userIds (bots and TTL-expired guests simply don't match). */
   async displayNames(userIds: string[]): Promise<Map<string, string>> {
     const humans = [...new Set(userIds)].filter((id) => !id.startsWith('bot:'));
@@ -160,7 +175,7 @@ export class HistoryRepo {
           ...(displayName !== undefined ? { displayName } : {}),
         };
       }),
-      winners: d.winners,
+      winners: HistoryRepo.winnersOfDoc(d),
       completedAt: d.completedAt.toISOString(),
       role: d.players.some((p) => p.userId === userId)
         ? ('player' as const)
@@ -202,7 +217,7 @@ export class HistoryRepo {
           ...(displayName !== undefined ? { displayName } : {}),
         };
       }),
-      winners: doc.winners,
+      winners: HistoryRepo.winnersOfDoc(doc),
       completedAt: doc.completedAt.toISOString(),
       role: doc.players.some((p) => p.userId === userId)
         ? ('player' as const)
@@ -213,9 +228,12 @@ export class HistoryRepo {
     };
   }
 
-  /** The archive doc with no membership filter — the caller decides access (replay visibility). */
-  get(gameId: string): Promise<MatchHistoryDoc | null> {
-    return this.col.findOne({ _id: gameId });
+  /** The archive doc with no membership filter — the caller decides access (replay visibility).
+   *  `winners` is re-derived (see {@link HistoryRepo.winnersOfDoc}), so every consumer of this
+   *  doc reads the team-aware result. */
+  async get(gameId: string): Promise<MatchHistoryDoc | null> {
+    const doc = await this.col.findOne({ _id: gameId });
+    return doc && { ...doc, winners: HistoryRepo.winnersOfDoc(doc) };
   }
 
   /**
@@ -282,7 +300,10 @@ export class HistoryRepo {
       ...(last ? { finalDigest: last.stateDigest } : {}),
       status: game.status as 'COMPLETED' | 'TERMINATED',
       ...(archive
-        ? { winners: archive.winners, completedAt: archive.completedAt.toISOString() }
+        ? {
+            winners: HistoryRepo.winnersOfDoc(archive),
+            completedAt: archive.completedAt.toISOString(),
+          }
         : {}),
       ...(game.terminatedAt
         ? {

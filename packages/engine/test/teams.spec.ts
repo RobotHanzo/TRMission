@@ -10,12 +10,12 @@ import type { RouteDef } from '@trm/map-data';
 import { taiwanBoard, CONTENT_HASH } from '../src/taiwan';
 import type { Board } from '../src/board';
 import type { GameConfig } from '../src/config';
-import type { GameState, PlayerState } from '../src/types/state';
+import type { FinalScoreboard, GameState, PlayerState, TeamFinal } from '../src/types/state';
 import { initGame } from '../src/setup';
 import { reduce } from '../src/reduce';
 import { legalActions, redactFor } from '../src/selectors';
 import { stateDigest, replay } from '../src/serialize';
-import { computeFinalScores } from '../src/scoring';
+import { computeFinalScores, winnersOf } from '../src/scoring';
 import { emptyHand } from '../src/hand';
 import { checkInvariants } from '../src/invariants';
 import { hasAnyLegalMove } from '../src/legality';
@@ -237,6 +237,49 @@ describe('team mode — shared network', () => {
     expect(p2?.longestBonus).toBe(0);
     expect(teamA?.longestBonus).toBe(state.ruleParams.longestPathBonus);
     expect(finals.teamRanking?.flat().sort()).toEqual([0, 1]);
+  });
+});
+
+describe('winnersOf', () => {
+  const scores = (over: Partial<FinalScoreboard>): FinalScoreboard =>
+    ({ players: [], ranking: [], ...over }) as FinalScoreboard;
+  const team = (id: number, members: string[], total: number) =>
+    ({ team: id, members: members.map(asPlayerId), total }) as unknown as TeamFinal;
+
+  it('is the individual ranking[0] in a free-for-all', () => {
+    const s = scores({ ranking: [['p1'], ['p0']].map((g) => g.map(asPlayerId)) });
+    expect(winnersOf(s)).toEqual([asPlayerId('p1')]);
+  });
+
+  it("is the first-place TEAM's members — not the top individual scorer — in a team game", () => {
+    // p1 out-totals everyone individually, but sits on the losing team.
+    const s = scores({
+      ranking: [['p1'], ['p0'], ['p2'], ['p3']].map((g) => g.map(asPlayerId)),
+      teams: [team(0, ['p0', 'p2'], 170), team(1, ['p1', 'p3'], 110)],
+      teamRanking: [[0], [1]],
+    });
+    expect(winnersOf(s)).toEqual([asPlayerId('p0'), asPlayerId('p2')]);
+  });
+
+  it('returns every member of every tied first-place team', () => {
+    const s = scores({
+      ranking: [],
+      teams: [team(0, ['p0', 'p2'], 140), team(1, ['p1', 'p3'], 140)],
+      teamRanking: [[0, 1]],
+    });
+    expect(winnersOf(s)).toEqual(['p0', 'p2', 'p1', 'p3'].map(asPlayerId));
+  });
+
+  it('agrees with the team ranking on a real scored team game', () => {
+    const { board, config } = cfg(4, 2);
+    const finals = computeFinalScores(board, initGame(board, config));
+    const first = finals.teamRanking?.[0] ?? [];
+    expect(winnersOf(finals).sort()).toEqual(
+      finals
+        .teams!.filter((t) => first.includes(t.team))
+        .flatMap((t) => [...t.members])
+        .sort(),
+    );
   });
 });
 

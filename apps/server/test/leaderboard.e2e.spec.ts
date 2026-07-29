@@ -133,3 +133,51 @@ describe('GET /api/v1/leaderboard', () => {
     expect(res.body).toEqual({ standing: null });
   });
 });
+
+// Stays LAST in the file: it registers four more accounts and rates them, which would shift the
+// absolute ranks the GET assertions above pin.
+describe('LeaderboardService.onGameOver — team games', () => {
+  it("credits the winning TEAM's members with a win, even the one who wasn't top scorer", async () => {
+    const carol = await registered('lb-carol@example.com', 'Carol');
+    const dave = await registered('lb-dave@example.com', 'Dave');
+    const erin = await registered('lb-erin@example.com', 'Erin');
+    const frank = await registered('lb-frank@example.com', 'Frank');
+
+    // Team 0 (Carol + Dave) wins 170-110, but Erin is the highest INDIVIDUAL scorer — so the
+    // individual `ranking` and the team result disagree, which is the case that used to be read
+    // as "Carol and Dave lost".
+    await t.db.collection('matchHistory').insertOne({
+      _id: 'lb-team-1',
+      players: [
+        { userId: carol.id, seat: 0 },
+        { userId: erin.id, seat: 1 },
+        { userId: dave.id, seat: 2 },
+        { userId: frank.id, seat: 3 },
+      ],
+      turnOrder: [carol.id, erin.id, dave.id, frank.id],
+      seed: 'seed',
+      contentHash: 'hash',
+      finalScores: {
+        players: [],
+        ranking: [[erin.id], [carol.id], [dave.id], [frank.id]],
+        teams: [
+          { team: 0, members: [carol.id, dave.id], total: 170 },
+          { team: 1, members: [erin.id, frank.id], total: 110 },
+        ],
+        teamRanking: [[0], [1]],
+      },
+      winners: [carol.id, dave.id],
+      completedAt: new Date(),
+    } as never);
+
+    await t.app.get(LeaderboardService).onGameOver('lb-team-1');
+
+    const stats = t.db.collection('playerLeaderboardStats');
+    const row = (id: string) => stats.findOne({ _id: `${id}:${ALL_TIME_SCOPE}` as never });
+    expect(await row(carol.id)).toMatchObject({ wins: 1, losses: 0 });
+    expect(await row(dave.id)).toMatchObject({ wins: 1, losses: 0 });
+    expect(await row(erin.id)).toMatchObject({ wins: 0, losses: 1 });
+    expect(await row(frank.id)).toMatchObject({ wins: 0, losses: 1 });
+    expect((await row(dave.id))!.rating).toBeGreaterThan((await row(erin.id))!.rating);
+  });
+});

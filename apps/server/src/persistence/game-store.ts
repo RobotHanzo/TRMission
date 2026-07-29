@@ -4,7 +4,7 @@
 // write-concern; multi-document transactions are not needed because every write for
 // a game is serialized by the per-game command queue (single writer).
 import type { Db, Collection } from 'mongodb';
-import { ENGINE_VERSION } from '@trm/engine';
+import { ENGINE_VERSION, winnersOf } from '@trm/engine';
 import type { GameConfig, GameState, Action } from '@trm/engine';
 import type { BotProfile } from '@trm/bots';
 import {
@@ -155,7 +155,9 @@ export class MongoGameStore implements GameStorePort {
           seed: game.seed,
           contentHash: game.contentHash,
           finalScores: scores,
-          winners: (scores.ranking[0] ?? []).map((id) => id as string),
+          // Team-aware: in a team game the winners are the first-place TEAM's members, not the
+          // top individual scorer (who can sit on the losing side).
+          winners: winnersOf(scores).map((id) => id as string),
           // A seated member can also mint a spectate ticket — their role stays "player".
           spectators: (game.spectators ?? []).filter(
             (id) => !game.config.players.some((p) => p.id === id),

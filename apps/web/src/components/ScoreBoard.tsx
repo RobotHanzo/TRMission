@@ -6,7 +6,7 @@ import type { RoomMember } from '../net/rest';
 import { api } from '../net/rest';
 import { seatColor, teamColor } from '../theme/colors';
 import { seatByPlayer } from '../game/view';
-import { teamStandings } from '@trm/client-core/game/teams';
+import { teamStandings, winnerIds } from '@trm/client-core/game/teams';
 import { usePlayerName } from '../game/playerName';
 import { ticketById } from '../game/content';
 import { useAnimationsStore } from '../store/animations';
@@ -170,7 +170,9 @@ export function ScoreBoard({
   if (!fs) return null;
 
   const seats = seatByPlayer(snapshot);
-  const winners = new Set(fs.ranking[0]?.playerIds ?? []);
+  // Team-aware: in a team game the crown follows the winning TEAM, so a member who outscored
+  // nobody still wears it and the losing side's top scorer doesn't.
+  const winners = winnerIds(snapshot);
   // Team standings (empty in a free-for-all) — the authoritative result in a team game.
   const teams = teamStandings(snapshot);
   const sorted = [...fs.players].sort((a, b) => b.total - a.total);

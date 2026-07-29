@@ -48,8 +48,11 @@ partners are interleaved around the table by construction and the genesis turn-o
 ROTATION (one `nextInt`) rather than a permutation — alternation cannot be broken. Teams share a
 network for ticket completion (including the mid-game lock) and score ONE combined longest-trail
 bonus on a team scoreboard row; the per-player rows carry `longestBonus: 0` so it is never doubled.
-Teammates see each other's kept tickets, but never each other's hands: cards move between partners
-only through the public per-team pool (`PUSH_TO_TEAM_POOL` is free once per turn and is deliberately
+**Who won is `winnersOf(finalScores)`** (`scoring.ts`) — the first-place TEAM's members, never
+`ranking[0]`, whose top individual scorer can sit on the losing side. Every "did they win" surface
+reads it: the completion archive, history, OG cards, and (mirrored) `winnerIds`/`viewerWon` in
+`@trm/client-core`. Teammates see each other's kept tickets, but never each other's hands: cards
+move between partners only through the public per-team pool (`PUSH_TO_TEAM_POOL` is free once per turn and is deliberately
 excluded from `hasAnyLegalMove` so A15 termination survives; `TAKE_FROM_TEAM_POOL` is a draw).
 
 Parallel-track exclusivity is a rule about **sides**, not players (v14): a team may hold at most ONE

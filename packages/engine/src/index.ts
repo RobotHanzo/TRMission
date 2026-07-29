@@ -95,6 +95,7 @@ export { currentPlayerId, endTurn } from './turn';
 
 export {
   computeFinalScores,
+  winnersOf,
   evaluatePlayerTickets,
   evaluateSideTickets,
   ticketDetailsByPlayer,
