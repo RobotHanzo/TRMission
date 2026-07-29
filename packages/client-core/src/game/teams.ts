@@ -227,10 +227,25 @@ export function liveTeamTally(snap: GameSnapshot): TeamTally | null {
   };
 }
 
-/** Team totals from the end-game scoreboard, ranked. Empty in a free-for-all. */
-export function teamStandings(
-  snap: GameSnapshot,
-): { team: number; total: number; place: number; memberIds: readonly string[] }[] {
+export interface TeamStanding {
+  readonly team: number;
+  readonly total: number;
+  readonly place: number;
+  readonly memberIds: readonly string[];
+  /** The side's COMBINED longest trail, in cars — the same number every member's row reports. */
+  readonly longestTrailLength: number;
+  /** The longest-route bonus, awarded once to the TEAM (never to a member's row). */
+  readonly longestBonus: number;
+}
+
+/**
+ * Team totals from the end-game scoreboard, ranked. Empty in a free-for-all.
+ *
+ * Carries the combined trail because the longest-route bonus is a TEAM award — the engine puts it
+ * on this row and leaves every member's `longestBonus` at 0 so it is never doubled. The team row is
+ * therefore the only place either client can honestly show that the bonus was granted.
+ */
+export function teamStandings(snap: GameSnapshot): TeamStanding[] {
   const finals = snap.finalScores;
   if (!finals || finals.teams.length === 0) return [];
   const placeOf = new Map<number, number>();
@@ -241,6 +256,8 @@ export function teamStandings(
       total: t.total,
       place: placeOf.get(t.team) ?? finals.teamRanking.length + 1,
       memberIds: t.memberIds,
+      longestTrailLength: t.longestTrailLength,
+      longestBonus: t.longestBonus,
     }))
     .sort((a, b) => a.place - b.place || a.team - b.team);
 }

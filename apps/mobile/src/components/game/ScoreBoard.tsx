@@ -190,6 +190,10 @@ export function ScoreBoard({
   const winners = winnerIds(snapshot);
   // Team standings (empty in a free-for-all) — the authoritative result in a team game.
   const teams = teamStandings(snapshot);
+  // The longest-route bonus is a TEAM award (the engine leaves every member's `longestBonus` at 0
+  // so it is never doubled), so in a team game the trail reads off this row, not the player's.
+  const teamRowOf = (playerId: string): (typeof teams)[number] | undefined =>
+    teams.find((r) => r.memberIds.includes(playerId));
   const sorted = [...fs.players].sort((a, b) => b.total - a.total);
   // Only games played with random events carry the ✨ stat — an events-off (or pre-events)
   // game would otherwise show an all-zero column.
@@ -213,6 +217,9 @@ export function ScoreBoard({
   // leaving only a floating bar to read it and return. The board stays pannable.
   if (viewingMap) {
     const pf = fs.players.find((p) => p.playerId === viewingMap);
+    // In a team game the highlighted segments are the SIDE's combined trail (both partners' rows
+    // reveal the same one), so the caption names the team's route and its team-level bonus.
+    const tr = teamRowOf(viewingMap);
     return (
       <View style={styles.reviewBar} pointerEvents="box-none">
         <View
@@ -223,10 +230,12 @@ export function ScoreBoard({
         >
           <MapIcon size={15} color={ink} />
           <Text style={[styles.reviewCaption, { color: tokens.ink }]} numberOfLines={2}>
-            {t('longestRouteOf', { name: nameOf(viewingMap) })}
-            {pf
-              ? ` · ${t('longestDetail', { cars: pf.longestTrailLength, pts: pf.longestBonus })}`
-              : ''}
+            {tr ? t('teamCombinedTrail') : t('longestRouteOf', { name: nameOf(viewingMap) })}
+            {tr
+              ? ` · ${t('longestDetail', { cars: tr.longestTrailLength, pts: tr.longestBonus })}`
+              : pf
+                ? ` · ${t('longestDetail', { cars: pf.longestTrailLength, pts: pf.longestBonus })}`
+                : ''}
           </Text>
           <Pressable
             style={[styles.primaryBtn, { backgroundColor: tokens.blue }]}
@@ -307,6 +316,21 @@ export function ScoreBoard({
                     {row.memberIds.map((id) => nameOf(id)).join(' · ')}
                   </Text>
                   <Text style={[styles.teamStandingTotal, { color: tokens.ink }]}>{row.total}</Text>
+                  {row.longestTrailLength > 0 && (
+                    // The one place the longest-route bonus is visible in a team game: it is
+                    // awarded to the SIDE, so the member rows below carry none of it.
+                    <Text
+                      style={[
+                        styles.teamStandingTrail,
+                        row.longestBonus > 0
+                          ? { color: tokens.blue, fontWeight: '700' }
+                          : { color: tokens.inkSoft },
+                      ]}
+                    >
+                      📏 {t('teamCombinedTrail')} ·{' '}
+                      {t('longestDetail', { cars: row.longestTrailLength, pts: row.longestBonus })}
+                    </Text>
+                  )}
                 </View>
               ))}
             </View>
@@ -376,7 +400,12 @@ export function ScoreBoard({
                     <View style={styles.statGroup}>
                       <Text style={[styles.stat, { color: ink }]}>
                         📏{' '}
-                        {t('longestDetail', { cars: pf.longestTrailLength, pts: pf.longestBonus })}
+                        {teams.length > 0
+                          ? t('longestDetailCars', { cars: pf.longestTrailLength })
+                          : t('longestDetail', {
+                              cars: pf.longestTrailLength,
+                              pts: pf.longestBonus,
+                            })}
                       </Text>
                       {pf.longestTrailRouteIds.length > 0 && (
                         <Pressable
@@ -546,7 +575,10 @@ const styles = StyleSheet.create({
   teamStanding: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    // Wraps so the combined-trail line can claim a full second row under name/members/total.
+    flexWrap: 'wrap',
+    columnGap: 8,
+    rowGap: 2,
     borderWidth: 2,
     borderRadius: 10,
     paddingHorizontal: 10,
@@ -555,6 +587,7 @@ const styles = StyleSheet.create({
   teamStandingName: { fontWeight: '700', fontSize: 13 },
   teamStandingMembers: { flex: 1, fontSize: 12 },
   teamStandingTotal: { fontSize: 17, fontWeight: '800' },
+  teamStandingTrail: { width: '100%', fontSize: 11 },
   backdrop: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.45)',

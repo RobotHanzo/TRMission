@@ -3125,6 +3125,17 @@ button.ticket-card:hover {
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
+/* Combined longest route: a full-width second line, because the +10 is awarded to the SIDE and
+   the member rows below therefore show none of it. */
+.team-standing-trail {
+  grid-column: 1 / -1;
+  color: var(--tr-muted);
+  font-size: 0.8rem;
+}
+.team-standing-trail.earned {
+  color: var(--tr-ok);
+  font-weight: 700;
+}
 .chat-channels {
   display: inline-flex;
   gap: 2px;

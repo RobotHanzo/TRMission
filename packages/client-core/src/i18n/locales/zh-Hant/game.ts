@@ -55,6 +55,7 @@ export default {
   longestPath: '最長路線',
   eventScoreBonus: '事件獎勵',
   longestDetail: '{{cars}} 節車廂（+{{pts}} 分）',
+  longestDetailCars: '{{cars}} 節車廂',
   totalScore: '總分',
   viewOnMap: '在地圖上查看',
   backToScores: '返回計分板',

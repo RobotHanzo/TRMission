@@ -16,6 +16,7 @@ import { routeById, ticketById, cityById } from '../game/content';
 import { completedByPlayer } from '../game/tickets';
 import { pbToCard } from '../game/cards';
 import { isMyTurn } from '../game/view';
+import { viewerWon } from '@trm/client-core/game/teams';
 import {
   handFromCounts,
   handAfterPayment,
@@ -260,7 +261,10 @@ export function GameStage({
     completedRef.current = gameId;
     const fs = snapshot.finalScores;
     const mine = fs?.players.find((p) => p.playerId === me);
-    const won = !!me && (fs?.ranking?.[0]?.playerIds.includes(me) ?? false);
+    // Team-aware, like every other "did they win / did they hold the longest route" surface: the
+    // result belongs to the TEAM, and so does the longest-route bonus (member rows carry 0).
+    const won = viewerWon(snapshot);
+    const myTeamRow = fs?.teams.find((row) => !!me && row.memberIds.includes(me));
     track('game_complete', {
       won,
       final_score: mine?.total ?? 0,
@@ -269,7 +273,7 @@ export function GameStage({
         ? { duration_sec: Math.round((Date.now() - startMsRef.current) / 1000) }
         : {}),
       ...(mine?.ticketsCompleted !== undefined ? { tickets_completed: mine.ticketsCompleted } : {}),
-      longest_path: (mine?.longestBonus ?? 0) > 0,
+      longest_path: (myTeamRow?.longestBonus ?? mine?.longestBonus ?? 0) > 0,
       is_spectator: isSpectator,
       map_id: mapId,
     });

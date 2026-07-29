@@ -161,6 +161,93 @@ describe('ScoreBoard', () => {
   });
 });
 
+// A finished 2v2 team game. The longest-route bonus is a TEAM award, so every player row carries
+// longestBonus 0 and only the team row has the +10 (issue #74).
+const teamSnap = create(GameSnapshotSchema, {
+  stateVersion: 1,
+  phase: Phase.GAME_OVER,
+  players: [
+    { id: 'p0', seat: 0, team: 0 },
+    { id: 'p1', seat: 1, team: 1 },
+  ],
+  you: { playerId: 'p0' },
+  gameSettings: { teamCount: 2 },
+  finalScores: {
+    players: [
+      {
+        playerId: 'p0',
+        routePoints: 50,
+        stationBonus: 8,
+        longestTrailLength: 18,
+        longestBonus: 0,
+        total: 58,
+        keptTicketIds: [],
+        completedTicketIds: [],
+        longestTrailRouteIds: longestRoutes,
+      },
+      {
+        playerId: 'p1',
+        routePoints: 20,
+        stationBonus: 4,
+        longestTrailLength: 9,
+        longestBonus: 0,
+        total: 24,
+        keptTicketIds: [],
+        completedTicketIds: [],
+        longestTrailRouteIds: [],
+      },
+    ],
+    ranking: [{ playerIds: ['p0'] }, { playerIds: ['p1'] }],
+    teams: [
+      {
+        team: 0,
+        memberIds: ['p0'],
+        routePoints: 50,
+        stationBonus: 8,
+        longestTrailLength: 18,
+        longestBonus: 10,
+        total: 68,
+      },
+      {
+        team: 1,
+        memberIds: ['p1'],
+        routePoints: 20,
+        stationBonus: 4,
+        longestTrailLength: 9,
+        longestBonus: 0,
+        total: 24,
+      },
+    ],
+    teamRanking: [{ teams: [0] }, { teams: [1] }],
+  },
+});
+
+describe('ScoreBoard team mode', () => {
+  beforeEach(() => {
+    useAnimations.getState().reset();
+    void i18n.changeLanguage('zh-Hant');
+  });
+
+  it('shows the longest-route bonus on the team row, where it is actually awarded', () => {
+    render(<ScoreBoard snapshot={teamSnap} onLeave={() => {}} />);
+    expect(screen.getByText(/合併最長路線 · 18 節車廂（\+10 分）/)).toBeInTheDocument();
+    expect(screen.getByText(/合併最長路線 · 9 節車廂（\+0 分）/)).toBeInTheDocument();
+  });
+
+  it('never shows a member a bare +0 for a bonus their side scored', () => {
+    const { container } = render(<ScoreBoard snapshot={teamSnap} onLeave={() => {}} />);
+    const cells = [...container.querySelectorAll('td.longest')].map((td) => td.textContent);
+    expect(cells).toEqual(['18 節車廂', '9 節車廂']);
+  });
+
+  it('captions the map review as the TEAM route, with the team-level bonus', () => {
+    render(<ScoreBoard snapshot={teamSnap} onLeave={() => {}} />);
+    fireEvent.click(screen.getByLabelText('在地圖上查看'));
+    expect(screen.getByText(/合併最長路線 · 18 節車廂（\+10 分）/)).toBeInTheDocument();
+    expect(screen.queryByText(/的最長路線/)).not.toBeInTheDocument();
+  });
+});
+
 const member = (over: Partial<RoomMember> = {}): RoomMember => ({
   userId: 'p0',
   displayName: 'Host',

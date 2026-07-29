@@ -175,6 +175,10 @@ export function ScoreBoard({
   const winners = winnerIds(snapshot);
   // Team standings (empty in a free-for-all) — the authoritative result in a team game.
   const teams = teamStandings(snapshot);
+  // The longest-route bonus is a TEAM award (the engine leaves every member's `longestBonus` at 0
+  // so it is never doubled), so in a team game the trail reads off this row, not the player's.
+  const teamRowOf = (playerId: string): (typeof teams)[number] | undefined =>
+    teams.find((r) => r.memberIds.includes(playerId));
   const sorted = [...fs.players].sort((a, b) => b.total - a.total);
   // Only games played with random events carry the ✨ column — an events-off (or pre-events)
   // game would otherwise show an all-zero column.
@@ -198,13 +202,19 @@ export function ScoreBoard({
   // only a top bar to read it and return. The backdrop is gone, so the board stays pannable.
   if (viewingMap) {
     const pf = fs.players.find((p) => p.playerId === viewingMap);
+    // In a team game the highlighted segments are the SIDE's combined trail (both partners' rows
+    // reveal the same one), so the caption names the team's route and its team-level bonus.
+    const tr = teamRowOf(viewingMap);
     return (
       <div className="scoreboard-review">
         <div className="review-bar">
           <span className="review-caption">
-            <MapIcon size={15} aria-hidden /> {t('longestRouteOf', { name: nameOf(viewingMap) })}
-            {pf &&
-              ` · ${t('longestDetail', { cars: pf.longestTrailLength, pts: pf.longestBonus })}`}
+            <MapIcon size={15} aria-hidden />{' '}
+            {tr ? t('teamCombinedTrail') : t('longestRouteOf', { name: nameOf(viewingMap) })}
+            {tr
+              ? ` · ${t('longestDetail', { cars: tr.longestTrailLength, pts: tr.longestBonus })}`
+              : pf &&
+                ` · ${t('longestDetail', { cars: pf.longestTrailLength, pts: pf.longestBonus })}`}
           </span>
           <button className="primary" onClick={backToScores}>
             {t('backToScores')}
@@ -265,6 +275,21 @@ export function ScoreBoard({
                   {row.memberIds.map((id) => nameOf(id)).join(' · ')}
                 </span>
                 <span className="team-standing-total">{row.total}</span>
+                {row.longestTrailLength > 0 && (
+                  // The one place the longest-route bonus is visible in a team game: it is awarded
+                  // to the SIDE, so the member rows below carry none of it.
+                  <span
+                    className={
+                      row.longestBonus > 0 ? 'team-standing-trail earned' : 'team-standing-trail'
+                    }
+                  >
+                    📏 {t('teamCombinedTrail')} ·{' '}
+                    {t('longestDetail', {
+                      cars: row.longestTrailLength,
+                      pts: row.longestBonus,
+                    })}
+                  </span>
+                )}
               </div>
             ))}
           </div>
@@ -342,7 +367,12 @@ export function ScoreBoard({
                     </td>
                     <td className="num longest" data-label={t('longestPath')}>
                       <span className="cell-value">
-                        {t('longestDetail', { cars: pf.longestTrailLength, pts: pf.longestBonus })}
+                        {teams.length > 0
+                          ? t('longestDetailCars', { cars: pf.longestTrailLength })
+                          : t('longestDetail', {
+                              cars: pf.longestTrailLength,
+                              pts: pf.longestBonus,
+                            })}
                         {pf.longestTrailRouteIds.length > 0 && (
                           <button
                             className="cell-view"

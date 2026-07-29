@@ -56,6 +56,9 @@ export default {
   longestPath: 'Longest path',
   eventScoreBonus: 'Event bonus',
   longestDetail: '{{cars}} cars (+{{pts}})',
+  // Team game: the bonus belongs to the TEAM row, so a member's cell shows the shared length only —
+  // a "+0" there would read as "the longest route scored nothing".
+  longestDetailCars: '{{cars}} cars',
   totalScore: 'Total',
   viewOnMap: 'View on map',
   backToScores: 'Back to scores',
