@@ -59,3 +59,6 @@ yarn-error.log*
 
 # OTA code-signing PRIVATE key (cert is committed; key lives on the OTA server secret mount)
 apps/mobile/certs/keys/
+
+# Data safety bisection probes (diagnostics for a rejected Play upload, never an artifact).
+docs/release/play-data-safety-bisect.csv

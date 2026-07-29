@@ -27,22 +27,32 @@ worse than no file at all:
 
 ## If Play says "Couldn't upload. Try again."
 
-That is a generic client-side error — it names no row, so it cannot be diagnosed from the file, and
-the file is provably well-formed by the three checks above. Work through these in order:
+A generic client-side error that names no row, so it cannot be diagnosed from the file — and the
+file is provably well-formed: the three assertions above hold, every declared type has its purposes,
+ephemeral flag and user-control answer set, and no undeclared type carries a stray usage answer.
 
-1. **Upload `play-data-safety-minimal.csv` instead.** It is the same file minus the ten rows
-   covering account creation, data deletion and outside-app sign-in — the only questions Google's
-   sample leaves blank, and therefore the only ones not demonstrated to be importable. If this one
-   succeeds, those five questions are UI-only: answer them by hand (two URLs, three radio groups)
-   and the 782-row bulk is still done for you.
-2. **Retry in a private window with extensions disabled.** The wording is Play Console's generic
-   upload failure rather than a validation message, so an interrupted request or a blocked XHR
-   produces it too.
-3. **Check the file was not opened and re-saved by Excel.** Excel rewrites line endings and can add
-   a BOM; both files are UTF-8, CRLF, no BOM, no trailing newline. Re-run the script to restore.
+**Run the control first: upload `data_safety_sample.csv` itself, unmodified.** It is Google's own
+file and we never touch a byte of it outside the answer column, so it splits the problem cleanly:
 
-If none of that works, the next step is bisection — halve the declared data types, regenerate, and
-find the row Play objects to.
+- **The sample fails too** ⇒ nothing generated here can help. The cause is Console-side — the form
+  locked by a submission already in review, an account without App content permission, or a Play
+  outage. Check those, not the CSV.
+- **The sample imports** ⇒ the row set is fine and something in our answers is rejected. Bisect:
+
+  ```bash
+  node docs/release/play-data-safety.mjs --only=PSL_EMAIL,PSL_USER_ACCOUNT,PSL_OTHER_PERSONAL
+  ```
+
+  `--only` declares just the named types and writes `play-data-safety-bisect.csv` (gitignored — a
+  probe, not an artifact) so the real files are never clobbered. Halve, upload, repeat until the
+  offending type is isolated.
+
+Two lesser suspects worth eliminating on the way: upload `play-data-safety-minimal.csv`, which drops
+the ten rows covering account creation, data deletion and outside-app sign-in — the only questions
+Google's sample leaves blank and therefore the only ones not demonstrated to import (if that
+succeeds, they are UI-only and cost five answers by hand). And confirm the file was not opened and
+re-saved by Excel, which rewrites line endings and adds a BOM; every file here is UTF-8, CRLF, no
+BOM, no trailing newline, and re-running the script restores that.
 
 Keep this in lockstep with `app-store-connect-setup.md` §11 (Apple's table) and
 `apps/web/src/screens/PrivacyScreen.tsx` (the published policy). A store-to-store mismatch is a

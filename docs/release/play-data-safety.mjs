@@ -32,6 +32,8 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const DEFAULT_INPUT = resolve(HERE, 'data_safety_sample.csv');
 const OUT = resolve(HERE, 'play-data-safety.csv');
 const MINIMAL_OUT = resolve(HERE, 'play-data-safety-minimal.csv');
+// Bisection probes are diagnostics, not artifacts — kept out of the repo.
+const BISECT_OUT = resolve(HERE, 'play-data-safety-bisect.csv');
 const DELETION_URL = 'https://trmission.robothanzo.dev/account/delete';
 
 // ---------------------------------------------------------------------------------------------
@@ -130,10 +132,20 @@ const TYPE_CHECKLIST = {
   PSL_DEVICE_ID: 'PSL_DATA_TYPES_IDENTIFIERS',
 };
 
-/** Expand DECLARED into the flat `question[:response]` → value map the transformer applies. */
-function buildAnswers({ minimal }) {
+/**
+ * Expand DECLARED into the flat `question[:response]` → value map the transformer applies.
+ *
+ * `only` restricts the declared types to a named subset — the bisection handle for when Play
+ * refuses a file without saying why. Halve the list, regenerate, upload, repeat.
+ */
+function buildAnswers({ minimal, only }) {
   const out = { ...OVERVIEW, ...(minimal ? {} : ACCOUNT_QUESTIONS) };
-  for (const [type, d] of Object.entries(DECLARED)) {
+  const types = only
+    ? Object.entries(DECLARED).filter(([t]) => only.includes(t))
+    : Object.entries(DECLARED);
+  const unknown = (only ?? []).filter((t) => !DECLARED[t]);
+  if (unknown.length) throw new Error(`--only names undeclared types: ${unknown.join(', ')}`);
+  for (const [type, d] of types) {
     out[`${TYPE_CHECKLIST[type]}:${type}`] = 'true';
     const q = `PSL_DATA_USAGE_RESPONSES:${type}`;
     out[`${q}:PSL_DATA_USAGE_COLLECTION_AND_SHARING:PSL_DATA_USAGE_ONLY_COLLECTED`] = 'true';
@@ -228,8 +240,11 @@ function assertNoNewQuoting(src, before, after) {
 function main() {
   const argv = process.argv.slice(2);
   const minimal = argv.includes('--minimal');
+  const onlyArg = argv.find((a) => a.startsWith('--only='));
+  const only = onlyArg?.slice('--only='.length).split(',').filter(Boolean);
   const src = argv.find((a) => !a.startsWith('--')) ?? DEFAULT_INPUT;
-  const out_ = minimal ? MINIMAL_OUT : OUT;
+  // A bisection run is a throwaway probe, so it never overwrites the real artifacts.
+  const out_ = only ? BISECT_OUT : minimal ? MINIMAL_OUT : OUT;
   const raw = readFileSync(src, 'utf8');
   const rows = parseCsv(raw);
 
@@ -244,7 +259,7 @@ function main() {
     throw new Error(`unexpected header in ${src}: ${header.join(',')}`);
   }
 
-  const answers = buildAnswers({ minimal });
+  const answers = buildAnswers({ minimal, only });
   const used = new Set();
   let changed = 0;
   for (const row of body) {
@@ -266,7 +281,9 @@ function main() {
   writeFileSync(out_, text, 'utf8');
 
   const declared = body.filter((r) => r[0].startsWith('PSL_DATA_TYPES_') && r[2] === 'true');
-  console.log(`wrote ${out_}${minimal ? '  (--minimal: account questions left blank)' : ''}`);
+  console.log(
+    `wrote ${out_}${minimal ? '  (--minimal: account questions left blank)' : ''}${only ? `  (--only: ${only.length} type(s))` : ''}`,
+  );
   console.log(`  from ${src}`);
   console.log(`  ${body.length} rows, ${changed} response values changed, 0 cells newly quoted`);
   console.log(`  ${declared.length} data types declared: ${declared.map((r) => r[1]).join(', ')}`);
