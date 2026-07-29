@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import type { GameSnapshot } from '@trm/proto';
 import { viewerWon, winnerIds } from '../src/game/teams';
+import { ownershipMap } from '../src/game/view';
 
 const snap = (finalScores: unknown, me: string | null = 'me'): GameSnapshot =>
   ({
@@ -62,5 +63,39 @@ describe('winnerIds', () => {
     const tied = { ...TEAM_FINALS, teamRanking: [{ teams: [0, 1] }] };
     expect([...winnerIds(snap(tied))]).toEqual(['me', 'mate', 'p3', 'p4']);
     expect(winnerIds(snap(undefined)).size).toBe(0);
+  });
+});
+
+// A claimed route carries BOTH colours in a team game: the cars go team-coloured (one network per
+// side) while the roadbed keeps the owner's seat, naming which partner laid the track.
+const board = (players: { id: string; seat: number; team: number }[]): GameSnapshot =>
+  ({
+    players,
+    ownership: [
+      { routeId: 'r1', cell: { case: 'ownerPlayerId', value: 'mate' } },
+      { routeId: 'r2', cell: { case: 'locked', value: true } },
+    ],
+  }) as unknown as GameSnapshot;
+
+describe('ownershipMap', () => {
+  it("carries the owner's team alongside their seat in a team game", () => {
+    const out = ownershipMap(
+      board([
+        { id: 'me', seat: 0, team: 0 },
+        { id: 'mate', seat: 3, team: 0 },
+      ]),
+    );
+    expect(out.get('r1')).toEqual({ ownerSeat: 3, ownerTeam: 0 });
+    expect(out.get('r2')).toEqual({ locked: true });
+  });
+
+  it('leaves the team absent in a free-for-all, so the cars stay the seat colour', () => {
+    const out = ownershipMap(
+      board([
+        { id: 'me', seat: 0, team: -1 },
+        { id: 'mate', seat: 3, team: -1 },
+      ]),
+    );
+    expect(out.get('r1')).toEqual({ ownerSeat: 3 });
   });
 });

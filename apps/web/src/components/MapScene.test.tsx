@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import { buildRouteGeometryFor } from '@trm/map-data';
 import { MapScene } from './MapScene';
+import { SEAT_COLORS, TEAM_COLORS } from '../theme/colors';
 
 const cities = [
   { id: 'a', x: 10, y: 10 },
@@ -50,6 +51,21 @@ describe('MapScene', () => {
     );
     expect(container.querySelector('[data-route-id="r2"]')!.classList.contains('owned')).toBe(true);
     expect(container.querySelectorAll('rect.slot.ferry-loco').length).toBe(0);
+  });
+
+  it('team game: cars take the team colour, the roadbed keeps the owner seat colour', () => {
+    const owned = new Map([['r1', { ownerSeat: 1, ownerTeam: 0 }]]);
+    const { container } = render(<MapScene {...base} owned={owned} />);
+    const g = container.querySelector('[data-route-id="r1"]') as SVGGElement;
+    expect(g.querySelector('rect.slot')!.getAttribute('fill')).toBe(TEAM_COLORS[0]);
+    expect(g.style.getPropertyValue('--seat')).toBe(SEAT_COLORS[1]);
+    // Free-for-all (no team): the cars stay the owner's own seat colour.
+    const { container: ffa } = render(
+      <MapScene {...base} owned={new Map([['r1', { ownerSeat: 1 }]])} />,
+    );
+    expect(ffa.querySelector('[data-route-id="r1"] rect.slot')!.getAttribute('fill')).toBe(
+      SEAT_COLORS[1],
+    );
   });
 
   it('claim and station affordances gate independently — one never leaks the other', () => {

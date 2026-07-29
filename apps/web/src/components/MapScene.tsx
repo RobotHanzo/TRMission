@@ -8,7 +8,7 @@ import type { CSSProperties, MouseEvent, PointerEvent, ReactNode, Ref } from 're
 import type { MapGeography, RouteGeometry } from '@trm/map-data';
 import { mapCssVars } from '@trm/map-data';
 import type { View } from '../game/geography';
-import { CARD_COLOR_TOKENS, GRAY_TOKEN, seatColor } from '../theme/colors';
+import { CARD_COLOR_TOKENS, GRAY_TOKEN, seatColor, teamColor } from '../theme/colors';
 import { Geography, CustomGeography } from './Geography';
 import { RouteShape, FerryLocoGradientDef } from './RouteShape';
 
@@ -35,6 +35,9 @@ export interface SceneRoute {
 /** A route's claim state (from the snapshot): owned by a seat, or locked (double sibling). */
 export interface RouteOwnership {
   readonly ownerSeat?: number | undefined;
+  /** Team games only: the owner's team. The cars take the TEAM's colour; the roadbed under them
+   *  stays the owner's own seat colour (see `fill` / `--seat` below). */
+  readonly ownerTeam?: number | undefined;
   readonly locked?: boolean | undefined;
 }
 
@@ -204,13 +207,16 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
         const claimable =
           !!canClaim && !o && !!onRouteClick && (claimFilter ? claimFilter(r) : true);
         const clickable = claimable || (!!alwaysHitRoutes && !!onRouteClick);
-        // Unclaimed → route colour; claimed → owner's seat colour; locked → muted grey.
+        // Unclaimed → route colour; claimed → the owner's colour (in a TEAM game their team's, so
+        // a side's network reads as one); locked → muted grey.
         const fill =
-          o?.ownerSeat !== undefined
-            ? seatColor(o.ownerSeat)
-            : o?.locked
-              ? '#9aa0a6'
-              : colorOf(r.color);
+          o?.ownerTeam !== undefined
+            ? teamColor(o.ownerTeam)
+            : o?.ownerSeat !== undefined
+              ? seatColor(o.ownerSeat)
+              : o?.locked
+                ? '#9aa0a6'
+                : colorOf(r.color);
         const carOpacity = o?.locked ? 0.45 : 1;
         const isFerry = (r.ferryLocos ?? 0) > 0;
         const kind = r.isTunnel ? ' tunnel' : isFerry ? ' ferry' : '';
@@ -230,7 +236,8 @@ export function MapScene<C extends SceneCity, R extends SceneRoute>({
           (brokenNow ? ' broken' : '') +
           extra;
         // The owner's seat colour, exposed to CSS so a claimed route tints its whole roadbed
-        // (the "background") to its owner — and the glow bloom reuses the same `--seat`.
+        // (the "background") to its owner — and the glow bloom reuses the same `--seat`. This
+        // stays the PLAYER's colour even in a team game, where the cars above it go team-coloured.
         const seatCss = glowSeat ?? o?.ownerSeat;
         // Double-route siblings split apart by a perpendicular nudge that counter-scales with
         // the track weight (--inv-scale), so the twin tracks stay snug at any zoom.

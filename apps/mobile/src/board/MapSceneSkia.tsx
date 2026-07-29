@@ -76,6 +76,9 @@ export interface SceneRoute {
 /** A route's claim state (from the snapshot): owned by a seat, or locked (double sibling). */
 export interface RouteOwnership {
   readonly ownerSeat?: number | undefined;
+  /** Team games only: the owner's team. The cars take the TEAM's colour; the roadbed under them
+   *  stays the owner's own seat colour (RouteLayer). */
+  readonly ownerTeam?: number | undefined;
   readonly locked?: boolean | undefined;
 }
 

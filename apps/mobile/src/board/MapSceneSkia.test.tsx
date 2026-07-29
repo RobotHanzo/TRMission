@@ -39,6 +39,7 @@ describe('MapSceneSkia', () => {
   it('renders with game state — ownership, stations, glow, targets, colour-blind', () => {
     const firstRoute = TAIWAN_CONTENT.routes[0]!;
     const secondRoute = TAIWAN_CONTENT.routes[1]!;
+    const thirdRoute = TAIWAN_CONTENT.routes[2]!;
     const firstCity = TAIWAN_CONTENT.cities[0]!;
     expect(() =>
       render(
@@ -52,6 +53,8 @@ describe('MapSceneSkia', () => {
           owned={
             new Map([
               [firstRoute.id, { ownerSeat: 0 }],
+              // Team-owned: team-coloured cars over a seat-coloured roadbed (RouteLayer's split).
+              [thirdRoute.id, { ownerSeat: 2, ownerTeam: 1 }],
               [secondRoute.id, { locked: true }],
             ])
           }
