@@ -1,6 +1,7 @@
 // The shape of a finished game, read straight off its action log: which run of actions was whose
-// turn, and where the moments worth scrubbing to landed. Pure derivation from `Action[]` — no
-// engine replay, no I/O — so a replay transport can draw the whole game before step 1 is applied.
+// turn, which rotation of the table that turn sat in, and where the moments worth scrubbing to
+// landed. Pure derivation from `Action[]` — no engine replay, no I/O — so a replay transport can
+// draw the whole game before step 1 is applied.
 import type { Action } from '@trm/engine';
 
 /**
@@ -21,6 +22,8 @@ export interface ReplayTurn {
   readonly seat: number;
   /** 1-based turn number; 0 for the opening draft. */
   readonly index: number;
+  /** 1-based round number — the table's rotation this turn belongs to; 0 for the opening draft. */
+  readonly round: number;
   readonly setup: boolean;
   /** Routes claimed or repaired this turn. Turning cards into track is the move that moves a game,
    *  so a transport can weight the turn by it and skip drawing every claim separately. */
@@ -41,6 +44,8 @@ export interface ReplayTimeline {
   readonly total: number;
   /** Played turns only — the opening draft is not one. */
   readonly turnCount: number;
+  /** Rounds the table got through; the last one is usually partial (the endgame cuts it short). */
+  readonly roundCount: number;
 }
 
 const momentKind = (action: Action): ReplayMomentKind | null => {
@@ -64,10 +69,16 @@ const laysTrack = (action: Action, next: Action | undefined): boolean => {
 };
 
 /**
- * Group an action log into turns and moments. A turn is a maximal run of consecutive actions by
- * one player, which is exactly what the rules produce: turn order rotates, and every free or
- * follow-up action (the second card draw, a tunnel resolve, a team-pool push) stays with the
- * player who opened the turn.
+ * Group an action log into turns, rounds and moments. A turn is a maximal run of consecutive
+ * actions by one player, which is exactly what the rules produce: turn order rotates, and every
+ * free or follow-up action (the second card draw, a tunnel resolve, a team-pool push) stays with
+ * the player who opened the turn.
+ *
+ * Rounds are read off the same runs. The engine bumps `roundIndex` when the seat cursor wraps back
+ * to `turnOrder[0]` (`endTurn`), and genesis opens on order index 0 — so the first player to take a
+ * turn IS that anchor, and every later turn of theirs opens a new round. Deriving it that way
+ * rather than counting turns in fours keeps it honest through the event that reverses turn order
+ * (the wrap still happens at index 0, just sooner) and through a final round the endgame cut short.
  */
 export function buildReplayTimeline(
   actions: readonly Action[],
@@ -76,6 +87,8 @@ export function buildReplayTimeline(
   const turns: ReplayTurn[] = [];
   const moments: ReplayMoment[] = [];
   let played = 0;
+  let round = 0;
+  let anchor: string | null = null;
   let i = 0;
 
   // The opening mission draft is simultaneous — every seat resolves its initial offer before
@@ -83,7 +96,7 @@ export function buildReplayTimeline(
   // a round of play that never happened.
   if (actions[0]?.t === 'KEEP_INITIAL_TICKETS') {
     while (actions[i]?.t === 'KEEP_INITIAL_TICKETS') i++;
-    turns.push({ from: 0, to: i, player: '', seat: -1, index: 0, setup: true, track: 0 });
+    turns.push({ from: 0, to: i, player: '', seat: -1, index: 0, round: 0, setup: true, track: 0 });
   }
 
   while (i < actions.length) {
@@ -95,8 +108,10 @@ export function buildReplayTimeline(
       i++;
     }
     played += 1;
+    if (anchor === null) anchor = player;
+    if (player === anchor) round += 1;
     const seat = seats.get(player) ?? 0;
-    turns.push({ from, to: i, player, seat, index: played, setup: false, track });
+    turns.push({ from, to: i, player, seat, index: played, round, setup: false, track });
   }
 
   for (let k = 0; k < actions.length; k++) {
@@ -107,7 +122,7 @@ export function buildReplayTimeline(
     moments.push({ step: k + 1, kind, player, seat: seats.get(player) ?? 0 });
   }
 
-  return { turns, moments, total: actions.length, turnCount: played };
+  return { turns, moments, total: actions.length, turnCount: played, roundCount: round };
 }
 
 /** The turn a step is sitting inside — the one holding the last applied action. Null before the
@@ -117,8 +132,14 @@ export function turnAtStep(timeline: ReplayTimeline, step: number): ReplayTurn |
   return timeline.turns.find((turn) => step > turn.from && step <= turn.to) ?? null;
 }
 
-/** Seek targets for turn-at-a-time stepping: the start of the log, then the end of every turn.
- *  Every landing point is a turn that has just finished, so the two directions are symmetric. */
-export function turnBoundaries(timeline: ReplayTimeline): number[] {
-  return [0, ...timeline.turns.map((turn) => turn.to)];
+/** Seek targets for round-at-a-time stepping: the start of the log, then the end of every round —
+ *  plus the end of the opening draft, which is its own stop so jumping forward from the start does
+ *  not skip straight over the whole draft. Every landing point is a rotation that has just
+ *  finished, so the two directions are symmetric. */
+export function roundBoundaries(timeline: ReplayTimeline): number[] {
+  const stops = [0];
+  timeline.turns.forEach((turn, k) => {
+    if (turn.round !== timeline.turns[k + 1]?.round) stops.push(turn.to);
+  });
+  return stops;
 }

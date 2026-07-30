@@ -9,12 +9,12 @@
 //
 // The painted strip is decoration over one real control: a native range input laid across it owns
 // every interaction, so dragging, arrow keys and screen readers all get the same slider. The
-// turn-jump buttons are the keyboard path to the structure the strip draws.
+// round-jump buttons are the keyboard path to the structure the strip draws.
 import { useMemo, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronFirst, ChevronLast, Pause, Play, StepBack, StepForward } from 'lucide-react';
 import type { Action } from '@trm/engine';
-import { buildReplayTimeline, turnAtStep, turnBoundaries } from '@trm/client-core/replay/timeline';
+import { buildReplayTimeline, turnAtStep, roundBoundaries } from '@trm/client-core/replay/timeline';
 import { REPLAY_SPEEDS, type ReplayControls } from '@trm/client-core/replay/useReplayPlayer';
 import type { ReplayPlayerMeta } from '../../net/rest';
 import { usePlayerName } from '../../game/playerName';
@@ -38,15 +38,15 @@ export function ReplayTransport({
 
   const seats = useMemo(() => new Map(players.map((p) => [p.userId, p.seat])), [players]);
   const timeline = useMemo(() => buildReplayTimeline(actions, seats), [actions, seats]);
-  const boundaries = useMemo(() => turnBoundaries(timeline), [timeline]);
+  const boundaries = useMemo(() => roundBoundaries(timeline), [timeline]);
 
   // An empty log still renders a (degenerate) strip rather than a hole in the layout.
   const span = timeline.total || 1;
   const pct = (step: number): string => `${(step / span) * 100}%`;
 
   const current = turnAtStep(timeline, player.step);
-  const prevTurnStep = boundaries.filter((b) => b < player.step).pop();
-  const nextTurnStep = boundaries.find((b) => b > player.step);
+  const prevRoundStep = boundaries.filter((b) => b < player.step).pop();
+  const nextRoundStep = boundaries.find((b) => b > player.step);
 
   const nowLabel = !current
     ? t('history.beforeStart')
@@ -131,10 +131,10 @@ export function ReplayTransport({
         <div className="transport-buttons">
           <button
             className="icon-btn"
-            onClick={() => player.seek(prevTurnStep ?? 0)}
-            disabled={prevTurnStep === undefined}
-            aria-label={t('history.prevTurn')}
-            title={t('history.prevTurn')}
+            onClick={() => player.seek(prevRoundStep ?? 0)}
+            disabled={prevRoundStep === undefined}
+            aria-label={t('history.prevRound')}
+            title={t('history.prevRound')}
           >
             <ChevronFirst size={16} aria-hidden />
           </button>
@@ -167,10 +167,10 @@ export function ReplayTransport({
           </button>
           <button
             className="icon-btn"
-            onClick={() => player.seek(nextTurnStep ?? player.total)}
-            disabled={nextTurnStep === undefined}
-            aria-label={t('history.nextTurn')}
-            title={t('history.nextTurn')}
+            onClick={() => player.seek(nextRoundStep ?? player.total)}
+            disabled={nextRoundStep === undefined}
+            aria-label={t('history.nextRound')}
+            title={t('history.nextRound')}
           >
             <ChevronLast size={16} aria-hidden />
           </button>

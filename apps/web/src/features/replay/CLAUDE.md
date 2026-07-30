@@ -22,10 +22,15 @@ load: genesis renders, then the first recorded action is rejected and the screen
 
 The scrubber is a route strip: `@trm/client-core`'s `buildReplayTimeline` groups the action log
 into turns (a maximal run of consecutive actions by one player, each carrying how much `track` it
-laid) and moments (station / tunnel), and the strip draws them as one liveried line — section
-length = turn length, section height = did that turn lay track, marks on the line = the rare
-moments. Nothing there replays the engine; it is pure derivation off `Action[]`, so it is
-available before step 1.
+laid and which `round` it belongs to) and moments (station / tunnel), and the strip draws them as
+one liveried line — section length = turn length, section height = did that turn lay track, marks
+on the line = the rare moments. Nothing there replays the engine; it is pure derivation off
+`Action[]`, so it is available before step 1.
+
+**Rounds come from the anchor, not from arithmetic.** `endTurn` bumps `roundIndex` when the seat
+cursor wraps to `turnOrder[0]`, and genesis opens on index 0 — so the first player to take a turn is
+the anchor and every later turn of theirs opens a round. Counting turns in Nths would desync on the
+turn-order reversal event and on an endgame-truncated final round; this doesn't.
 
 **Everything lives on one line, deliberately.** A stacked layout (bands + a separate glyph row) was
 tried and cut: at any real width a step is a few pixels, so drawing every claim put ~40 marks
@@ -45,7 +50,9 @@ Two more rules hold it together:
   `width - thumb` and a fat thumb lands the seek up to half a thumb from the pointer.
   Don't attach click handlers to glyphs — per-moment seeking would need N focusable
   targets in the tab order to stay accessible, and the rail's log already names the current step.
-  Turn-at-a-time seeking is the keyboard path, via `turnBoundaries`.
+  Round-at-a-time seeking is the keyboard path, via `roundBoundaries` — a stop at the end of the
+  opening draft, then one per completed rotation (issue #77; the buttons used to jump a single
+  turn, which is what the ±1-action arrows beside them are for).
 - **Marker shape carries the meaning, colour only says whose seat**, so the strip survives the
   colour-blind setting; marker size carries how notable the moment is.
 

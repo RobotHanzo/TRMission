@@ -22,7 +22,7 @@ import {
 } from 'react-native';
 import { ChevronFirst, ChevronLast, Pause, Play, StepBack, StepForward } from 'lucide-react-native';
 import type { Action } from '@trm/engine';
-import { buildReplayTimeline, turnAtStep, turnBoundaries } from '@trm/client-core/replay/timeline';
+import { buildReplayTimeline, turnAtStep, roundBoundaries } from '@trm/client-core/replay/timeline';
 import { REPLAY_SPEEDS, type ReplayControls } from '@trm/client-core/replay/useReplayPlayer';
 import type { ReplayPlayerMeta } from '../../net/rest';
 import { seatColor } from '../../theme/colors';
@@ -98,15 +98,15 @@ export function ReplayTransport({
 
   const seats = useMemo(() => new Map(players.map((p) => [p.userId, p.seat])), [players]);
   const timeline = useMemo(() => buildReplayTimeline(actions, seats), [actions, seats]);
-  const boundaries = useMemo(() => turnBoundaries(timeline), [timeline]);
+  const boundaries = useMemo(() => roundBoundaries(timeline), [timeline]);
 
   // An empty log still renders a (degenerate) strip rather than a hole in the layout.
   const span = timeline.total || 1;
   const pct = (step: number): `${number}%` => `${(step / span) * 100}%`;
 
   const current = turnAtStep(timeline, player.step);
-  const prevTurnStep = boundaries.filter((b) => b < player.step).pop();
-  const nextTurnStep = boundaries.find((b) => b > player.step);
+  const prevRoundStep = boundaries.filter((b) => b < player.step).pop();
+  const nextRoundStep = boundaries.find((b) => b > player.step);
 
   const nowLabel = !current
     ? t('history.beforeStart')
@@ -243,9 +243,9 @@ export function ReplayTransport({
 
       <View style={styles.foot}>
         <TransportButton
-          label={t('history.prevTurn')}
-          disabled={prevTurnStep === undefined}
-          onPress={() => player.seek(prevTurnStep ?? 0)}
+          label={t('history.prevRound')}
+          disabled={prevRoundStep === undefined}
+          onPress={() => player.seek(prevRoundStep ?? 0)}
         >
           <ChevronFirst size={18} color={tokens.ink} />
         </TransportButton>
@@ -278,9 +278,9 @@ export function ReplayTransport({
           <StepForward size={18} color={tokens.ink} />
         </TransportButton>
         <TransportButton
-          label={t('history.nextTurn')}
-          disabled={nextTurnStep === undefined}
-          onPress={() => player.seek(nextTurnStep ?? player.total)}
+          label={t('history.nextRound')}
+          disabled={nextRoundStep === undefined}
+          onPress={() => player.seek(nextRoundStep ?? player.total)}
         >
           <ChevronLast size={18} color={tokens.ink} />
         </TransportButton>

@@ -1,13 +1,15 @@
 import { describe, it, expect } from 'vitest';
 import type { Action } from '@trm/engine';
 import { asPlayerId, type CityId, type PlayerId, type RouteId, type TicketId } from '@trm/shared';
-import { buildReplayTimeline, turnAtStep, turnBoundaries } from '../src/replay/timeline';
+import { buildReplayTimeline, turnAtStep, roundBoundaries } from '../src/replay/timeline';
 
 const p1 = asPlayerId('p1');
 const p2 = asPlayerId('p2');
+const p3 = asPlayerId('p3');
 const seats = new Map([
   ['p1', 0],
   ['p2', 1],
+  ['p3', 2],
 ]);
 
 const keepInitial = (player: PlayerId): Action => ({
@@ -94,14 +96,58 @@ describe('buildReplayTimeline', () => {
     expect(turnAtStep(timeline, 3)?.seat).toBe(1);
   });
 
-  it('offers the start plus every turn end as symmetric seek targets', () => {
-    const timeline = buildReplayTimeline([draw(p1), draw(p1), draw(p2)], seats);
-    expect(turnBoundaries(timeline)).toEqual([0, 2, 3]);
+  it('numbers rounds off the anchor — the first player to take a turn', () => {
+    const timeline = buildReplayTimeline(
+      [
+        keepInitial(p1),
+        keepInitial(p2),
+        keepInitial(p3),
+        draw(p1),
+        draw(p2),
+        draw(p3),
+        draw(p1),
+        draw(p2), // the endgame cuts round 2 short — p3 never plays it
+      ],
+      seats,
+    );
+    expect(timeline.turns.map((t) => t.round)).toEqual([0, 1, 1, 1, 2, 2]);
+    expect(timeline.roundCount).toBe(2);
+  });
+
+  it('keeps rounds honest when turn order reverses mid-game', () => {
+    // The reversal event flips the cursor rather than restarting it, so the seats walk back down
+    // (p1,p2,p3,p2,p1) and the round still turns over exactly where the engine bumps roundIndex:
+    // when the cursor lands back on the anchor.
+    const timeline = buildReplayTimeline([draw(p1), draw(p2), draw(p3), draw(p2), draw(p1)], seats);
+    expect(timeline.turns.map((t) => t.round)).toEqual([1, 1, 1, 1, 2]);
+  });
+
+  it('offers the start, the draft and every round end as symmetric seek targets', () => {
+    const timeline = buildReplayTimeline(
+      [
+        keepInitial(p1),
+        keepInitial(p2),
+        draw(p1),
+        draw(p1),
+        draw(p2),
+        claim(p1, 'r1'), // opens round 2
+        draw(p2),
+      ],
+      seats,
+    );
+    // 0 → end of the opening draft → end of round 1 → end of round 2 (the log's end).
+    expect(roundBoundaries(timeline)).toEqual([0, 2, 5, 7]);
   });
 
   it('survives an empty log', () => {
     const timeline = buildReplayTimeline([], seats);
-    expect(timeline).toMatchObject({ turns: [], moments: [], total: 0, turnCount: 0 });
-    expect(turnBoundaries(timeline)).toEqual([0]);
+    expect(timeline).toMatchObject({
+      turns: [],
+      moments: [],
+      total: 0,
+      turnCount: 0,
+      roundCount: 0,
+    });
+    expect(roundBoundaries(timeline)).toEqual([0]);
   });
 });
