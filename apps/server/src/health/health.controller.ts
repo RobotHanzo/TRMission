@@ -4,6 +4,7 @@ import { SkipThrottle } from '@nestjs/throttler';
 import { ENGINE_VERSION } from '@trm/engine';
 import { OFFICIAL_MAPS } from '@trm/map-data';
 import { PROTOCOL_VERSION } from '@trm/proto';
+import { runningCommit } from '../selfupdate/buildInfo';
 import { env } from '../config/env';
 
 // Liveness + build/version metadata. Documented so the generated OpenAPI has at least
@@ -30,13 +31,13 @@ export class HealthController {
       engineVersion: ENGINE_VERSION,
       protocolVersion: PROTOCOL_VERSION,
       contentHash: OFFICIAL_MAPS[0]?.hash ?? '',
-      commitHash: env.gitCommit,
+      commitHash: runningCommit(),
     };
   }
 
   @Get('version/mobile')
   @ApiOperation({ summary: 'Mobile forced-update gate: minimum accepted app build' })
   versionMobile(): { minBuild: number; commitHash: string } {
-    return { minBuild: env.mobileMinBuild, commitHash: env.gitCommit };
+    return { minBuild: env.mobileMinBuild, commitHash: runningCommit() };
   }
 }

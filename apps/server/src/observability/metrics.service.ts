@@ -22,6 +22,8 @@ export class MetricsService implements MetricsHooks {
   private readonly gamesPurged: Counter<'trigger' | 'priorStatus'>;
   private readonly pushesSent: Counter<'kind'>;
   private readonly pushesFailed: Counter<'kind'>;
+  private readonly selfUpdateChecks: Counter<'result'>;
+  private readonly selfUpdateRejections: Counter<'reason'>;
 
   constructor() {
     collectDefaultMetrics({ register: this.registry });
@@ -109,6 +111,18 @@ export class MetricsService implements MetricsHooks {
       labelNames: ['kind'],
       registers: [this.registry],
     });
+    this.selfUpdateChecks = new Counter({
+      name: 'trm_selfupdate_checks_total',
+      help: 'Server-OTA manifest checks, by outcome',
+      labelNames: ['result'],
+      registers: [this.registry],
+    });
+    this.selfUpdateRejections = new Counter({
+      name: 'trm_selfupdate_rejected_total',
+      help: 'Server-OTA bundles refused (bad signature, bad digest, unsafe path). Alert on any increase',
+      labelNames: ['reason'],
+      registers: [this.registry],
+    });
   }
 
   commandReceived(): void {
@@ -158,6 +172,14 @@ export class MetricsService implements MetricsHooks {
   }
   pushFailed(kind: string): void {
     this.pushesFailed.inc({ kind });
+  }
+  selfUpdateChecked(result: string): void {
+    this.selfUpdateChecks.inc({ result });
+  }
+  /** A bundle failed verification. Like `leakBlocked`, this should stay at 0 in a healthy
+   *  deployment — an increase means something is serving manifests this key did not sign. */
+  selfUpdateRejected(reason: string): void {
+    this.selfUpdateRejections.inc({ reason });
   }
 
   metrics(): Promise<string> {

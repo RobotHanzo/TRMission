@@ -7,6 +7,7 @@ on:
     paths:
       - 'apps/**'
       - 'packages/**'
+      - 'tooling/**'
       - 'yarn.lock'
       - '.github/workflows/docker-build.yml'
 
@@ -99,3 +100,140 @@ jobs:
           # hiccup on export from failing an otherwise-good image build.
           cache-from: type=registry,ref=ghcr.io/${{ steps.owner.outputs.name }}/trmission-${{ matrix.image }}:buildcache
           cache-to: type=registry,ref=ghcr.io/${{ steps.owner.outputs.name }}/trmission-${{ matrix.image }}:buildcache,mode=max,ignore-error=true
+
+  # Server OTA (docs/release/server-ota.md). Publishes a signed source+web bundle so a deployment can
+  # apply a code-only change in seconds without re-pulling the image, then routes the update:
+  #
+  #   fence unchanged → the deployment's own poll (or the nudge below) hot-applies it
+  #   fence changed   → an OTA physically cannot carry it, so fire the Portainer stack webhook instead
+  #
+  # Everything here is optional. With TRM_OTA_SIGNING_KEY unset the bundle is still published but is
+  # unsigned, so no deployment will accept it; with the deploy vars unset nothing is nudged. An
+  # unconfigured repo therefore behaves exactly as it did before this job existed.
+  publish-ota:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # gh release upload
+      packages: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Lowercase repo owner
+        id: owner
+        run: echo "name=${OWNER,,}" >> "$GITHUB_OUTPUT"
+        env:
+          OWNER: ${{ github.repository_owner }}
+
+      # Take the built artifacts OUT OF THE PUSHED IMAGES rather than rebuilding them here. A rebuild
+      # would be a second, independently-produced copy of the same commit — and the whole point of the
+      # fence is that the bundle and the image agree. This also means no `yarn install` in this job:
+      # the generated protobuf comes from the image that already ran the codegen.
+      - name: Lift the built artifacts out of the pushed images
+        run: |
+          set -euo pipefail
+          tag="sha-${GITHUB_SHA::7}"
+          server="ghcr.io/${{ steps.owner.outputs.name }}/trmission-server:$tag"
+          web="ghcr.io/${{ steps.owner.outputs.name }}/trmission-web:$tag"
+          docker pull -q "$server"
+          docker pull -q "$web"
+          sid=$(docker create "$server")
+          wid=$(docker create "$web")
+          rm -rf packages/proto/src/gen ota-web
+          docker cp "$sid:/app/packages/proto/src/gen" packages/proto/src/gen
+          docker cp "$sid:/app/.trm-deps-fingerprint" image-fingerprint.txt
+          docker cp "$wid:/srv/web/baked" ota-web
+          docker rm -v "$sid" "$wid" > /dev/null
+
+      # The fence only works if the image's baked fingerprint and the one computed from this checkout
+      # agree. If they ever drift, every bundle would be refused as "needs an image pull" and the OTA
+      # path would silently stop existing — so fail loudly here instead.
+      - name: Assert the fence matches the image
+        run: |
+          set -euo pipefail
+          computed=$(node tooling/ota/depsFingerprint.mjs)
+          baked=$(cat image-fingerprint.txt)
+          if [ "$computed" != "$baked" ]; then
+            echo "::error::deps fingerprint drift — image=$baked checkout=$computed"
+            exit 1
+          fi
+          echo "fence $computed"
+
+      - name: Build + sign the bundle
+        id: bundle
+        env:
+          TRM_OTA_SIGNING_KEY: ${{ secrets.TRM_OTA_SIGNING_KEY }}
+        run: |
+          set -euo pipefail
+          base="https://github.com/${{ github.repository }}/releases/download/server-ota"
+          node tooling/ota/buildBundle.mjs \
+            --out dist-ota \
+            --commit "$GITHUB_SHA" \
+            --web-dist ota-web \
+            --bundle-url "$base/bundle-$GITHUB_SHA.tar.gz"
+          node -e '
+            const m = JSON.parse(require("fs").readFileSync("dist-ota/manifest.json", "utf8"));
+            const p = JSON.parse(Buffer.from(m.payload, "base64").toString("utf8"));
+            console.log(`fingerprint=${p.depsFingerprint}`);
+          ' >> "$GITHUB_OUTPUT"
+
+      # A rolling prerelease, not one release per commit: the manifest URL a deployment polls has to be
+      # stable. The bundle is uploaded BEFORE the manifest that points at it, and the manifest carries
+      # its own signature in-file, so there is never a moment where a deployment can read a manifest
+      # whose bundle or signature is missing.
+      - name: Publish to the rolling server-ota release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh release view server-ota > /dev/null 2>&1 || gh release create server-ota \
+            --prerelease \
+            --title 'Server OTA channel' \
+            --notes 'Rolling channel for hot server/web updates. manifest.json is the pointer deployments poll; see docs/release/server-ota.md. Not a product release.'
+          gh release upload server-ota "dist-ota/bundle-$GITHUB_SHA.tar.gz" --clobber
+          gh release upload server-ota dist-ota/manifest.json --clobber
+          # Keep the channel from growing without bound, but leave a few bundles to roll back to.
+          gh release view server-ota --json assets --jq \
+            '[.assets[] | select(.name | startswith("bundle-"))] | sort_by(.createdAt) | reverse | .[5:] | .[].name' \
+            | while read -r asset; do
+                [ -n "$asset" ] && gh release delete-asset server-ota "$asset" --yes
+              done
+
+      # Route the update. `needsImagePull` is read from the DEPLOYMENT, not from a git diff: that stays
+      # correct across a multi-commit push, a revert, and a deployment that sat out a few releases.
+      - name: Deliver
+        if: vars.TRM_DEPLOY_ORIGIN != ''
+        env:
+          ORIGIN: ${{ vars.TRM_DEPLOY_ORIGIN }}
+          CHECK_TOKEN: ${{ secrets.TRM_SELFUPDATE_WEBHOOK_SECRET }}
+          PORTAINER_WEBHOOK: ${{ secrets.PORTAINER_WEBHOOK_URL }}
+          BUNDLE_FINGERPRINT: ${{ steps.bundle.outputs.fingerprint }}
+        run: |
+          set -euo pipefail
+          status=$(curl -fsS --max-time 20 "$ORIGIN/api/v1/selfupdate/status" || echo '{}')
+          live=$(printf '%s' "$status" | jq -r '.depsFingerprint // ""')
+          echo "deployment fence: ${live:-<unreachable>}"
+          if [ -n "$live" ] && [ "$live" = "$BUNDLE_FINGERPRINT" ]; then
+            if [ -z "$CHECK_TOKEN" ]; then
+              echo 'OTA-eligible; no webhook secret set, so the deployment will pick it up on its next poll.'
+              exit 0
+            fi
+            echo 'OTA-eligible — nudging the deployment to check now.'
+            curl -fsS --max-time 30 -X POST "$ORIGIN/api/v1/selfupdate/check" \
+              -H "x-trm-selfupdate-token: $CHECK_TOKEN"
+            exit 0
+          fi
+          echo 'Dependencies/assets changed (or the deployment is unreachable) — this needs an image pull.'
+          if [ -z "$PORTAINER_WEBHOOK" ]; then
+            echo '::warning::PORTAINER_WEBHOOK_URL is not set — redeploy the stack manually to pick this up.'
+            exit 0
+          fi
+          curl -fsS --max-time 120 -X POST "$PORTAINER_WEBHOOK"

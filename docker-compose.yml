@@ -124,11 +124,25 @@ services:
       SENTRY_DSN: ${SENTRY_DSN:-}
       SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-}
       SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-}
+      # Server OTA (docs/release/server-ota.md) — hot-apply a signed code bundle instead of
+      # re-pulling the image. OFF unless BOTH of the first two are set; an unsigned or
+      # differently-signed bundle is never applied. TRM_SELFUPDATE_WEBHOOK_SECRET is optional and only
+      # lets CI say "check now" (the signature is what authorises the code, so a leaked token buys a
+      # poll). A bundle that changes dependencies is refused and reported as needing an image pull.
+      TRM_SELFUPDATE_MANIFEST_URL: ${TRM_SELFUPDATE_MANIFEST_URL:-}
+      TRM_SELFUPDATE_PUBLIC_KEY: ${TRM_SELFUPDATE_PUBLIC_KEY:-}
+      TRM_SELFUPDATE_POLL_MS: ${TRM_SELFUPDATE_POLL_MS:-}
+      TRM_SELFUPDATE_WEBHOOK_SECRET: ${TRM_SELFUPDATE_WEBHOOK_SECRET:-}
     depends_on:
       mongo:
         condition: service_healthy
     ports:
       - '3001:3001'
+    # The web tier's release directory, shared so a server OTA can also swap the browser bundle.
+    # Both sides mount it read-write: the web container seeds it from its own image and writes the
+    # sentinel that proves to the server this volume is the one nginx serves.
+    volumes:
+      - trm-web-releases:/srv/web
     restart: unless-stopped
 
   web:
@@ -150,6 +164,8 @@ services:
       - server
     ports:
       - '8080:80'
+    volumes:
+      - trm-web-releases:/srv/web
     restart: unless-stopped
 
   # Self-hosted expo-updates server for the mobile app (spec §10, expo-open-ota — see
@@ -248,6 +264,7 @@ services:
 
 volumes:
   trm-mongo-data:
+  trm-web-releases:
   trm-node-modules:
   trm-yarn-state:
   trm-proto-gen:

@@ -16,6 +16,7 @@ import { AccountModule } from './account/account.module';
 import { PushModule } from './push/push.module';
 import { ModerationModule } from './moderation/moderation.module';
 import { OgModule } from './og/og.module';
+import { SelfUpdateModule } from './selfupdate/selfupdate.module';
 import { ObservabilityModule } from './observability/observability.module';
 import { HealthController } from './health/health.controller';
 import { WellKnownController } from './health/well-known.controller';
@@ -47,6 +48,7 @@ import { OpenApiHolder } from './openapi/openapi.holder';
     PushModule,
     ModerationModule,
     OgModule,
+    SelfUpdateModule,
   ],
   controllers: [HealthController, DocsController, WellKnownController],
   providers: [

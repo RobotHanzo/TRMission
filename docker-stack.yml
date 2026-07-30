@@ -59,8 +59,26 @@ services:
       SENTRY_DSN: ${SENTRY_DSN:-}
       SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-}
       SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-}
+      # Server OTA — apply a code-only update in seconds without re-pulling the image
+      # (docs/release/server-ota.md). OFF unless BOTH the manifest URL and the public key are set.
+      # Set these in Portainer → Stacks → Environment variables:
+      #   TRM_SELFUPDATE_MANIFEST_URL  https://github.com/<owner>/<repo>/releases/download/server-ota/manifest.json
+      #   TRM_SELFUPDATE_PUBLIC_KEY    the public half printed by `node tooling/ota/keygen.mjs`
+      #   TRM_SELFUPDATE_WEBHOOK_SECRET  optional; lets CI trigger a check immediately
+      # A bundle that changes dependencies is REFUSED and reported as needing an image pull — which is
+      # what this stack's Portainer webhook is for (CI fires it automatically for exactly that case).
+      TRM_SELFUPDATE_MANIFEST_URL: ${TRM_SELFUPDATE_MANIFEST_URL:-}
+      TRM_SELFUPDATE_PUBLIC_KEY: ${TRM_SELFUPDATE_PUBLIC_KEY:-}
+      TRM_SELFUPDATE_POLL_MS: ${TRM_SELFUPDATE_POLL_MS:-}
+      TRM_SELFUPDATE_WEBHOOK_SECRET: ${TRM_SELFUPDATE_WEBHOOK_SECRET:-}
     ports:
       - '3001:3001'
+    # Shared with the web service so a server OTA can swap the browser bundle too. Swarm note: this is
+    # a LOCAL volume, so both services must land on the same node (they do here — one replica each,
+    # and mongo's data volume is local as well). Without the share, the server still updates itself and
+    # reports webOta: "unavailable" in /api/v1/selfupdate/status.
+    volumes:
+      - trm-web-releases:/srv/web
     deploy:
       restart_policy:
         condition: any
@@ -71,9 +89,12 @@ services:
     image: <registry>/trm-web:latest # replace with your image
     ports:
       - '8080:80'
+    volumes:
+      - trm-web-releases:/srv/web
     deploy:
       restart_policy:
         condition: any
 
 volumes:
   trm-mongo-data:
+  trm-web-releases:

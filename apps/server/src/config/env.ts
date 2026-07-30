@@ -169,4 +169,25 @@ export const env = {
   /** A LIVE game the hub marked inactive (auto-play paused) longer than this is ENDED by the
    *  sweep via the normal END_GAME path (scored, archived to history) rather than hard-purged. */
   gamePausedPurgeHours: Number(process.env.GAME_PAUSED_PURGE_HOURS ?? 24),
+
+  // Server OTA (src/selfupdate, docs/release/server-ota.md). Entirely opt-in and fails CLOSED:
+  // self-update is live only when BOTH the manifest URL and the verification key are set, because
+  // hot-loading code into this process is the most privileged thing in the system and an unsigned
+  // bundle must never be applicable. An unconfigured deployment behaves exactly as it did before.
+  /** Full URL of the published manifest.json (its signature is read from `<url>.sig`). */
+  selfUpdateManifestUrl: process.env.TRM_SELFUPDATE_MANIFEST_URL ?? '',
+  /** ed25519 public key (PEM, or base64 of one) that every manifest must be signed by. */
+  selfUpdatePublicKey: process.env.TRM_SELFUPDATE_PUBLIC_KEY ?? '',
+  /** Manifest poll interval (ms). ETag-conditional, so a no-op check is a 304. 0 disables polling
+   *  and leaves the webhook below as the only trigger. */
+  selfUpdatePollMs: Number(process.env.TRM_SELFUPDATE_POLL_MS ?? 30_000),
+  /** Shared secret for `POST /api/v1/selfupdate/check`, CI's "look now" nudge. Unset ⇒ the endpoint
+   *  is disabled. It only triggers a check — the manifest signature is what authorises the code — so
+   *  the worst a leaked token buys is an early poll. */
+  selfUpdateWebhookSecret: process.env.TRM_SELFUPDATE_WEBHOOK_SECRET ?? '',
+  /** Where this server's code is installed. Mirrors selfupdate/layout.ts's own read of the same var
+   *  (that module must stay importable before the config layer exists — see its header). */
+  selfUpdateAppRoot: process.env.TRM_SELFUPDATE_APP_ROOT ?? '/app',
+  /** Volume shared with the nginx container, holding the swappable web releases. */
+  selfUpdateWebRoot: process.env.TRM_SELFUPDATE_WEB_ROOT ?? '/srv/web',
 } as const;

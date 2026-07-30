@@ -32,6 +32,7 @@ env vars.
 | Maintainer dashboard, permissions, audit, purge              | `src/dashboard/CLAUDE.md`     |
 | Mobile version gate + deep-link well-knowns                  | `src/health/CLAUDE.md`        |
 | Metrics, Sentry, `instrument.mjs`, `ErrorReporter`           | `src/observability/CLAUDE.md` |
+| Server OTA: hot code updates, the deps fence, rollback       | `src/selfupdate/CLAUDE.md`    |
 | Env vars (the single parse point)                            | `src/config/CLAUDE.md`        |
 | Engine⇄wire codec seam                                       | `packages/codec/CLAUDE.md`    |
 

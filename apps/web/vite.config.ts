@@ -75,8 +75,35 @@ function ogPreviewPlugin(): Plugin {
   };
 }
 
+// `/build.json` — the probe that lets a loaded tab notice it is running an outdated bundle and
+// reload itself, with no "a new version is available" prompt (packages/client-core's buildVersion).
+//
+// It has to be served by the WEB TIER, and compared against this bundle's own baked
+// VITE_COMMIT_HASH. Comparing against the server's /version commitHash instead would be a reload
+// LOOP: the two containers are updated independently, so there are seconds where the server is on a
+// new commit and nginx is still serving the old bundle — every client would reload straight back
+// into the build it was trying to leave. See docs/release/server-ota.md.
+function buildIdPlugin(): Plugin {
+  const body = `${JSON.stringify({ buildId: process.env.VITE_COMMIT_HASH ?? 'dev' })}\n`;
+  return {
+    name: 'trm-build-id',
+    generateBundle() {
+      this.emitFile({ type: 'asset', fileName: 'build.json', source: body });
+    },
+    // Dev serves it too, so the reload path is exercisable locally: set VITE_COMMIT_HASH to
+    // something, load the app, restart vite with a different value.
+    configureServer(server) {
+      server.middlewares.use('/build.json', (_req, res) => {
+        res.setHeader('content-type', 'application/json');
+        res.setHeader('cache-control', 'no-store');
+        res.end(body);
+      });
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [react(), ogPreviewPlugin(), ...sentryPlugins()],
+  plugins: [react(), ogPreviewPlugin(), buildIdPlugin(), ...sentryPlugins()],
   build: {
     sourcemap: uploadSourceMaps ? 'hidden' : false,
     // The shared sound cues (@trm/client-core/assets/sounds) are imported as URLs and fetched by

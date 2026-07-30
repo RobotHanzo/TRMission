@@ -76,6 +76,14 @@ RUN --mount=type=secret,id=sentry_auth_token \
 
 FROM nginx:alpine AS run
 COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/apps/web/dist /usr/share/nginx/html
-COPY --from=build /app/apps/admin/dist /usr/share/nginx/html/admin
+# The bundles land in /srv/web/baked, NOT in nginx's document root: nginx serves from
+# /srv/web/current, a symlink the server re-points when it applies a web OTA (see nginx.conf and
+# docs/release/server-ota.md). The seed script below makes `current` exist before nginx starts, so an
+# image-only deployment with no volume mounted behaves exactly as it did before.
+COPY --from=build /app/apps/web/dist /srv/web/baked
+COPY --from=build /app/apps/admin/dist /srv/web/baked/admin
+COPY apps/web/docker-seed-releases.sh /docker-entrypoint.d/20-trm-seed-releases.sh
+# chmod as its own RUN rather than `COPY --chmod`: nginx's entrypoint skips a non-executable script
+# with only a warning, and `--chmod` needs BuildKit, which a `DOCKER_BUILDKIT=0` build won't have.
+RUN chmod +x /docker-entrypoint.d/20-trm-seed-releases.sh
 EXPOSE 80

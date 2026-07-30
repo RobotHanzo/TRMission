@@ -24,6 +24,11 @@ test-results/
 # dev-only rendered output (apps/server/scripts/render-og-cards.ts)
 apps/server/.og-preview/
 
+# server-OTA build output + the fence a Dockerfile bakes into the image, both of which a local dry
+# run of tooling/ota/ can leave behind on the host (docs/release/server-ota.md)
+dist-ota/
+.trm-deps-fingerprint
+
 # turbo
 .turbo/
 

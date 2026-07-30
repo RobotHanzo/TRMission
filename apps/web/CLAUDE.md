@@ -28,6 +28,7 @@ Read the one for the area you're touching (Claude Code loads them on demand).
 | UI strings vs content names                               | `src/i18n/CLAUDE.md`             |
 | Sentry façade, `SECRET_CLASS` replay blocking             | `src/observability/CLAUDE.md`    |
 | Stale-chunk recovery across a redeploy                    | `src/lib/CLAUDE.md`              |
+| Silent auto-reload onto a new deploy                      | `docs/release/server-ota.md`     |
 | Custom map builder (lazy route)                           | `src/features/builder/CLAUDE.md` |
 | Client-side replay                                        | `src/features/replay/CLAUDE.md`  |
 | Shared headless core (net, stores, view logic, tutorial)  | `packages/client-core/CLAUDE.md` |

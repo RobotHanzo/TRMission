@@ -9,6 +9,7 @@ import { CARD_COLORS, type CardColor } from '@trm/shared';
 import type { RouteDef } from '@trm/map-data';
 import { OFFICIAL_MAPS } from '@trm/map-data';
 import { track } from '../lib/analytics';
+import { useReloadHold } from '../hooks/useAutoReload';
 import type { RoomMember } from '../net/rest';
 import { useGameStore, type RejectionInfo } from '../store/game';
 import { useUi } from '../store/ui';
@@ -148,6 +149,10 @@ export function GameStage({
   const [tunnelBase, setTunnelBase] = useState<Payment | null>(null);
   const [nightGive, setNightGive] = useState<CardColor>('RED');
   const [nightSlot, setNightSlot] = useState(0);
+  // A deploy reloads this tab silently (hooks/useAutoReload.ts). Hold that off while the player is
+  // part-way through a payment or a tunnel resolution: a reload loses nothing the SERVER knows about,
+  // but it would discard the card selection they are still assembling.
+  useReloadHold(claim !== null || tunnelBase !== null);
   const pushNotification = useAnimationsStore((s) => s.pushNotification);
   // Tracks the last rejection object already turned into a chip, so the push effect below can
   // list its true dependencies (rejection, pushNotification, t) without re-pushing the same

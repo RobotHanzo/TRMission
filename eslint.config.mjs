@@ -128,6 +128,16 @@ export default tseslint.config(
       globals: { console: 'readonly', process: 'readonly' },
     },
   },
+  // tooling/ota/*.mjs: plain Node ESM run directly by node — inside both Dockerfiles (before any
+  // install exists, so it can have no dependencies), in CI, and by hand. Kept linted rather than
+  // added to `ignores` above: this is the code that decides what a deployment will accept
+  // (docs/release/server-ota.md).
+  {
+    files: ['tooling/ota/*.mjs'],
+    languageOptions: {
+      globals: { Buffer: 'readonly', console: 'readonly', process: 'readonly' },
+    },
+  },
   // Tests may use whatever they need.
   {
     files: ['**/*.{spec,test}.ts', '**/test/**/*.ts'],

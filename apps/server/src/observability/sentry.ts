@@ -11,6 +11,7 @@
 // Must be initialised BEFORE the app graph imports `http`/`mongodb` — see src/instrument.ts.
 import * as Sentry from '@sentry/nestjs';
 import { scrubTelemetryBreadcrumb, scrubTelemetryEvent, telemetrySampleRate } from '@trm/shared';
+import { runningCommit } from '../selfupdate/buildInfo';
 import { env } from '../config/env';
 
 /** Default trace sampling when SENTRY_TRACES_SAMPLE_RATE is unset — enough to see latency shape
@@ -40,7 +41,7 @@ export function initSentry(): boolean {
     environment: env.sentryEnvironment,
     // The commit already baked into the image (CI build-arg → Docker ENV); ties an event to a
     // source tree without introducing a second provenance axis.
-    release: env.gitCommit,
+    release: runningCommit(),
     // Let the SDK attach the request context (client IP, headers, body) it collects by default:
     // "which account, from where, with what payload" is most of what makes a 500 diagnosable, and
     // the pieces of it that ARE dangerous — `cookie`, `authorization`, `password` — are dropped by

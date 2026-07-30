@@ -1,0 +1,5 @@
+# Shell scripts that run INSIDE a Linux container (apps/web/docker-seed-releases.sh) must keep LF
+# endings. With git's `core.autocrlf=true` — the common Windows default — a checkout would rewrite
+# them to CRLF, and the Docker build would bake `#!/bin/sh\r` into the image. That fails at exec with
+# a "not found" that names the interpreter, not the line endings, which is a bad afternoon.
+*.sh text eol=lf

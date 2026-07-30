@@ -19,6 +19,14 @@
 // which is what lets `src/main.ts` load. Keep this as the sole `--import`.
 import '@swc-node/register/esm-register';
 
+// Server-OTA repair, BEFORE anything imports the app graph (docs/release/server-ota.md). If a
+// previous process died midway through swapping source trees in, the tree on disk is a mix of old and
+// new — an import from main.ts would throw, the container would restart, and it would throw again.
+// This is the only place that runs early enough to finish (or roll back) that swap. A deployment that
+// has never applied an OTA finds no journal and returns immediately.
+const { recoverSelfUpdate } = await import('./src/selfupdate/recover.ts');
+recoverSelfUpdate();
+
 const { initSentry } = await import('./src/observability/sentry.ts');
 
 // No SENTRY_DSN configured ⇒ initSentry() returns false, nothing is installed, and the process
