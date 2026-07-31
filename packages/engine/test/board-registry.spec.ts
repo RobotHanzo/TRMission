@@ -4,11 +4,12 @@ import { boardForContentHash, taiwanBoard } from '../src/taiwan';
 
 // Resolve each registered version's hash by its map version, so this stays correct as more
 // versions are archived (v2 = pre-R77-tunnel, v3 = 39-city graph, v4/v5 = tw2.1 network,
-// v6 = current, post 2026-07-19 route changelog).
+// v6 = current, post 2026-07-19 route changelog). Scoped to the Taiwan map: the registry holds
+// every official map's versions, and a version number is only unique within one map.
 const entries = [...CONTENT_REGISTRY.entries()];
 const hashOfVersion = (v: number): string => {
-  const found = entries.find(([, c]) => c.meta.version === v);
-  if (!found) throw new Error(`no registered content for version ${v}`);
+  const found = entries.find(([, c]) => c.meta.mapId === 'taiwan' && c.meta.version === v);
+  if (!found) throw new Error(`no registered taiwan content for version ${v}`);
   return found[0];
 };
 

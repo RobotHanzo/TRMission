@@ -9,7 +9,9 @@ preview but **the server is authority** — nothing here decides an outcome. Mos
 
 `catalog.ts` builds a `ContentCatalog` (content + id maps + geometry + display names) from whatever
 `GameContent` the active game/replay/editor is using, and `contentCache.ts` resolves a `contentHash`
-to one — bundled official maps resolve synchronously, anything else (a custom map) fetches
+to one — every official content version in `@trm/map-data`'s `CONTENT_REGISTRY` (current **and**
+archived, so a game started against a since-edited map still renders the board the server rebuilds
+for it) resolves synchronously, anything else (a custom map) fetches
 `GET /api/v1/maps/content/:hash` and caches by hash (never a single "current content" singleton, so
 a stale in-flight fetch for a hash you've since navigated away from can't clobber the active
 catalog). `useActiveContent(hash)` is the hook screens gate rendering on; `GameScreen`/`ReplayScreen`

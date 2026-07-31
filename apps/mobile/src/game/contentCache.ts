@@ -1,11 +1,14 @@
 import { asCityId, asRouteId, asTicketId } from '@trm/shared';
 import type { RouteLength } from '@trm/shared';
-import { OFFICIAL_MAPS } from '@trm/map-data';
+import { CONTENT_REGISTRY } from '@trm/map-data';
 import type { CityTier, GameContent } from '@trm/map-data';
 import { api, type MapContentDto } from '../net/rest';
 
-/** Every official map ships in the bundle, so its content resolves with no network call. */
-const bundled = new Map<string, GameContent>(OFFICIAL_MAPS.map((m) => [m.hash, m.content]));
+/** Every official map ships in the bundle, so its content resolves with no network call. Keyed off
+ *  the version registry, not `OFFICIAL_MAPS`: a game started against a map that has since been
+ *  edited stores the hash of the content it was published with, and that archived version renders
+ *  here exactly the way the server rebuilds its board from it. */
+const bundled: ReadonlyMap<string, GameContent> = CONTENT_REGISTRY;
 const cache = new Map<string, GameContent>();
 const inflight = new Map<string, Promise<GameContent>>();
 

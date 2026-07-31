@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, lazy, Suspense } from 'react';
+import { useEffect, useRef, useState, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUi, isHomeColdLoadPath } from './store/ui';
 import { useHasFeature, useSession } from './store/session';
@@ -8,6 +8,7 @@ import { usePageViewTracking } from './hooks/usePageViewTracking';
 import { useSoundSetup } from './hooks/useSoundSetup';
 import { useDocumentMeta } from './hooks/useDocumentMeta';
 import { useAutoReload } from './hooks/useAutoReload';
+import { lazyChunk } from './lib/preloadRecovery';
 import { setSentryGameContext, setSentryUser } from './observability/report';
 import { HomeScreen } from './screens/HomeScreen';
 import { LandingScreen } from './screens/LandingScreen';
@@ -18,32 +19,39 @@ import { TermsScreen } from './screens/TermsScreen';
 import './styles/app.css';
 import './styles/home.css';
 
-// Lazy so @trm/engine + @trm/codec land in a separate chunk, not the main bundle.
-const TutorialScreen = lazy(() => import('./features/tutorial/TutorialScreen'));
-const EncyclopediaModal = lazy(() => import('./features/tutorial/EncyclopediaModal'));
-const ReplayScreen = lazy(() => import('./screens/ReplayScreen'));
-const AdminReplayScreen = lazy(() => import('./screens/AdminReplayScreen'));
-const AdminSpectateScreen = lazy(() => import('./screens/AdminSpectateScreen'));
+// Lazy so @trm/engine + @trm/codec land in a separate chunk, not the main bundle. Every one of
+// these loads through `lazyChunk`, never `lazy` directly: it carries the stale-deploy/flaky-network
+// recovery contract (lib/preloadRecovery.ts), without which a failed chunk fetch crashes the app.
+const TutorialScreen = lazyChunk(() => import('./features/tutorial/TutorialScreen'));
+const EncyclopediaModal = lazyChunk(() => import('./features/tutorial/EncyclopediaModal'));
+const ReplayScreen = lazyChunk(() => import('./screens/ReplayScreen'));
+const AdminReplayScreen = lazyChunk(() => import('./screens/AdminReplayScreen'));
+const AdminSpectateScreen = lazyChunk(() => import('./screens/AdminSpectateScreen'));
 // The map builder (world data + zod-shaped editor state) is its own chunk too.
-const MapsScreen = lazy(() => import('./features/builder/MapsScreen'));
-const MapEditorScreen = lazy(() => import('./features/builder/editor/EditorScreen'));
+const MapsScreen = lazyChunk(() => import('./features/builder/MapsScreen'));
+const MapEditorScreen = lazyChunk(() => import('./features/builder/editor/EditorScreen'));
 // The in-game + lobby UI (board interaction, protobuf command codec, panels, chat) and the
 // auth-gated secondary screens are all off the public landing/login funnel — keep them out of
 // the main chunk so a first paint of `/` doesn't ship code it never runs.
-const RoomScreen = lazy(() =>
-  import('./screens/RoomScreen').then((m) => ({ default: m.RoomScreen })),
+const RoomScreen = lazyChunk(
+  () => import('./screens/RoomScreen'),
+  (m) => m.RoomScreen,
 );
-const GameScreen = lazy(() =>
-  import('./screens/GameScreen').then((m) => ({ default: m.GameScreen })),
+const GameScreen = lazyChunk(
+  () => import('./screens/GameScreen'),
+  (m) => m.GameScreen,
 );
-const HistoryScreen = lazy(() =>
-  import('./screens/HistoryScreen').then((m) => ({ default: m.HistoryScreen })),
+const HistoryScreen = lazyChunk(
+  () => import('./screens/HistoryScreen'),
+  (m) => m.HistoryScreen,
 );
-const LeaderboardScreen = lazy(() =>
-  import('./screens/LeaderboardScreen').then((m) => ({ default: m.LeaderboardScreen })),
+const LeaderboardScreen = lazyChunk(
+  () => import('./screens/LeaderboardScreen'),
+  (m) => m.LeaderboardScreen,
 );
-const DeleteAccountScreen = lazy(() =>
-  import('./screens/DeleteAccountScreen').then((m) => ({ default: m.DeleteAccountScreen })),
+const DeleteAccountScreen = lazyChunk(
+  () => import('./screens/DeleteAccountScreen'),
+  (m) => m.DeleteAccountScreen,
 );
 
 export function App() {

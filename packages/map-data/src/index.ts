@@ -10,6 +10,7 @@ import { CONTENT_V2 } from './archive/v2';
 import { CONTENT_V3 } from './archive/v3';
 import { CONTENT_V4 } from './archive/v4';
 import { CONTENT_V5 } from './archive/v5';
+import { TAIPEI_TRANSIT_CONTENT_V1 } from './archive/taipei-transit-v1';
 
 export * from './types';
 export * from './cities';
@@ -90,6 +91,9 @@ export const CONTENT_REGISTRY: ReadonlyMap<string, GameContent> = new Map(
     CONTENT_V5,
     TAIWAN_CONTENT,
     TAIPEI_CONTENT,
+    // 大臺北軌道交通 as first published, before the 中正紀念堂 name correction moved its hash
+    // in place (see archive/taipei-transit-v1.ts).
+    TAIPEI_TRANSIT_CONTENT_V1,
     TAIPEI_TRANSIT_CONTENT,
   ].map((c) => [hashContent(c), c] as const),
 );

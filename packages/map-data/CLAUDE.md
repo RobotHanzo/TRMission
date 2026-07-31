@@ -93,7 +93,16 @@ To change a map **without breaking already-persisted games**:
    later edit makes a referenced table drift, forcing you to freeze it too.
 3. `resolveContentByHash` (consumed by the engine's `boardForContentHash`, which the server's default
    board resolver calls on recovery) does the rest. An unregistered hash throws — recovery fails loudly
-   rather than replaying against the wrong board.
+   rather than replaying against the wrong board. Both clients resolve the same registry for their
+   render catalog (`apps/{web,mobile}/src/game/contentCache.ts`), so an archived version renders as
+   well as it recovers.
+
+Taiwan's archives are `archive/v<n>.ts`; another map's is named for the map
+(`archive/taipei-transit-v1.ts`). That one is the cautionary tale: a stop-name typo was corrected
+**in place** the day after 大臺北軌道交通 shipped, moving its hash while `meta.version` stayed at 1,
+and every game started in that window then failed recovery with `No registered map content for hash …`
+(TRMISSION-SERVER-1) until the pre-correction content was frozen and registered. Re-pinning a hash
+strands games even when the map is hours old — freeze the superseded content in the same commit.
 
 Finished games in `matchHistory` store a denormalized scoreboard and are **never** replayed, so they
 are unaffected by content edits regardless of the registry.

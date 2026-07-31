@@ -14,6 +14,7 @@ import {
   validateGeography,
   validateForPlay,
 } from '../src/index';
+import { TAIPEI_TRANSIT_CONTENT_V1 } from '../src/archive/taipei-transit-v1';
 
 const result = validateContent(TAIPEI_TRANSIT_CONTENT);
 const land = TAIPEI_TRANSIT_GEOGRAPHY.land[0]!;
@@ -211,5 +212,24 @@ describe('大臺北軌道交通 (Greater Taipei Rail Transit) map content', () =
     expect(TAIPEI_TRANSIT_CONTENT_HASH).toBe(
       '73ef79727bd6fe03a5f0f51dd06cd25dfbb601f4a59bafc931c3f92e34d112f6',
     );
+  });
+
+  // The re-pin above stranded the games started in the window before it: their stored hash was
+  // this one, and recovery threw `No registered map content for hash 00214d…`
+  // (TRMISSION-SERVER-1). The snapshot is registered, so it resolves again — and this pin is the
+  // tripwire that a later edit to a table it references must freeze that table too.
+  it('still resolves the as-first-published v1 content, before the name correction', () => {
+    const originalHash = hashContent(TAIPEI_TRANSIT_CONTENT_V1);
+    expect(originalHash).toBe('00214d544da8b26e7ab34e855ff5d32cc2e3765d1f437d54d93b4946de8924ab');
+    expect(originalHash).not.toBe(TAIPEI_TRANSIT_CONTENT_HASH);
+    expect(resolveContentByHash(originalHash)).toBe(TAIPEI_TRANSIT_CONTENT_V1);
+    expect(validateContent(TAIPEI_TRANSIT_CONTENT_V1).ok).toBe(true);
+    // The one authored difference, and nothing else.
+    const drifted = TAIPEI_TRANSIT_CONTENT_V1.cities.filter((old) => {
+      const live = TAIPEI_TRANSIT_CITIES.find((c) => c.id === old.id);
+      return JSON.stringify(live) !== JSON.stringify(old);
+    });
+    expect(drifted.map((c) => c.id)).toEqual(['tt_cksmemorial']);
+    expect(drifted[0]!.nameZh).toBe('中正紀念館');
   });
 });
