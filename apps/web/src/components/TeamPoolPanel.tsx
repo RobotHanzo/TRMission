@@ -9,6 +9,7 @@ import {
   isTeamGame,
 } from '@trm/client-core/game/teams';
 import { handFromCounts } from '../game/payments';
+import { SECRET_CLASS } from '../observability/secrets';
 import { CARD_COLOR_TOKENS, LOCOMOTIVE_GRADIENT, teamColor } from '../theme/colors';
 
 interface Props {
@@ -72,7 +73,9 @@ export function TeamPoolPanel({ snapshot, onPush, onTake }: Props) {
 
       <div className="team-pool-push">
         <span className="muted">{hint}</span>
-        <div className="team-pool-cards">
+        {/* SECRET_CLASS: one button per colour the viewer holds — a readout of their hidden hand.
+            Only this row is marked; the pool row above it is open information. */}
+        <div className={`team-pool-cards ${SECRET_CLASS}`}>
           {CARD_COLORS.filter((c) => hand[c] > 0).map((color) => {
             const tok = CARD_COLOR_TOKENS[color];
             const isLoco = color === 'LOCOMOTIVE';

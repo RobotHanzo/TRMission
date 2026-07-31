@@ -9,6 +9,7 @@ import request from 'supertest';
 import { createTestApp, type TestApp } from './app';
 import type { GameDoc, MatchHistoryDoc } from '../src/persistence/types';
 import { escapeXml, estimateWidth, fitText } from '../src/og/card-svg';
+import { mapPanelSvg } from '../src/og/map-svg';
 import { MapsService } from '../src/maps/maps.service';
 import { env } from '../src/config/env';
 
@@ -413,6 +414,33 @@ describe('shared-map cards', () => {
       .expect(204);
     const revoked = await request(server()).get(`/api/v1/og/map/${shareCode}.png`).expect(200);
     expect(expectPng(revoked.body).equals(sitePng)).toBe(true);
+  });
+});
+
+describe('map-svg graticule over a custom draft view', () => {
+  const panel = { x: 0, y: 0, w: 500, h: 300, r: 16 };
+  const mapWith = (baseView: { x: number; y: number; w: number; h: number }) => ({
+    cities: [],
+    routes: [],
+    geography: { baseView, land: [], crop: { lonMin: 0, lonMax: 1, latMin: 0, latMax: 1 } },
+  });
+  const lineCount = (svg: string) => (svg.match(/<line /g) ?? []).length;
+
+  it('draws the 20-unit grid across an ordinary authored view', () => {
+    // 0,20,40,60,80 on each axis — the line at 100 is outside the half-open view.
+    expect(lineCount(mapPanelSvg(mapWith({ x: 0, y: 0, w: 100, h: 100 }), panel, 'c'))).toBe(10);
+  });
+
+  // A shared map's baseView is author-supplied and the card renders anonymously, so the grid
+  // must never be sized by it: before the clamp a huge span allocated hundreds of millions of
+  // lines on the event loop, and a far-from-origin view spun forever (`v + 20 === v` in float).
+  it('clamps a hostile view instead of stepping across it', () => {
+    expect(
+      lineCount(mapPanelSvg(mapWith({ x: 0, y: 0, w: 4e9, h: 4e9 }), panel, 'c')),
+    ).toBeLessThanOrEqual(400);
+    expect(
+      lineCount(mapPanelSvg(mapWith({ x: 1e18, y: 1e18, w: 1e18, h: 1e18 }), panel, 'c')),
+    ).toBeLessThanOrEqual(400);
   });
 });
 

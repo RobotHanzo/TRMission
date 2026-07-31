@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { FlightEnd } from '../game/animationModel';
 import { useAnimationsStore, type Flight, type Float, type TicketCue } from '../store/animations';
 import { useGameStore } from '../store/game';
+import { SECRET_CLASS } from '../observability/secrets';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import { seatColor } from '../theme/colors';
 import { FlyingCard } from './FlyingCard';
@@ -86,9 +87,19 @@ function FlightMover({ flight }: { flight: Flight }) {
     };
   }, [flight, me, reduced, removeFlight]);
 
+  // SECRET_CLASS: a blind deck draw carries a colour only for the drawer themselves
+  // (`intentsFromEvents`), so a face-DOWN flight that still has a face is this viewer's hidden
+  // card — Session Replay must not record it. Face-up flights (market slot, team pool) show a card
+  // the whole table already saw, so they stay recordable.
+  const secret = !flight.faceUp && flight.color !== null;
+
   return (
     <div
-      className={'flying-card' + (flight.color ? ' is-face' : ' is-cover')}
+      className={
+        'flying-card' +
+        (flight.color ? ' is-face' : ' is-cover') +
+        (secret ? ` ${SECRET_CLASS}` : '')
+      }
       style={style}
       onTransitionEnd={() => removeFlight(flight.id)}
     >

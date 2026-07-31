@@ -57,6 +57,32 @@ export function ferryLocoGradientDef(): string {
   return `<linearGradient id="ferryLocoRainbow" x1="0" y1="0" x2="1" y2="1">${stops}</linearGradient>`;
 }
 
+/** Hard cap on graticule lines per axis for a custom draft. A card renders anonymously from a
+ *  stored map's authored `baseView`, so its magnitude is caller-supplied — and drafts stored
+ *  before maps.schemas.ts bounded it may hold any value at all. Past ~200 lines the grid is an
+ *  illegible wash at the card's ~500px scale anyway (the widest plausible authored view is the
+ *  builder's ~100 units ⇒ 5 lines), so clamping costs nothing real and keeps a hostile view from
+ *  allocating unboundedly on the event loop. */
+const MAX_GRATICULE_LINES = 200;
+
+/** Grid coordinates every `step` units across `[start, start + span)`, at most
+ *  {@link MAX_GRATICULE_LINES} of them. The iteration count — not just the drawn span — is what
+ *  is bounded: an enormous span otherwise runs for hundreds of millions of iterations, and a
+ *  far-from-origin view never terminates at all, since `v += step` stops moving once step falls
+ *  under half an ulp. Stepping by index off `first` keeps that same case advancing, and is exact
+ *  wherever the old accumulation was, so any view under the cap grids exactly as before. */
+function gridLines(start: number, span: number, step: number): number[] {
+  const end = start + span;
+  const first = Math.ceil(start / step) * step;
+  const out: number[] = [];
+  for (let i = 0; i < MAX_GRATICULE_LINES; i++) {
+    const v = first + i * step;
+    if (!(v < end)) break;
+    out.push(v);
+  }
+  return out;
+}
+
 /** The quiet cartographic grid: the same hand-picked lines as the real board
  *  (Geography.tsx's `GRATICULE`) for official Taiwan; a fixed 20-unit step for a custom
  *  draft (its authored `land` rings carry no hand-tuned graticule of their own). */
@@ -68,8 +94,8 @@ function graticuleLayer(
   const ys: number[] = official ? [...TAIWAN_GRATICULE.ys] : [];
   if (!official) {
     const step = 20;
-    for (let y = Math.ceil(view.y / step) * step; y < view.y + view.h; y += step) ys.push(y);
-    for (let x = Math.ceil(view.x / step) * step; x < view.x + view.w; x += step) xs.push(x);
+    ys.push(...gridLines(view.y, view.h, step));
+    xs.push(...gridLines(view.x, view.w, step));
   }
   const lines = [
     ...ys.map(

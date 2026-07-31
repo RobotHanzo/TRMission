@@ -12,6 +12,14 @@ const MAX_CITIES = 120;
 const MAX_ROUTES = 300;
 const MAX_TICKETS = 200;
 const MAX_GEOGRAPHY_RINGS = 400;
+// The authored view (MapGeography.baseView) drives per-view rendering work — the OG card's
+// graticule steps across it — so a newly saved draft may not declare an absurd one. Deliberately
+// generous: the builder's projection emits a ~108-unit square view and official maps fork at the
+// same order, so these sit two-plus orders of magnitude above any real draft while staying far
+// below the magnitudes that make view-driven work explode. Write-side only — already-stored
+// drafts are never re-parsed through this schema, so nothing existing is invalidated.
+const MAX_VIEW_ORIGIN = 100_000;
+const MAX_VIEW_SPAN = 10_000;
 
 const idString = z.string().min(1).max(40);
 const name60 = z.string().min(1).max(60);
@@ -69,10 +77,10 @@ export const AuspiciousPairDraftSchema = z.object({
 const ringSchema = z.array(z.tuple([z.number().finite(), z.number().finite()])).min(3);
 export const MapGeographyDraftSchema = z.object({
   baseView: z.object({
-    x: z.number().finite(),
-    y: z.number().finite(),
-    w: z.number().finite().positive(),
-    h: z.number().finite().positive(),
+    x: z.number().finite().min(-MAX_VIEW_ORIGIN).max(MAX_VIEW_ORIGIN),
+    y: z.number().finite().min(-MAX_VIEW_ORIGIN).max(MAX_VIEW_ORIGIN),
+    w: z.number().finite().positive().max(MAX_VIEW_SPAN),
+    h: z.number().finite().positive().max(MAX_VIEW_SPAN),
   }),
   land: z.array(ringSchema).max(MAX_GEOGRAPHY_RINGS),
   crop: z.object({

@@ -73,3 +73,29 @@ describe('MapDraftSchema keeps display-area fields', () => {
     expect(parsed.auspiciousPairs).toEqual([{ id: 'lucky-1', a: 'TAIPEI', b: 'KAOHSIUNG' }]);
   });
 });
+
+describe('MapDraftSchema bounds a saved geography baseView', () => {
+  const withView = (baseView: { x: number; y: number; w: number; h: number }) => ({
+    cities: [],
+    routes: [],
+    tickets: [],
+    geography: { baseView, land: [], crop: { lonMin: 0, lonMax: 1, latMin: 0, latMax: 1 } },
+  });
+
+  it('still accepts anything a real draft produces, with room to spare', () => {
+    // The builder's projection emits a ~108-unit square view and official forks are the same
+    // order (Taiwan is 84x98 at -4,-2); the bound sits orders of magnitude above both.
+    expect(MapDraftSchema.safeParse(withView({ x: -4, y: -2, w: 84, h: 98 })).success).toBe(true);
+    expect(
+      MapDraftSchema.safeParse(withView({ x: -5000, y: 5000, w: 10_000, h: 10_000 })).success,
+    ).toBe(true);
+  });
+
+  it('refuses an absurd view at write time (the OG card grids across baseView)', () => {
+    expect(MapDraftSchema.safeParse(withView({ x: 0, y: 0, w: 4e9, h: 100 })).success).toBe(false);
+    expect(MapDraftSchema.safeParse(withView({ x: 0, y: 0, w: 100, h: 1e15 })).success).toBe(false);
+    expect(MapDraftSchema.safeParse(withView({ x: 1e18, y: 0, w: 100, h: 100 })).success).toBe(
+      false,
+    );
+  });
+});

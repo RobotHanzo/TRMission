@@ -8,6 +8,7 @@ import { tunnelRevealMs } from '../game/tunnel';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import { TrainCarCard } from './TrainCarCard';
 import { soundPlayer } from '../sound/player';
+import { SECRET_CLASS } from '../observability/secrets';
 
 interface Props {
   revealed: PbCardColor[];
@@ -143,7 +144,8 @@ export function TunnelModal({
                 <p className="tunnel-surcharge">
                   {extraRequired === 0 ? t('tunnelNoExtra') : t('payExtra', { n: extraRequired })}
                 </p>
-                <ul className="payment-options card-options">
+                {/* SECRET_CLASS: every option here is enumerated from the viewer's hidden hand. */}
+                <ul className={`payment-options card-options ${SECRET_CLASS}`}>
                   {options.map((p, i) => {
                     const hasCards = (p.color && p.colorCount > 0) || p.locomotives > 0;
                     return (

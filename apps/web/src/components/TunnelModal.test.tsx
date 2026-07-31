@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { CardColor } from '@trm/proto';
 import '../i18n';
 import { TunnelModal } from './TunnelModal';
+import { SECRET_CLASS } from '../observability/secrets';
 
 const { play } = vi.hoisted(() => ({ play: vi.fn() }));
 vi.mock('../sound/player', () => ({
@@ -81,5 +82,42 @@ describe('TunnelModal spectator view', () => {
     );
     expect(container.querySelector('.payment-card--readonly')).toBeNull();
     expect(screen.queryByRole('button')).toBeNull();
+  });
+});
+
+describe('TunnelModal replay blocking', () => {
+  it('marks the claimant spend options as secret', () => {
+    const { container } = render(
+      <TunnelModal
+        revealed={revealed}
+        extraRequired={1}
+        playedColor={CardColor.BLUE}
+        options={[{ color: 'BLUE', colorCount: 1, locomotives: 0 }]}
+        onCommit={() => {}}
+        onAbort={() => {}}
+      />,
+    );
+    // The options are enumerated from the viewer's hidden hand — Session Replay must not record them.
+    const list = container.querySelector('.payment-options');
+    expect(list).not.toBeNull();
+    expect(list?.classList.contains(SECRET_CLASS)).toBe(true);
+  });
+
+  it('leaves the spectator surcharge combination unblocked', () => {
+    const { container } = render(
+      <TunnelModal
+        revealed={revealed}
+        extraRequired={2}
+        playedColor={CardColor.BLUE}
+        options={[]}
+        spectator
+        onCommit={() => {}}
+        onAbort={() => {}}
+      />,
+    );
+    // Public info (N cards of the played colour): blocking it would cost debugging value for free.
+    const list = container.querySelector('.payment-options');
+    expect(list).not.toBeNull();
+    expect(list?.classList.contains(SECRET_CLASS)).toBe(false);
   });
 });

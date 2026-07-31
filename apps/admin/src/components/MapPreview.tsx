@@ -12,26 +12,31 @@ interface PreviewRoute {
 }
 
 const GRATICULE_STEP = 20;
+/** Hard cap on grid lines per axis. A moderated draft's `baseView` is attacker-controlled and only
+ *  bounded by `finite().positive()` on the way in, so the walk can never be driven by the span
+ *  alone: a real map is ~100 units across (5 lines), and 1000 lines is already unreadable. */
+const GRATICULE_MAX_LINES = 1000;
+
+/** Lines along one axis at a fixed step, clipped to `[start, start + span)`. Walked by index rather
+ *  than by accumulation so a huge or extreme-coordinate span can't spin forever — at very large
+ *  coordinates `+= step` falls below the float ULP and never advances. */
+function axisLines(start: number, span: number) {
+  const first = Math.ceil(start / GRATICULE_STEP) * GRATICULE_STEP;
+  const end = start + span;
+  const out: number[] = [];
+  let prev: number | undefined;
+  for (let i = 0; i < GRATICULE_MAX_LINES; i++) {
+    const v = first + i * GRATICULE_STEP;
+    if (!(v < end) || v === prev) break;
+    out.push(v);
+    prev = v;
+  }
+  return out;
+}
 
 /** Grid lines at a fixed step, clipped to the given view — mirrors apps/web's Geography.tsx. */
 function graticuleLines(view: { x: number; y: number; w: number; h: number }) {
-  const xs: number[] = [];
-  for (
-    let x = Math.ceil(view.x / GRATICULE_STEP) * GRATICULE_STEP;
-    x < view.x + view.w;
-    x += GRATICULE_STEP
-  ) {
-    xs.push(x);
-  }
-  const ys: number[] = [];
-  for (
-    let y = Math.ceil(view.y / GRATICULE_STEP) * GRATICULE_STEP;
-    y < view.y + view.h;
-    y += GRATICULE_STEP
-  ) {
-    ys.push(y);
-  }
-  return { xs, ys };
+  return { xs: axisLines(view.x, view.w), ys: axisLines(view.y, view.h) };
 }
 
 /** Read-only board-shape glance for moderation: the draft's own land silhouette (when it has

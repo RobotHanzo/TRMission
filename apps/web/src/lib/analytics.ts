@@ -119,10 +119,34 @@ const SCREEN_TO_PATH: Record<View, string> = {
   terms: '/terms',
 };
 
+/** Screen → page title, for the same reason: `document.title` is NOT read here. The room view's
+ *  <title> interpolates the room code (`Room {{code}} · …`), which is the join capability for an
+ *  INVITE_ONLY lobby, so forwarding the live title would ship that capability to GA4/Zaraz — and
+ *  any view change can fire while the title still belongs to the previous view. These are fixed
+ *  English labels rather than the localized <title>, so the dimension is a constant per screen. */
+const SCREEN_TO_TITLE: Record<View, string> = {
+  home: 'Home',
+  room: 'Room lobby',
+  game: 'Game',
+  tutorial: 'Tutorial',
+  login: 'Sign in',
+  loginCallback: 'Sign in callback',
+  history: 'Match history',
+  leaderboard: 'Leaderboard',
+  replay: 'Replay',
+  adminReplay: 'Admin replay',
+  adminSpectate: 'Admin spectate',
+  maps: 'Custom maps',
+  mapEditor: 'Map editor',
+  deleteAccount: 'Delete account',
+  privacy: 'Privacy policy',
+  terms: 'Terms of service',
+};
+
 export function trackPageView(screen: View): void {
   track('page_view', {
     screen,
     page_path: SCREEN_TO_PATH[screen] ?? '/',
-    page_title: typeof document === 'undefined' ? '' : document.title,
+    page_title: SCREEN_TO_TITLE[screen] ?? 'TRMission',
   });
 }

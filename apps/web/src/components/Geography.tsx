@@ -17,15 +17,34 @@ export function GeographyLayer() {
   return ACTIVE_GEOGRAPHY ? <CustomGeography geography={ACTIVE_GEOGRAPHY} /> : <Geography />;
 }
 
+const GRATICULE_STEP = 20;
+/** Hard cap on graticule lines per axis. A custom map's `baseView` is third-party content (a
+ *  cloned shared map in the builder, the active map in someone else's room), so the grid must be
+ *  bounded by the code and not by the view: an absurd span would otherwise allocate until the tab
+ *  dies. Authored views are a handful of lines per axis, far under this. */
+const MAX_GRATICULE_LINES = 512;
+
+/** Grid line positions from the first multiple of the step at or after `start`, up to `end`. */
+function axisLines(start: number, end: number): number[] {
+  const first = Math.ceil(start / GRATICULE_STEP) * GRATICULE_STEP;
+  const vs: number[] = [];
+  let prev = Number.NaN;
+  for (let i = 0; i < MAX_GRATICULE_LINES; i++) {
+    const v = first + i * GRATICULE_STEP;
+    // Same `< end` bound as an incrementing walk, but indexed off `first`, so the loop count is
+    // fixed even where the step is below the float ULP (a view at ±1e300 never advances at all)
+    // and a non-advancing value stops rather than repeating itself — and its React key.
+    if (!(v < end) || v === prev) break;
+    vs.push(v);
+    prev = v;
+  }
+  return vs;
+}
+
 /** A simple grid at a fixed step, sized to the map's own viewBox (custom maps have no hand-tuned
  *  graticule the way Taiwan does). */
 function graticuleFor(view: View): { xs: number[]; ys: number[] } {
-  const step = 20;
-  const xs: number[] = [];
-  for (let x = Math.ceil(view.x / step) * step; x < view.x + view.w; x += step) xs.push(x);
-  const ys: number[] = [];
-  for (let y = Math.ceil(view.y / step) * step; y < view.y + view.h; y += step) ys.push(y);
-  return { xs, ys };
+  return { xs: axisLines(view.x, view.x + view.w), ys: axisLines(view.y, view.y + view.h) };
 }
 
 export interface CustomGeographyProps {
