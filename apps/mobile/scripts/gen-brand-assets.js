@@ -128,23 +128,77 @@ function badge(rx, p = PALETTE_BRAND) {
   return `${tile}<g transform="scale(${S})">${ticket(p)}</g>`;
 }
 
-/** Scale a piece of OUT-space art about the centre by `k` (Android adaptive/monochrome safe zone). */
-const safeZone = (k, body) =>
-  `<g transform="translate(${OUT / 2} ${OUT / 2}) scale(${k}) translate(${-OUT / 2} ${-OUT / 2})">${body}</g>`;
-
 const svg = (body) =>
   `<svg xmlns="http://www.w3.org/2000/svg" width="${OUT}" height="${OUT}" viewBox="0 0 ${OUT} ${OUT}">${body}</svg>`;
 
-const renderPng = (markup) =>
+const renderImage = (markup) =>
   new Resvg(markup, {
     fitTo: { mode: 'width', value: OUT },
     // Single bare CJK family: resvg falls through a comma-separated list to a kaiti fallback for
     // some glyphs. The wordmark is rasterised here and baked into the PNG, so this dev-machine
     // (Windows) font only needs to exist at generate time, never on the device.
     font: { loadSystemFonts: true, defaultFontFamily: 'Microsoft JhengHei' },
-  })
-    .render()
-    .asPng();
+  }).render();
+
+const renderPng = (markup) => renderImage(markup).asPng();
+
+// ── Android adaptive-icon safe zone ────────────────────────────────────────────────────────────
+// The foreground layer is a 108dp square, of which the launcher shows only the inner 72dp viewport
+// (66.7%) — and since the mask SHAPE is the launcher's choice, only a centred 66dp CIRCLE (61.1%)
+// is guaranteed visible. This used to be a flat `scale(0.8)` about the canvas centre, which left the
+// mark's enclosing circle at 66.8% — past the viewport, and offset ~1.2% right/down because the
+// ticket (drop shadow included) isn't centred on the artboard. Launchers with a boxy mask got away
+// with it; Samsung's near-circular One UI squircle sliced the ticket's ends off with no margin at
+// all. So fit the mark to the 66dp circle instead of eyeballing a scale factor.
+const ADAPTIVE_SAFE = 66 / 108;
+
+/** Exact ink extent of OUT-space art, measured off the rasterised alpha channel rather than
+ *  approximated from path data — so it stays correct if the mark is ever redrawn. Returns the alpha
+ *  bounding box's centre plus `radius`, the smallest circle about that centre covering every
+ *  non-transparent pixel (antialiased fringe included, i.e. conservative). */
+function inkMetrics(body) {
+  const img = renderImage(svg(body));
+  const { width: w, height: h, pixels } = img;
+  const opaque = (x, y) => pixels[(y * w + x) * 4 + 3] > 0;
+  let minX = w;
+  let maxX = -1;
+  let minY = h;
+  let maxY = -1;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      if (!opaque(x, y)) continue;
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+    }
+  }
+  const cx = (minX + maxX + 1) / 2;
+  const cy = (minY + maxY + 1) / 2;
+  let far = 0;
+  for (let y = minY; y <= maxY; y++) {
+    for (let x = minX; x <= maxX; x++) {
+      if (!opaque(x, y)) continue;
+      far = Math.max(far, (x + 0.5 - cx) ** 2 + (y + 0.5 - cy) ** 2);
+    }
+  }
+  return { cx, cy, radius: Math.sqrt(far) };
+}
+
+// Measured ONCE, from the full-colour ticket (drop shadow included — it is ink the mask clips too),
+// and reused verbatim for the monochrome variant so the two render the ticket at the same size and
+// position. `safeZone` recentres the art's ink on the artboard, then scales it until its enclosing
+// circle exactly meets the 66dp guarantee.
+const MARK = `<g transform="scale(${S})">${ticket()}</g>`;
+const MARK_INK = inkMetrics(MARK);
+const SAFE_K = (OUT * ADAPTIVE_SAFE) / 2 / MARK_INK.radius;
+const safeZone = (body) =>
+  `<g transform="translate(${OUT / 2} ${OUT / 2}) scale(${SAFE_K.toFixed(5)}) ` +
+  `translate(${(-MARK_INK.cx).toFixed(2)} ${(-MARK_INK.cy).toFixed(2)})">${body}</g>`;
+console.log(
+  `adaptive safe zone: fitted the mark to ${(ADAPTIVE_SAFE * 100).toFixed(1)}% of the artboard ` +
+    `(scale ${SAFE_K.toFixed(4)})`,
+);
 
 // The rounded badge pre-rasterised to a transparent PNG. resvg mis-matches CJK fonts when the
 // mark's vector paths share an SVG with the wordmark text; embedding the badge as an inert <image>
@@ -210,15 +264,12 @@ const jobs = [
   ['icon-dark.png', svg(badge(0, PALETTE_DARK))],
   // Fallback trio `tinted` slot — de-hued so the system's own tint + glass pass reads cleanly.
   ['icon-tinted.png', svg(badge(0, PALETTE_TINTED))],
-  // Android adaptive foreground — the ticket alone in the ~66% safe zone (transparent; the config's
-  // orange backgroundColor is the tile behind it).
-  ['adaptive-icon.png', svg(safeZone(0.8, `<g transform="scale(${S})">${ticket()}</g>`))],
-  // Android 13 themed (monochrome) icon — white-alpha ticket silhouette (train punched out), same
-  // safe zone. The launcher tints the alpha to the wallpaper palette.
-  [
-    'adaptive-icon-monochrome.png',
-    svg(safeZone(0.8, `<g transform="scale(${S})">${monoMark()}</g>`)),
-  ],
+  // Android adaptive foreground — the ticket alone, fitted to the 66dp safe circle (transparent;
+  // the config's orange backgroundColor is the tile behind it).
+  ['adaptive-icon.png', svg(safeZone(MARK))],
+  // Android 13 themed (monochrome) icon — white-alpha ticket silhouette (train punched out), placed
+  // by the same fit. The launcher tints the alpha to the wallpaper palette.
+  ['adaptive-icon-monochrome.png', svg(safeZone(`<g transform="scale(${S})">${monoMark()}</g>`))],
   // Splash lockups — logo mark only, no wordmark text (light/dark are the same artwork).
   ['splash-icon.png', splash()],
   ['splash-icon-dark.png', splash()],
