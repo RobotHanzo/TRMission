@@ -93,6 +93,11 @@ Repo **variables**: `TRM_SERVER_ORIGIN`, `TRM_GOOGLE_WEB_CLIENT_ID`, `TRM_GOOGLE
 `TRM_GOOGLE_IOS_URL_SCHEME` (the reversed iOS OAuth client id, `com.googleusercontent.apps.*` — the
 google-signin config plugin validates it at every config eval, so `expo prebuild`/`run:android` need
 it set or fall back to a format-valid placeholder; see `apps/mobile/app.config.ts`).
+There is deliberately **no `TRM_GOOGLE_ANDROID_CLIENT_ID`** — Android Google Sign-In is keyed on the
+app's (package name, signing-cert SHA-1) matched against an Android OAuth client in the Cloud
+console, so a lane can look fully configured and still fail with `DEVELOPER_ERROR` on device.
+Registering the **Play app-signing** key's SHA-1 (not the upload key's) is the fix:
+`docs/release/play-console-setup.md` §4.
 
 **Fingerprint-input env vars (issue #62).** `TRM_GOOGLE_IOS_URL_SCHEME`, `TRM_OTA_APP_ID`,
 `TRM_OTA_CHANNEL`, `TRM_OTA_URL`, `TRM_SERVER_ORIGIN` reach the OTA `runtimeVersion` fingerprint, so

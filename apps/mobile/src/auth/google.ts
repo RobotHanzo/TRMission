@@ -8,6 +8,14 @@ import { useSession } from '../store/session';
 // no GoogleService-Info.plist to fall back to — this project runs without Firebase) — so this
 // must be awaited and its rejection propagated, or a bad iOS client id silently no-ops the
 // button forever (`configured` would otherwise latch true on a failed attempt too).
+//
+// Android takes NO client id here by design: Play Services matches the caller's (package name,
+// signing-cert SHA-1) against an *Android* OAuth client that must exist in the SAME Cloud project
+// as `webClientId`. Absent or mismatched ⇒ `signIn()` rejects with DEVELOPER_ERROR (status 10)
+// with everything on this side correct — nothing in this repo can fix it. Play App Signing
+// re-signs the uploaded AAB, so the fingerprint to register is the Play **app signing** key's, not
+// the upload key's (and a locally-installed debug build needs its debug key registered too).
+// docs/release/play-console-setup.md §4.
 let configured = false;
 async function ensureConfigured(): Promise<void> {
   if (configured || !GoogleSigninModule) return;

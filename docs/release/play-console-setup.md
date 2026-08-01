@@ -81,6 +81,7 @@ rather than improvising in the Console:
   **`play-data-safety.md` is why each answer is what it is** — the mapping back to the code that
   collects each type, plus the four answers that are judgement calls rather than facts. Read it
   before changing a cell.
+
 - **Ads**: declare **contains ads** (the app serves AdMob banners + one interstitial — see
   `apps/mobile/src/ads/CLAUDE.md`). This also puts the "Contains ads" badge on the store listing.
   **Government app / COVID-19 app / financial features / news app**: all no.
@@ -122,6 +123,35 @@ SHA-256 is what production installs actually run with — it's what `ANDROID_CER
 (server env, feeds `.well-known/assetlinks.json` for Android App Links) must contain. This is a
 launch-gate item already tracked in
 `docs/superpowers/plans/2026-07-06-mobile-p6-release-compliance.md` Task 10 Step 2 / Task 11.
+
+### Google Sign-In needs the SHA-**1** registered too (Google Cloud Console, not Play)
+
+Android Google Sign-In has no client id in the app config — unlike iOS, which passes
+`iosClientId`. Play Services identifies the caller by **(package name, signing-cert SHA-1)** and
+looks for a matching **Android** OAuth client in the same Google Cloud project that owns
+`TRM_GOOGLE_WEB_CLIENT_ID`. No match ⇒ `signIn()` rejects with `DEVELOPER_ERROR` (status 10), which
+is why Google login can work on iOS and fail on Android from an otherwise identical release.
+
+Google Cloud Console → **APIs & Services → Credentials → Create credentials → OAuth client ID →
+Android**, package name `dev.robothanzo.trmission`. One client holds exactly one fingerprint, so
+create one per key that installs the app:
+
+| Key                      | Where its SHA-1 comes from                                                                                    | Needed for                                               |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Play **app signing** key | Play Console → Setup → App signing (or App integrity)                                                         | anything installed from Play (internal testing included) |
+| **Upload** key           | `keytool -list -v -keystore release.keystore -alias <alias>`                                                  | sideloading the CI AAB/APK directly                      |
+| **Debug** key            | `keytool -list -v -keystore apps/mobile/android/app/debug.keystore -alias androiddebugkey -storepass android` | local `expo run:android`                                 |
+
+Play App Signing means a Play install is **not** signed with the upload key — registering only the
+upload fingerprint is the usual cause of "works when I sideload, DEVELOPER_ERROR from Play". To
+check what a device actually runs, pull the installed APK
+(`adb shell pm path dev.robothanzo.trmission` → `adb pull <path>`) and read
+`keytool -printcert -jarfile <apk>`.
+
+The Android client is never referenced by any env var or code — creating it is the entire fix.
+Propagation takes a few minutes; force-stop the app afterwards. Once past `DEVELOPER_ERROR`, the
+ID token Android returns carries `TRM_GOOGLE_WEB_CLIENT_ID` as its audience, so that value must
+equal the server's `GOOGLE_CLIENT_ID` or appear in its `GOOGLE_MOBILE_CLIENT_IDS`.
 
 ## 5. First manual upload (bootstraps the app — required, can't be skipped)
 
