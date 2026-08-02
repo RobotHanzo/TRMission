@@ -217,7 +217,9 @@ const DEFAULT_BOT_TAKEOVER_AFTER = 3;
 // longer LIVE (a resurrected zombie from the F20 race, or a termination that landed mid-turn).
 // Distinct from 'persistFailed' (a transient infra error) — the driver must treat it as
 // terminal, not reschedule another attempt.
-type BotMoveOutcome = 'moved' | 'noLegalAction' | 'persistFailed' | 'gameNotLive';
+// 'stale': the state that made this bot actable changed while the move waited for the queue
+// (see `botMove`). Ordinary concurrency, not a stall — the driver just re-picks.
+type BotMoveOutcome = 'moved' | 'noLegalAction' | 'persistFailed' | 'gameNotLive' | 'stale';
 
 export class GameHub {
   private readonly log = new Logger('bots');
@@ -1359,6 +1361,12 @@ export class GameHub {
    * retry forever since nothing else will ever evict this match, so it's evicted here instead.
    * Every failure mode is metered via `botDriverStalled` — it should never fire outside of
    * injected-failure tests (or, for `game_not_live`, outside the F20 race itself).
+   *
+   * The bot is picked OUTSIDE the queue and then paced (`botStepDelayMs`), so the state that
+   * made it actable can change before its move reaches the head of the queue — most visibly a
+   * concurrent END_GAME (the room's end-game vote, the paused-game purge sweep) or a seat
+   * reclaimed by its returning human. `botMove` re-checks under the queue and reports 'stale';
+   * that is ordinary concurrency, so the driver just loops and re-picks from the new state.
    */
   private async driveBots(gameId: string): Promise<void> {
     const bots = this.bots.get(gameId);
@@ -1380,7 +1388,7 @@ export class GameHub {
           if (outcome !== 'persistFailed' || attempt >= this.botPersistRetries) break;
           await sleep(this.botPersistRetryDelayMs);
         }
-        if (outcome === 'moved') continue;
+        if (outcome === 'moved' || outcome === 'stale') continue;
         if (outcome === 'persistFailed') {
           this.log.error(
             `persist kept failing for bot ${profile.playerId} in game ${gameId} after ${this.botPersistRetries + 1} attempts; rescheduling driver`,
@@ -1418,27 +1426,43 @@ export class GameHub {
 
   /** The first bot with a move available right now (turn owner, or a pending offer/tunnel). */
   private nextActableBot(match: Match, bots: Map<string, BotProfile>): BotProfile | undefined {
-    const s = match.session;
-    const phase = s.phase;
-    const current = s.currentPlayer;
-    const tunnelPlayer = s.raw().pendingTunnel?.playerId ?? null;
     for (const profile of bots.values()) {
-      const pid = asPlayerId(profile.playerId);
-      if (phase === 'SETUP_TICKETS') {
-        if (s.hasPendingOffer(pid)) return profile;
-      } else if (phase === 'TICKET_SELECTION') {
-        if (current === pid && s.hasPendingOffer(pid)) return profile;
-      } else if (phase === 'TUNNEL_PENDING') {
-        if (tunnelPlayer === pid) return profile;
-      } else if (current === pid) {
-        return profile; // AWAIT_ACTION / DRAWING_CARDS
-      }
+      if (this.isActableBot(match, profile)) return profile;
     }
     return undefined;
   }
 
-  /** Choose + apply one move for `profile`. */
+  /**
+   * Does this bot have a move available in the state as it stands? Evaluated twice per step: once
+   * to pick the bot, then again under the command queue (`botMove`) because the pacing delay and
+   * the queue wait sit in between. Also gates on the roster, so a seat its human reclaimed during
+   * that window is no longer played for them.
+   */
+  private isActableBot(match: Match, profile: BotProfile): boolean {
+    if (!this.bots.get(match.session.gameId)?.has(profile.playerId)) return false;
+    const s = match.session;
+    const pid = asPlayerId(profile.playerId);
+    switch (s.phase) {
+      case 'GAME_OVER':
+        return false;
+      case 'SETUP_TICKETS':
+        return s.hasPendingOffer(pid);
+      case 'TICKET_SELECTION':
+        return s.currentPlayer === pid && s.hasPendingOffer(pid);
+      case 'TUNNEL_PENDING':
+        return (s.raw().pendingTunnel?.playerId ?? null) === pid;
+      default:
+        return s.currentPlayer === pid; // AWAIT_ACTION / DRAWING_CARDS
+    }
+  }
+
+  /** Choose + apply one move for `profile`. Runs inside the per-game command queue. */
   private async botMove(match: Match, profile: BotProfile): Promise<BotMoveOutcome> {
+    // The pick happened before the pacing delay and the queue wait; only here is the state the
+    // one the move will actually apply to. If it moved on (a vote/purge END_GAME landed, a human
+    // command changed the turn, the seat was reclaimed) there is simply nothing to do — bailing
+    // out here is what keeps that ordinary race off the `no_legal_action` stall alarm below.
+    if (!this.isActableBot(match, profile)) return 'stale';
     const botId = asPlayerId(profile.playerId);
     const chosen = chooseBotAction(
       match.session.board,

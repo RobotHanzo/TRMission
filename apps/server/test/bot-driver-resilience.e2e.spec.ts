@@ -182,3 +182,42 @@ describe('bot driver resilience: transient persist failures never permanently fr
     expect(store.appendCount).toBe(countAfterEviction);
   });
 });
+
+describe('bot driver concurrency: a state change under the queue is not a stall', () => {
+  it('drops a paced bot move whose game ended first, without alarming', async () => {
+    const board = taiwanBoard();
+    const { config, bots } = allBotConfig('ended-mid-step');
+    const { stalls, metrics } = stallCounter();
+    const reports: string[] = [];
+
+    const hub = new GameHub(new GameRegistry(), {
+      store: new FlakyStore(0),
+      metrics,
+      reporter: {
+        capture(_error, tag) {
+          reports.push(tag);
+        },
+        captureMessage(_message, tag) {
+          reports.push(tag);
+        },
+      },
+      // A real pacing delay: the bot is picked, then its move waits — the window an END_GAME
+      // (the room's end-game vote, the paused-game purge sweep) lands in.
+      botMoveDelayMs: 20,
+      botPersistRetryDelayMs: 0,
+      botDriverRescheduleMs: 5,
+    });
+    const match = await hub.createMatch('ended-mid-step', board, config, bots);
+
+    // The driver is mid-delay on its first bot; end the game out from under it.
+    expect(await hub.endGame('ended-mid-step', asPlayerId('bot:1'))).toBe('ended');
+    expect(match.session.phase).toBe('GAME_OVER');
+
+    // The queued move now lands on a finished game, where nothing is legal — not even PASS.
+    // That is ordinary concurrency, so it must not touch the stall alarm.
+    await new Promise((r) => setTimeout(r, 60));
+    expect(stalls.no_legal_action).toBe(0);
+    expect(reports).toEqual([]);
+    expect(match.session.phase).toBe('GAME_OVER');
+  });
+});
