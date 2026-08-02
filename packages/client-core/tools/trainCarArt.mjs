@@ -277,7 +277,7 @@ function buildCar(car, sheet, prefix) {
   const allDefs = defBlocks(sheet.defs);
   const ids = new Set();
   let pool = inlined;
-  for (let grew = true; grew; ) {
+  for (let grew = true; grew;) {
     grew = false;
     for (const m of pool.matchAll(/url\(#([^)]+)\)/g)) {
       if (allDefs[m[1]] && !ids.has(m[1])) {

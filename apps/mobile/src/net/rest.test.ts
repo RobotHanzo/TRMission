@@ -66,8 +66,7 @@ describe('mobile REST client', () => {
     expect(user).toEqual({ id: 'u1' });
 
     const refreshCall = fetchMock.mock.calls.find(([u]) => String(u).includes('/auth/refresh')) as
-      | [string, RequestInit]
-      | undefined;
+      [string, RequestInit] | undefined;
     expect(refreshCall).toBeDefined();
     expect(JSON.parse(String(refreshCall![1].body))).toEqual({ refreshToken: 'refresh-1' });
     expect(store.setRefreshToken).toHaveBeenCalledWith('refresh-2');

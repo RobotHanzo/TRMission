@@ -72,8 +72,7 @@ export interface RoomSpectator {
 }
 export type RoomVisibility = 'PUBLIC' | 'INVITE_ONLY';
 export type MapSelector =
-  | { source: 'official'; mapId: string }
-  | { source: 'custom'; customMapId: string };
+  { source: 'official'; mapId: string } | { source: 'custom'; customMapId: string };
 export interface RoomSettings {
   unlimitedStationBorrow: boolean;
   secondDrawAfterBlindRainbow: boolean;

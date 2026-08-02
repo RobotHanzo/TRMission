@@ -940,11 +940,9 @@ it('broadcasts chat to members, persists it, and enforces length + rate limits',
     encodeClient(2, { case: 'chat', value: { content: { case: 'text', value: '  hi there  ' } } }),
   );
   const chat1 = f1.find((f) => f.event.case === 'chat')?.event.value as
-    | { content: { case: string; value: string } }
-    | undefined;
+    { content: { case: string; value: string } } | undefined;
   const chat2 = f2.find((f) => f.event.case === 'chat')?.event.value as
-    | { content: { case: string; value: string } }
-    | undefined;
+    { content: { case: string; value: string } } | undefined;
   expect(chat1?.content).toEqual({ case: 'text', value: 'hi there' }); // trimmed
   expect(chat2?.content).toEqual({ case: 'text', value: 'hi there' }); // both members receive it
 
@@ -958,8 +956,7 @@ it('broadcasts chat to members, persists it, and enforces length + rate limits',
     }),
   );
   const rej = f1.find((f) => f.event.case === 'rejection')?.event.value as
-    | { code: number }
-    | undefined;
+    { code: number } | undefined;
   expect(rej?.code).toBe(RejectionCode.MALFORMED);
   expect(f2.find((f) => f.event.case === 'chat')).toBeUndefined();
 
@@ -995,8 +992,7 @@ it('broadcasts a preset chat message and rejects an unrecognized preset id', asy
     encodeClient(2, { case: 'chat', value: { content: { case: 'presetId', value: 'GOOD_LUCK' } } }),
   );
   const chat2 = f2.find((f) => f.event.case === 'chat')?.event.value as
-    | { content: { case: string; value: string } }
-    | undefined;
+    { content: { case: string; value: string } } | undefined;
   expect(chat2?.content).toEqual({ case: 'presetId', value: 'GOOD_LUCK' });
 
   f1.length = 0;
@@ -1005,8 +1001,7 @@ it('broadcasts a preset chat message and rejects an unrecognized preset id', asy
     encodeClient(3, { case: 'chat', value: { content: { case: 'presetId', value: 'NOT_REAL' } } }),
   );
   const rej = f1.find((f) => f.event.case === 'rejection')?.event.value as
-    | { code: number; messageKey: string }
-    | undefined;
+    { code: number; messageKey: string } | undefined;
   expect(rej?.code).toBe(RejectionCode.MALFORMED);
   expect(rej?.messageKey).toBe('errors:chatInvalidPreset');
 });

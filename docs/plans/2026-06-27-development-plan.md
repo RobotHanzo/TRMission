@@ -134,20 +134,20 @@ Original topology inspired by real TRA/THSR/branch lines; graph, colourings, len
 
 ### 6.1 Cities (46 nodes)
 
-| #   | 中文 | English      | x   | y   | region       | island |
+| # | 中文 | English | x | y | region | island |
 | --- | ---- | ------------ | --- | --- | ------------ | ------ | --- | --- | ---- | ------------- | --- | --- | ------------ | --- | --- | --- | ------ | ------------- | --- | --- | ----------- | --- | --- | --- | ------ | -------- | --- | --- | ------------ | --- |
-| 1   | 基隆 | Keelung      | 63  | 5   | North        | no     |     | 2   | 瑞芳 | Ruifang       | 66  | 8   | North        | no  |     | 3   | 臺北   | Taipei        | 58  | 9   | North       | no  |     | 4   | 淡水   | Tamsui   | 53  | 6   | North        | no  |
-| 5   | 板橋 | Banqiao      | 56  | 11  | North        | no     |     | 6   | 桃園 | Taoyuan       | 51  | 14  | North        | no  |     | 7   | 中壢   | Zhongli       | 48  | 17  | North       | no  |     | 8   | 新竹   | Hsinchu  | 43  | 22  | NW           | no  |
-| 9   | 竹南 | Zhunan       | 42  | 25  | NW           | no     |     | 10  | 苗栗 | Miaoli        | 41  | 29  | NW           | no  |     | 11  | 大甲   | Dajia         | 38  | 31  | C-West 海線 | no  |     | 12  | 沙鹿   | Shalu    | 37  | 35  | C-West 海線  | no  |
-| 13  | 豐原 | Fengyuan     | 43  | 34  | C-West 山線  | no     |     | 14  | 臺中 | Taichung      | 41  | 38  | C-West       | no  |     | 15  | 彰化   | Changhua      | 39  | 41  | C-West      | no  |     | 16  | 鹿港   | Lukang   | 35  | 42  | C-West coast | no  |
-| 17  | 員林 | Yuanlin      | 40  | 44  | C-West       | no     |     | 18  | 南投 | Nantou        | 47  | 43  | Interior     | no  |     | 19  | 日月潭 | Sun Moon Lake | 51  | 46  | Interior    | no  |     | 20  | 二水   | Ershui   | 40  | 46  | C-West       | no  |
-| 21  | 斗六 | Douliu       | 40  | 49  | Yun-Chia-Nan | no     |     | 22  | 嘉義 | Chiayi        | 38  | 53  | Yun-Chia-Nan | no  |     | 23  | 阿里山 | Alishan       | 48  | 55  | Interior    | no  |     | 24  | 新營   | Xinying  | 37  | 57  | Yun-Chia-Nan | no  |
-| 25  | 臺南 | Tainan       | 36  | 61  | Yun-Chia-Nan | no     |     | 26  | 高雄 | Kaohsiung     | 38  | 66  | South        | no  |     | 27  | 屏東   | Pingtung      | 44  | 66  | South       | no  |     | 28  | 潮州   | Chaozhou | 45  | 70  | South        | no  |
-| 29  | 枋寮 | Fangliao     | 45  | 75  | South        | no     |     | 30  | 恆春 | Hengchun      | 48  | 86  | South cape   | no  |     | 31  | 大武   | Dawu          | 53  | 80  | South-link  | no  |     | 32  | 臺東   | Taitung  | 58  | 76  | South-link   | no  |
-| 33  | 知本 | Zhiben       | 56  | 78  | South-link   | no     |     | 34  | 池上 | Chishang      | 61  | 67  | East-Rift    | no  |     | 35  | 玉里   | Yuli          | 64  | 61  | East-Rift   | no  |     | 36  | 花蓮   | Hualien  | 68  | 49  | East-Rift    | no  |
-| 37  | 蘇澳 | Su'ao        | 65  | 34  | Northeast    | no     |     | 38  | 羅東 | Luodong       | 63  | 31  | Northeast    | no  |     | 39  | 宜蘭   | Yilan         | 62  | 28  | Northeast   | no  |     | 40  | 頭城   | Toucheng | 63  | 24  | Northeast    | no  |
-| 41  | 澎湖 | Penghu       | 20  | 56  | Islands      | yes    |     | 42  | 金門 | Kinmen        | 5   | 48  | Islands      | yes |     | 43  | 馬祖   | Matsu         | 22  | 10  | Islands     | yes |     | 44  | 小琉球 | Liuqiu   | 31  | 69  | Islands      | yes |
-| 45  | 綠島 | Green Island | 70  | 78  | Islands      | yes    |     | 46  | 蘭嶼 | Orchid Island | 73  | 88  | Islands      | yes |     |     |        |               |     |     |             |
+| 1 | 基隆 | Keelung | 63 | 5 | North | no | | 2 | 瑞芳 | Ruifang | 66 | 8 | North | no | | 3 | 臺北 | Taipei | 58 | 9 | North | no | | 4 | 淡水 | Tamsui | 53 | 6 | North | no |
+| 5 | 板橋 | Banqiao | 56 | 11 | North | no | | 6 | 桃園 | Taoyuan | 51 | 14 | North | no | | 7 | 中壢 | Zhongli | 48 | 17 | North | no | | 8 | 新竹 | Hsinchu | 43 | 22 | NW | no |
+| 9 | 竹南 | Zhunan | 42 | 25 | NW | no | | 10 | 苗栗 | Miaoli | 41 | 29 | NW | no | | 11 | 大甲 | Dajia | 38 | 31 | C-West 海線 | no | | 12 | 沙鹿 | Shalu | 37 | 35 | C-West 海線 | no |
+| 13 | 豐原 | Fengyuan | 43 | 34 | C-West 山線 | no | | 14 | 臺中 | Taichung | 41 | 38 | C-West | no | | 15 | 彰化 | Changhua | 39 | 41 | C-West | no | | 16 | 鹿港 | Lukang | 35 | 42 | C-West coast | no |
+| 17 | 員林 | Yuanlin | 40 | 44 | C-West | no | | 18 | 南投 | Nantou | 47 | 43 | Interior | no | | 19 | 日月潭 | Sun Moon Lake | 51 | 46 | Interior | no | | 20 | 二水 | Ershui | 40 | 46 | C-West | no |
+| 21 | 斗六 | Douliu | 40 | 49 | Yun-Chia-Nan | no | | 22 | 嘉義 | Chiayi | 38 | 53 | Yun-Chia-Nan | no | | 23 | 阿里山 | Alishan | 48 | 55 | Interior | no | | 24 | 新營 | Xinying | 37 | 57 | Yun-Chia-Nan | no |
+| 25 | 臺南 | Tainan | 36 | 61 | Yun-Chia-Nan | no | | 26 | 高雄 | Kaohsiung | 38 | 66 | South | no | | 27 | 屏東 | Pingtung | 44 | 66 | South | no | | 28 | 潮州 | Chaozhou | 45 | 70 | South | no |
+| 29 | 枋寮 | Fangliao | 45 | 75 | South | no | | 30 | 恆春 | Hengchun | 48 | 86 | South cape | no | | 31 | 大武 | Dawu | 53 | 80 | South-link | no | | 32 | 臺東 | Taitung | 58 | 76 | South-link | no |
+| 33 | 知本 | Zhiben | 56 | 78 | South-link | no | | 34 | 池上 | Chishang | 61 | 67 | East-Rift | no | | 35 | 玉里 | Yuli | 64 | 61 | East-Rift | no | | 36 | 花蓮 | Hualien | 68 | 49 | East-Rift | no |
+| 37 | 蘇澳 | Su'ao | 65 | 34 | Northeast | no | | 38 | 羅東 | Luodong | 63 | 31 | Northeast | no | | 39 | 宜蘭 | Yilan | 62 | 28 | Northeast | no | | 40 | 頭城 | Toucheng | 63 | 24 | Northeast | no |
+| 41 | 澎湖 | Penghu | 20 | 56 | Islands | yes | | 42 | 金門 | Kinmen | 5 | 48 | Islands | yes | | 43 | 馬祖 | Matsu | 22 | 10 | Islands | yes | | 44 | 小琉球 | Liuqiu | 31 | 69 | Islands | yes |
+| 45 | 綠島 | Green Island | 70 | 78 | Islands | yes | | 46 | 蘭嶼 | Orchid Island | 73 | 88 | Islands | yes | | | | | | | |
 
 ### 6.2 Routes (90 segments; flags: **D-x** double-pair, **Ferry(n)**, **Tunnel**)
 

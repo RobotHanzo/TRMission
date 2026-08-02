@@ -685,7 +685,7 @@ git commit -m "feat(web): track game lifecycle (start/first-action/complete/rout
 - In `join()` (~:181), on a successful join: `track('room_join', { via: 'code' });`
 - Public-list open (~:299) `onClick`: `track('room_join', { via: 'public_list' });`
 - Rejoin-banner (~:240) `onClick`: `track('room_join', { via: 'rejoin' });`
-- `watch()` (~:157) success (~:301 entry): `track('spectate_start', {});`
+- `watch()` (~~:157) success (~~:301 entry): `track('spectate_start', {});`
 - `startPractice()` (~:136): before navigating, `useUi.getState().setPractice(true); track('practice_start', {});`
 - Encyclopedia open (~:310): `track('encyclopedia_open', {});`
 
@@ -730,7 +730,7 @@ git commit -m "feat(web): track lobby/matchmaking events"
 
 - [ ] **Step 1: Add the calls**
 
-`ChatPanel.tsx` — `import { track } from '../lib/analytics';`. The in-game chat is only real usage outside sandbox; `ChatPanel` renders inside `CommsPanel`. Gate on a `sandbox` prop if the component already receives one, else on the presence of the live socket (`getSocket()` is truthy for live). In `send()` (~:58): `track('chat_send', { kind: 'text', context: 'game' });` and in `sendPreset` (~:67): `track('chat_send', { kind: 'preset', context: 'game' });` — only when not sandbox.
+`ChatPanel.tsx` — `import { track } from '../lib/analytics';`. The in-game chat is only real usage outside sandbox; `ChatPanel` renders inside `CommsPanel`. Gate on a `sandbox` prop if the component already receives one, else on the presence of the live socket (`getSocket()` is truthy for live). In `send()` (~~:58): `track('chat_send', { kind: 'text', context: 'game' });` and in `sendPreset` (~~:67): `track('chat_send', { kind: 'preset', context: 'game' });` — only when not sandbox.
 
 `net/connection.ts` — `import { track } from '../lib/analytics';`. In the resync-after-drop path (~:25, where a dropped socket successfully re-fetches a ticket and resyncs on a fresh snapshot): `track('reconnect', {});`. Guard so it fires only on an actual reconnect (a prior disconnect happened), not the initial connect.
 

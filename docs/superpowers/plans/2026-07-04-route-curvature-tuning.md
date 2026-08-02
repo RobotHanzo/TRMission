@@ -1175,14 +1175,7 @@ export function CurvesStage() {
 
 ```ts
 export type Stage =
-  | 'crop'
-  | 'trim'
-  | 'stops'
-  | 'routes'
-  | 'curves'
-  | 'missions'
-  | 'rules'
-  | 'share';
+  'crop' | 'trim' | 'stops' | 'routes' | 'curves' | 'missions' | 'rules' | 'share';
 export const STAGES: readonly Stage[] = [
   'crop',
   'trim',

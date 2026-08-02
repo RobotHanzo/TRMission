@@ -80,11 +80,9 @@ describe('history + chat over the hub', () => {
       }),
     );
     const chat1 = f1.find((f) => f.event.case === 'chat')?.event.value as
-      | { content: { case: string; value: string } }
-      | undefined;
+      { content: { case: string; value: string } } | undefined;
     const chat2 = f2.find((f) => f.event.case === 'chat')?.event.value as
-      | { content: { case: string; value: string } }
-      | undefined;
+      { content: { case: string; value: string } } | undefined;
     expect(chat1?.content).toEqual({ case: 'text', value: 'hi there' }); // trimmed
     expect(chat2?.content).toEqual({ case: 'text', value: 'hi there' }); // both members receive it
 
@@ -98,8 +96,7 @@ describe('history + chat over the hub', () => {
       }),
     );
     const rej = f1.find((f) => f.event.case === 'rejection')?.event.value as
-      | { code: number }
-      | undefined;
+      { code: number } | undefined;
     expect(rej?.code).toBe(RejectionCode.MALFORMED);
     expect(f2.find((f) => f.event.case === 'chat')).toBeUndefined();
 
@@ -141,8 +138,7 @@ describe('history + chat over the hub', () => {
       }),
     );
     const chat2 = f2.find((f) => f.event.case === 'chat')?.event.value as
-      | { content: { case: string; value: string } }
-      | undefined;
+      { content: { case: string; value: string } } | undefined;
     expect(chat2?.content).toEqual({ case: 'presetId', value: 'GOOD_LUCK' });
 
     f1.length = 0;
@@ -154,8 +150,7 @@ describe('history + chat over the hub', () => {
       }),
     );
     const rej = f1.find((f) => f.event.case === 'rejection')?.event.value as
-      | { code: number; messageKey: string }
-      | undefined;
+      { code: number; messageKey: string } | undefined;
     expect(rej?.code).toBe(RejectionCode.MALFORMED);
     expect(rej?.messageKey).toBe('errors:chatInvalidPreset');
   });
@@ -194,11 +189,9 @@ describe('spectator chat', () => {
     );
 
     const memberChat = fMember.find((f) => f.event.case === 'chat')?.event.value as
-      | { playerId: string; content: { case: string; value: string } }
-      | undefined;
+      { playerId: string; content: { case: string; value: string } } | undefined;
     const specChat = fSpec.find((f) => f.event.case === 'chat')?.event.value as
-      | { playerId: string; content: { case: string; value: string } }
-      | undefined;
+      { playerId: string; content: { case: string; value: string } } | undefined;
     expect(memberChat?.playerId).toBe('watcher');
     expect(memberChat?.content).toEqual({ case: 'text', value: 'hi from the stands' });
     expect(specChat?.content).toEqual({ case: 'text', value: 'hi from the stands' });

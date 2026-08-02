@@ -27,9 +27,7 @@ const decode = (token: string): { familyId: string; secret: string } | null => {
 };
 
 export type RefreshOutcome =
-  | { kind: 'ok'; userId: string; token: string }
-  | { kind: 'reuse' }
-  | { kind: 'invalid' };
+  { kind: 'ok'; userId: string; token: string } | { kind: 'reuse' } | { kind: 'invalid' };
 
 @Injectable()
 export class SessionRepo implements OnModuleInit {

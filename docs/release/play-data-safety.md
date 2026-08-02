@@ -60,19 +60,19 @@ review flag.
 
 ## Declared data types
 
-| Play data type | Shared | Req/Opt | What it actually is |
-| --- | --- | --- | --- |
-| Personal info → Email address | No | Optional | `UserDoc.email` — password sign-up, Google/Discord OAuth, Apple relay address. Guest accounts have none, which is what makes it optional. |
-| Personal info → User IDs | No | Required | `UserDoc._id`, `displayName`, OAuth subject ids (`oauth.google`/`discord`/`apple`), `userDevices` keyed to `userId`. |
-| Personal info → Other info | No | Required | `UserDoc.lastLoginIp` — sign-in IP kept for abuse and security. Play has no IP data type; this is the honest home and matches Apple's Other Data row. |
-| Location → Approximate location | Yes | Required | Only because Google states the Mobile Ads SDK estimates general location from the IP address. The app requests no location permission and holds no location data. |
-| Messages → Other in-app messages | No | Optional | In-game chat (free text + preset ids) persisted on the game record; lobby chat is capped and never outlives the room. Optional because a player need never send one. |
-| App activity → App interactions | Yes | Required | AdMob impressions/clicks plus Sentry's react-navigation screen transitions. Play defines this type as page visits and taps — hence only these, and hence shared. |
-| App activity → Other user-generated content | No | Optional | Display names, authored custom maps, abuse-report free text (`moderation.schemas.ts`, max 1000 chars). |
-| App activity → Other actions | No | Required | Gameplay: finished-game records (seats, scores, deterministic action logs), leaderboard and rating rows, tutorial completion, seen feature intros. Play names gameplay under *Other actions*, not *App interactions*. |
-| App info and performance → Crash logs | Yes | Required | Sentry (DSN-gated — a build with no DSN never initialises the SDK) plus the Mobile Ads SDK's own crash logs. Scrubbed through `@trm/shared`'s `telemetry.ts` before egress. |
-| App info and performance → Diagnostics | Yes | Required | Sentry tracing spans, breadcrumbs and tags; the local `crashCapture` record a user can share from Settings → About. Same scrubber. |
-| Device or other IDs | Yes | Required | The Android advertising ID read by the Google Mobile Ads SDK (`AD_ID` is deliberately not blocked — `app.config.ts`), and the FCM device push token stored as `userDevices._id` against the account. |
+| Play data type                              | Shared | Req/Opt  | What it actually is                                                                                                                                                                                                   |
+| ------------------------------------------- | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Personal info → Email address               | No     | Optional | `UserDoc.email` — password sign-up, Google/Discord OAuth, Apple relay address. Guest accounts have none, which is what makes it optional.                                                                             |
+| Personal info → User IDs                    | No     | Required | `UserDoc._id`, `displayName`, OAuth subject ids (`oauth.google`/`discord`/`apple`), `userDevices` keyed to `userId`.                                                                                                  |
+| Personal info → Other info                  | No     | Required | `UserDoc.lastLoginIp` — sign-in IP kept for abuse and security. Play has no IP data type; this is the honest home and matches Apple's Other Data row.                                                                 |
+| Location → Approximate location             | Yes    | Required | Only because Google states the Mobile Ads SDK estimates general location from the IP address. The app requests no location permission and holds no location data.                                                     |
+| Messages → Other in-app messages            | No     | Optional | In-game chat (free text + preset ids) persisted on the game record; lobby chat is capped and never outlives the room. Optional because a player need never send one.                                                  |
+| App activity → App interactions             | Yes    | Required | AdMob impressions/clicks plus Sentry's react-navigation screen transitions. Play defines this type as page visits and taps — hence only these, and hence shared.                                                      |
+| App activity → Other user-generated content | No     | Optional | Display names, authored custom maps, abuse-report free text (`moderation.schemas.ts`, max 1000 chars).                                                                                                                |
+| App activity → Other actions                | No     | Required | Gameplay: finished-game records (seats, scores, deterministic action logs), leaderboard and rating rows, tutorial completion, seen feature intros. Play names gameplay under _Other actions_, not _App interactions_. |
+| App info and performance → Crash logs       | Yes    | Required | Sentry (DSN-gated — a build with no DSN never initialises the SDK) plus the Mobile Ads SDK's own crash logs. Scrubbed through `@trm/shared`'s `telemetry.ts` before egress.                                           |
+| App info and performance → Diagnostics      | Yes    | Required | Sentry tracing spans, breadcrumbs and tags; the local `crashCapture` record a user can share from Settings → About. Same scrubber.                                                                                    |
+| Device or other IDs                         | Yes    | Required | The Android advertising ID read by the Google Mobile Ads SDK (`AD_ID` is deliberately not blocked — `app.config.ts`), and the FCM device push token stored as `userDevices._id` against the account.                  |
 
 Nothing is processed ephemerally: every declared type is persisted, so `PSL_DATA_USAGE_EPHEMERAL`
 is uniformly `false`.
@@ -83,7 +83,7 @@ Financial info — no in-app purchases anywhere in the dependency tree. Photos a
 picker; avatars are a URL carried over from the OAuth provider, never an uploaded file. Audio — no
 microphone permission. Precise location, contacts, calendar, files and docs, health and fitness,
 web browsing, in-app search history, installed apps, name, address, phone number, race/ethnicity,
-beliefs, sexual orientation — never collected. *Other app performance data* is left off because
+beliefs, sexual orientation — never collected. _Other app performance data_ is left off because
 Play Vitals is Google's own collection and needs no declaration from us.
 
 ## Four answers that are decisions, not facts
