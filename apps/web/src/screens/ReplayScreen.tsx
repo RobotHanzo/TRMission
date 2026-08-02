@@ -229,6 +229,7 @@ export function ReplayStage({
           commands={null}
           sandbox
           frameTarget={frameTarget}
+          playbackSpeed={player.speed}
           onLeave={onLeave ?? (() => {})}
         />
       </div>

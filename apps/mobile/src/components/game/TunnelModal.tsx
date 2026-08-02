@@ -16,37 +16,40 @@ import {
   View,
 } from 'react-native';
 import type { CardColor as PbCardColor } from '@trm/proto';
-import { REVEAL_FLIP_MS, REVEAL_STAGGER_MS } from '@trm/client-core/game/tunnel';
 import { CARD_COLOR_TOKENS } from '../../theme/colors';
 import { useTheme } from '../../theme/useTheme';
 import { rgba } from '../../theme/shade';
 import { pbToCard } from '../../game/cards';
 import type { Payment } from '../../game/payments';
-import { tunnelRevealMs } from '../../game/tunnel';
+import { tunnelRevealTiming } from '../../game/tunnel';
 import { useReducedMotion } from '../../hooks/useReducedMotion';
 import { soundPlayer } from '../../sound/player';
 import { TrainCarCard } from './TrainCarCard';
 
 /** One revealed card flipping in on the shared stagger (web `.tunnel-reveal-card`): a rotateY
- *  swing from face-down with a fade, slow for suspense. Plain RN Animated — low-frequency UI. */
+ *  swing from face-down with a fade, slow for suspense. Plain RN Animated — low-frequency UI.
+ *  `flipMs`/`staggerMs` come from the shared `tunnelRevealTiming`, so replay autoplay's rate
+ *  reaches the flip itself — a change of rate mid-reveal restarts it at the new one. */
 function FlipInCard({
   index,
   reduced,
+  flipMs,
+  staggerMs,
   children,
-}: PropsWithChildren<{ index: number; reduced: boolean }>) {
+}: PropsWithChildren<{ index: number; reduced: boolean; flipMs: number; staggerMs: number }>) {
   const progress = useRef(new Animated.Value(reduced ? 1 : 0)).current;
   useEffect(() => {
     if (reduced) return;
     const anim = Animated.timing(progress, {
       toValue: 1,
-      duration: REVEAL_FLIP_MS,
-      delay: index * REVEAL_STAGGER_MS,
+      duration: flipMs,
+      delay: index * staggerMs,
       easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
     });
     anim.start();
     return () => anim.stop();
-  }, [progress, index, reduced]);
+  }, [progress, index, reduced, flipMs, staggerMs]);
   return (
     <Animated.View
       style={{
@@ -77,6 +80,9 @@ interface Props {
   spectator?: boolean | undefined;
   /** Playback (replay): nothing here can resolve the tunnel, so the dialog needs a plain Close. */
   onDismiss?: (() => void) | undefined;
+  /** Playback rate the reveal runs at — replay autoplay at 2×/4× shortens the hold before the
+   *  next action by the same factor, so the flip has to keep up or it never finishes on screen. */
+  speed?: number | undefined;
   onCommit(p: Payment): void;
   onAbort(): void;
 }
@@ -99,6 +105,7 @@ export function TunnelModal({
   playedColor,
   spectator = false,
   onDismiss,
+  speed = 1,
   onCommit,
   onAbort,
 }: Props) {
@@ -110,6 +117,8 @@ export function TunnelModal({
   const [showResult, setShowResult] = useState(reduced);
 
   const resultCuePlayed = useRef(false);
+  // One rate for the whole reveal: the flips below, these timers, and the per-card ticks.
+  const { staggerMs, flipMs, totalMs } = tunnelRevealTiming(revealed.length, reduced, speed);
 
   useEffect(() => {
     if (reduced) {
@@ -117,9 +126,9 @@ export function TunnelModal({
       return;
     }
     setShowResult(false);
-    const timer = setTimeout(() => setShowResult(true), tunnelRevealMs(revealed.length, reduced));
+    const timer = setTimeout(() => setShowResult(true), totalMs);
     return () => clearTimeout(timer);
-  }, [revealed, reduced]);
+  }, [revealed, reduced, totalMs]);
 
   // Card-placement tick per revealed tunnel card, synced to the flip stagger.
   useEffect(() => {
@@ -128,10 +137,10 @@ export function TunnelModal({
       return;
     }
     const timers = revealed.map((_, i) =>
-      setTimeout(() => soundPlayer.play('tunnelDraw'), i * REVEAL_STAGGER_MS),
+      setTimeout(() => soundPlayer.play('tunnelDraw'), i * staggerMs),
     );
     return () => timers.forEach((id) => clearTimeout(id));
-  }, [revealed, reduced]);
+  }, [revealed, reduced, staggerMs]);
 
   // Result cue once the surcharge outcome is shown.
   useEffect(() => {
@@ -152,7 +161,13 @@ export function TunnelModal({
               const color = pbToCard(c);
               if (!color) return null;
               return (
-                <FlipInCard key={i} index={i} reduced={reduced}>
+                <FlipInCard
+                  key={i}
+                  index={i}
+                  reduced={reduced}
+                  flipMs={flipMs}
+                  staggerMs={staggerMs}
+                >
                   <TrainCarCard color={color} size={CARD_SIZE} />
                 </FlipInCard>
               );

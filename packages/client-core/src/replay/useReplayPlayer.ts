@@ -19,7 +19,7 @@ export const STEP_MS = 1100;
 /** Offered autoplay rates. A long game is several hundred actions; 1× start to finish is a
  *  ten-minute sit, so watching one back needs a way to skim without giving up the animations. */
 export const REPLAY_SPEEDS = [1, 2, 4] as const;
-/** Floor on the sped-up delay, so 4× over a tunnel reveal still leaves the flip on screen. */
+/** Floor on the sped-up delay, so the fastest rate still leaves each step visible for a beat. */
 const MIN_STEP_MS = 160;
 /** State checkpoints every N actions so seeks rebuild from nearby, not genesis. */
 const CHECKPOINT_EVERY = 32;
@@ -74,6 +74,8 @@ export function useReplayPlayer(
   // Delay before the AUTOPLAY tick following the current step. Normally STEP_MS, but a step that
   // opens a tunnel reveal (TUNNEL_PENDING) extends this so the dialog's card-flip + surcharge
   // reveal finishes on screen before the next tick applies RESOLVE_TUNNEL and closes it.
+  // Held in 1× terms: the autoplay effect divides it by `speed`, and the dialog scales its own
+  // reveal by that same rate (`tunnelRevealTiming`), so the two stay in step at 2× and 4×.
   const nextDelay = useRef(STEP_MS);
   // Lazily-built caches: raw events emitted by action i, and periodic state checkpoints.
   // Both are viewer-agnostic (redaction happens at projection time).

@@ -107,6 +107,9 @@ export interface GameStageProps {
    *  The compact dock follows it — sliding open on that tab while a beat references a HUD
    *  panel, tucking back down to its strip after — so the clip choreographs the tray. */
   demoDock?: DockTabKey | null | undefined;
+  /** Replay only: the autoplay rate, so timed reveals (the tunnel flip) run at it rather than
+   *  being cut off by the shortened gap between actions. Live play leaves this at 1×. */
+  playbackSpeed?: number | undefined;
 }
 
 const RAIL_WIDTH = 360;
@@ -148,6 +151,7 @@ export function GameStage({
   onPendingClaim,
   demo,
   demoDock,
+  playbackSpeed,
 }: GameStageProps) {
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
@@ -630,6 +634,7 @@ export function GameStage({
           options={flow.tunnelExtras}
           spectator={!flow.tunnelMine}
           onDismiss={playback ? tunnelReveal.dismiss : undefined}
+          speed={playbackSpeed}
           onCommit={flow.onTunnelCommit}
           onAbort={flow.onTunnelAbort}
         />

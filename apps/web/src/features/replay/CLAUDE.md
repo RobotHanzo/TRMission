@@ -57,6 +57,11 @@ Two more rules hold it together:
   colour-blind setting; marker size carries how notable the moment is.
 
 Autoplay rate lives on the shared player (`speed`/`setSpeed`, `REPLAY_SPEEDS`), not here.
+**A rate change shortens the gap between actions, so anything timed on screen has to take the rate
+too** — `ReplayStage` hands it to `GameStage` as `playbackSpeed`, and the tunnel reveal divides its
+flip, stagger and result beat by it (`@trm/client-core`'s `tunnelRevealTiming`, which both clients'
+`TunnelModal` and the player's autoplay hold read). A new timed reveal belongs on that seam, not on
+a hard-coded duration that 4× would cut off mid-animation.
 
 The rail (perspective / log / share) is ONE card, hairline-divided — `.replay-rail` carries the
 card chrome and its children are sections, so `PerspectiveSwitcher`/`ReplayShare` must not add
