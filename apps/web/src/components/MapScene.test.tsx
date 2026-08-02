@@ -14,6 +14,17 @@ const routes = [
   { id: 'r2', a: 'b', b: 'c', color: 'GRAY', length: 2, isTunnel: false, ferryLocos: 1 },
 ];
 const { geometry, hubs } = buildRouteGeometryFor(cities, routes);
+
+/** jsdom 30 round-trips CSSOM colour properties through its parser, so `style.fill` comes back as
+ *  `rgb(r, g, b)` instead of echoing the authored hex. (Presentation ATTRIBUTES and custom
+ *  properties are untouched — only real CSS colour values are re-serialised.) Compare by value
+ *  rather than by spelling so the assertions still pin the exact colour. */
+const asRgb = (color: string): string => {
+  const hex = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(color);
+  if (!hex) return color;
+  const [r, g, b] = [hex[1]!, hex[2]!, hex[3]!].map((c) => parseInt(c, 16));
+  return `rgb(${r}, ${g}, ${b})`;
+};
 const base = {
   cities,
   routes,
@@ -73,7 +84,7 @@ describe('MapScene', () => {
     expect(g.style.getPropertyValue('--seat')).toBe(TEAM_COLORS[0]); // the roadbed wash
     expect(
       (container.querySelector('[data-city-id="a"] circle.station') as SVGCircleElement).style.fill,
-    ).toBe(TEAM_COLORS[0]); // partner's station, same team colour
+    ).toBe(asRgb(TEAM_COLORS[0]!)); // partner's station, same team colour
   });
 
   it('free-for-all: the same marks stay per-seat (no teamBySeat)', () => {
@@ -89,7 +100,7 @@ describe('MapScene', () => {
     expect(g.style.getPropertyValue('--seat')).toBe(SEAT_COLORS[1]);
     expect(
       (container.querySelector('[data-city-id="a"] circle.station') as SVGCircleElement).style.fill,
-    ).toBe(SEAT_COLORS[2]);
+    ).toBe(asRgb(SEAT_COLORS[2]!));
   });
 
   it('claim and station affordances gate independently — one never leaks the other', () => {

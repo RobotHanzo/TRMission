@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { UserFeature } from '@trm/shared';
 import '../i18n';
@@ -9,11 +10,15 @@ import { useSession } from '../store/session';
 // SettingsModal only needs the store; stub the socket teardown the ui store imports.
 vi.mock('../net/connection', () => ({ disconnectGame: vi.fn() }));
 
+// vitest 4's bare `vi.fn()` widens to Mock<Constructable | Procedure>, which no longer assigns to a
+// specific slot. Derive the signature from the store so the mock can't drift from the real one.
+type SavePreferences = ReturnType<typeof useSession.getState>['savePreferences'];
+
 describe('SettingsModal account sync', () => {
-  let saved: ReturnType<typeof vi.fn>;
+  let saved: Mock<SavePreferences>;
   beforeEach(() => {
     localStorage.clear();
-    saved = vi.fn();
+    saved = vi.fn<SavePreferences>();
     useSession.setState({ savePreferences: saved });
     useUi.setState({ theme: 'system', colorBlind: false, locale: 'zh-Hant', boardLayout: 'rail' });
   });

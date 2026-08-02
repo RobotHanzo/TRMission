@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react';
 import { sentryVitePlugin } from '@sentry/vite-plugin';
 
 // The maintainer dashboard is served under /admin/ from the same origin as the API
-// (the Strict refresh cookie requires it). Vite ^5 is pinned repo-wide (vitest 2).
+// (the Strict refresh cookie requires it). Vite ^8 / vitest ^4 / plugin-react ^6 move as one unit.
 const serverHost = process.env.VITE_SERVER_HOST ?? 'localhost';
 
 // Source-map upload for readable Sentry stack traces — opt-in via SENTRY_AUTH_TOKEN (a

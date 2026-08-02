@@ -17,7 +17,7 @@ lanes below are self-managed signing with **no EAS** — app context: `apps/mobi
   `docs/release/play-console-setup.md`. Native-build speed stack: **RNRepo** prebuilt artifacts
   (`@rnrepo/expo-config-plugin`) replace source compilation of the covered autolinked modules
   (Skia/Reanimated/Worklets/gesture-handler/screens; `expo-modules-core` still builds from source on
-  RN 0.85), **ccache** (`CCACHE_COMPILERCHECK=content` — the default `mtime` missed everything because
+  RN 0.86), **ccache** (`CCACHE_COMPILERCHECK=content` — the default `mtime` missed everything because
   CNG regenerates `android/` each run) covers the fallback compiles, and **`gradle/actions/setup-gradle`**'s
   build cache the Kotlin/Java/dex tasks; `lintVitalRelease` is skipped, and a daily scheduled
   warm-up on main keeps those caches alive between infrequent release runs (see **Cache scoping**).
@@ -27,7 +27,7 @@ lanes below are self-managed signing with **no EAS** — app context: `apps/mobi
   the app target to manual signing — prebuild emits an Automatic/no-team project — → gym). Every
   run uploads the `.ipa` as a workflow artifact; `pilot` → TestFlight only on a real
   `v<semver>+<build>` tag (`upload:true`), mirroring Android's Play gate — non-tag runs all carry
-  BUILD_NUMBER=1, which TestFlight would reject as a duplicate. Native-build speed stack: **RN 0.85
+  BUILD_NUMBER=1, which TestFlight would reject as a duplicate. Native-build speed stack: **RN 0.86
   official prebuilt binaries** (`RCT_USE_PREBUILT_RNCORE=1` + `RCT_USE_RN_DEP=1` at `pod install` —
   Meta-built core and folly/glog/boost tarballs from Maven Central, auto-reverting to source when
   absent; `RCT_SYMBOLICATE_PREBUILT_FRAMEWORKS` stays **unset** — it nests each dSYM inside

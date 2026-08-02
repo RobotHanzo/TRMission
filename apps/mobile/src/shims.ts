@@ -12,13 +12,13 @@
 // ("undefined cannot be used as a constructor") before any screen renders. Polyfill
 // getCanonicalLocales + Locale FIRST so the matcher has a real constructor. All three self-guard
 // (no-op when the native API is present), so on Node/jest — which has full Intl — these are no-ops.
-// The `.js` subpaths are required: intl-getcanonicallocales/intl-locale only expose `./polyfill.js`
-// in their exports map (intl-pluralrules exposes the extensionless `./polyfill`).
+// The `.js` subpaths are required: all three packages expose only extension-bearing subpaths in
+// their exports maps (intl-pluralrules dropped its extensionless `./polyfill` alias in v6).
 import '@formatjs/intl-getcanonicallocales/polyfill.js';
 import '@formatjs/intl-locale/polyfill.js';
-import '@formatjs/intl-pluralrules/polyfill';
-import '@formatjs/intl-pluralrules/locale-data/en';
-import '@formatjs/intl-pluralrules/locale-data/zh';
+import '@formatjs/intl-pluralrules/polyfill.js';
+import '@formatjs/intl-pluralrules/locale-data/en.js';
+import '@formatjs/intl-pluralrules/locale-data/zh.js';
 
 // protobuf-es's binary codec lazily constructs `new TextEncoder()`, `new TextDecoder()`, and
 // `new TextDecoder("utf-8", { fatal: true })` off globalThis (see @bufbuild/protobuf wire/

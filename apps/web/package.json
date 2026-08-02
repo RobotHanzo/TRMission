@@ -13,8 +13,8 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@bufbuild/protobuf": "^2.12.1",
-    "@sentry/react": "^10.68.0",
+    "@bufbuild/protobuf": "^2.13.0",
+    "@sentry/react": "^10.69.0",
     "@trm/client-core": "workspace:*",
     "@trm/codec": "workspace:*",
     "@trm/engine": "workspace:*",
@@ -22,29 +22,29 @@
     "@trm/proto": "workspace:*",
     "@trm/shared": "workspace:*",
     "canvas-confetti": "^1.9.4",
-    "i18next": "^24.2.0",
-    "immer": "^10.1.1",
-    "lucide-react": "^0.468.0",
+    "i18next": "^26.3.6",
+    "immer": "^11.1.15",
+    "lucide-react": "^1.28.0",
     "polygon-clipping": "^0.15.7",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "react-i18next": "^15.4.0",
+    "react-i18next": "^17.0.11",
     "react-zoom-pan-pinch": "^4.0.3",
-    "zustand": "^5.0.2"
+    "zustand": "^5.0.14"
   },
   "devDependencies": {
     "@sentry/vite-plugin": "^5.4.0",
-    "@testing-library/dom": "^10.4.0",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.1.0",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^7.0.0",
+    "@testing-library/react": "^16.3.2",
     "@trm/tsc7": "workspace:*",
     "@types/canvas-confetti": "^1.9.0",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "@vitejs/plugin-react": "^4.3.4",
-    "jsdom": "^25.0.1",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.0.5",
+    "jsdom": "^30.0.1",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
-    "vite": "^5.4.11",
-    "vitest": "^2.1.8"
+    "vite": "^8.2.0",
+    "vitest": "^4.1.10"
   }
 }

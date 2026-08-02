@@ -12,7 +12,10 @@ yarn workspace @trm/web build     # vite build
 yarn workspace @trm/web test      # vitest + @testing-library/react
 ```
 
-**Pin:** Vite is held at **^5** for vitest 2 compatibility — do not bump to Vite 6.
+**Pin:** Vite **^8** + vitest **^4** + `@vitejs/plugin-react` **^6** move as one unit — vitest 4 needs
+vite ≥6 and plugin-react 6 needs vite 8, so none of the three can be bumped alone. Vite 8 bundles
+with **Rolldown**: `manualChunks` in `vite.config.ts` still works, but it is what keeps the Sentry
+Replay recorder off the landing critical path, so re-check the emitted chunks after editing it.
 
 ## Where the per-area docs live
 

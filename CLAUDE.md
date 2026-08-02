@@ -11,7 +11,7 @@ only; never copy artwork, names, layout, or verbatim rules text. UI ships in **T
 
 ## Commands
 
-Yarn 4 (via Corepack) + Turborepo. Node 20+.
+Yarn 4 (via Corepack) + Turborepo. Node 22+ (`.nvmrc` is 24, matching the `node:24` runtime image).
 
 ```bash
 yarn install
@@ -174,7 +174,11 @@ These mirror the ADRs in the development plan; treat them as binding.
   replay crosses engine versions only through an explicit compatibility allowlist (mobile offline
   resume remains exact-version pinned). `CONTENT_HASH` is derived from the authored content, so any map
   edit changes it.
-- **Naming/tooling pins.** `apps/web` pins **Vite ^5** for vitest 2 compatibility — do not bump to Vite 6.
+- **Naming/tooling pins.** `apps/web` + `apps/admin` are on **Vite ^8 with vitest ^4**, and the three
+  move as ONE unit: vitest 4 requires vite ≥6 and `@vitejs/plugin-react` 6 requires vite 8, so
+  bumping any one alone breaks the other two. (This supersedes the old "hold Vite at ^5 for vitest 2"
+  pin — that constraint died with vitest 2.) Vite 8 bundles with **Rolldown**, not Rollup/esbuild;
+  `rollupOptions.output.manualChunks` still applies, but re-verify the chunk split after touching it.
 
 ## Server env vars
 

@@ -21,7 +21,8 @@ yarn workspace @trm/admin test App.test
 yarn workspace @trm/admin test FeaturesView.test
 ```
 
-**Pin:** Vite is held at **^5** for vitest 2 compatibility, same as `apps/web` — do not bump to Vite 6.
+**Pin:** Vite **^8** + vitest **^4** + `@vitejs/plugin-react` **^6** move as one unit, same as
+`apps/web` — vitest 4 needs vite ≥6 and plugin-react 6 needs vite 8.
 
 ## Where the per-area docs live
 
