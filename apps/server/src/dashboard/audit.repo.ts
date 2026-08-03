@@ -25,6 +25,7 @@ export type DashboardAuditAction =
   | 'map.transfer'
   | 'config.features'
   | 'config.officialMaps'
+  | 'config.trainCarSkins'
   | 'report.resolve'
   | 'push.test';
 

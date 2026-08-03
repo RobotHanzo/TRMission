@@ -10,6 +10,8 @@ import {
   X,
   type LucideIcon,
 } from 'lucide-react';
+import type { TrainCarSkin } from '@trm/shared';
+import { trainCarSkinOptions } from '@trm/client-core/game/trainCarSkins';
 import { useUi } from '../store/ui';
 import { useSession, useHasFeature } from '../store/session';
 import { track } from '../lib/analytics';
@@ -45,10 +47,13 @@ export function SettingsModal({ onClose }: Props) {
   const theme = useUi((s) => s.theme);
   const colorBlind = useUi((s) => s.colorBlind);
   const boardLayout = useUi((s) => s.boardLayout);
+  const trainCarSkin = useUi((s) => s.trainCarSkin);
+  const availableTrainCarSkins = useUi((s) => s.availableTrainCarSkins);
   const setLocale = useUi((s) => s.setLocale);
   const setTheme = useUi((s) => s.setTheme);
   const setColorBlind = useUi((s) => s.setColorBlind);
   const setBoardLayout = useUi((s) => s.setBoardLayout);
+  const setTrainCarSkin = useUi((s) => s.setTrainCarSkin);
   const soundEnabled = useUi((s) => s.soundEnabled);
   const soundVolume = useUi((s) => s.soundVolume);
   const setSoundEnabled = useUi((s) => s.setSoundEnabled);
@@ -72,7 +77,9 @@ export function SettingsModal({ onClose }: Props) {
   // guests, who persist via localStorage only). Spreading the current values keeps every
   // preference in the synced payload while overriding just the one the user changed.
   const persist = (patch: Partial<UserPreferences>) =>
-    void savePreferences({ theme, colorBlind, locale, boardLayout, ...patch });
+    void savePreferences({ theme, colorBlind, locale, boardLayout, trainCarSkin, ...patch });
+  // Only the packs a maintainer currently offers; a single-pack list means nothing to choose.
+  const skinOptions = trainCarSkinOptions(availableTrainCarSkins, locale);
   const chooseTheme = (next: Theme) => {
     setTheme(next);
     persist({ theme: next });
@@ -92,6 +99,11 @@ export function SettingsModal({ onClose }: Props) {
     setBoardLayout(next);
     persist({ boardLayout: next });
     track('settings_change', { setting: 'board_layout', value: next });
+  };
+  const chooseTrainCarSkin = (next: TrainCarSkin) => {
+    setTrainCarSkin(next);
+    persist({ trainCarSkin: next });
+    track('settings_change', { setting: 'train_car_skin', value: next });
   };
   const chooseSound = (next: boolean) => {
     setSoundEnabled(next);
@@ -158,6 +170,19 @@ export function SettingsModal({ onClose }: Props) {
             ariaLabel={t('layout')}
           />
         </section>
+
+        {skinOptions.length > 1 && (
+          <section className="setting">
+            <div className="setting-label">{t('trainCarSkin')}</div>
+            <div className="muted setting-desc">{t('trainCarSkinDesc')}</div>
+            <Segmented
+              options={skinOptions.map(({ skin, label }) => ({ value: skin, label }))}
+              value={trainCarSkin}
+              onChange={chooseTrainCarSkin}
+              ariaLabel={t('trainCarSkin')}
+            />
+          </section>
+        )}
 
         <section className="setting setting-row">
           <div>

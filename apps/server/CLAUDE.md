@@ -27,6 +27,7 @@ env vars.
 | Account-deletion cascade                                     | `src/account/CLAUDE.md`       |
 | Rooms, seat CAS, match start                                 | `src/lobby/CLAUDE.md`         |
 | Custom maps, share codes, `mapContents`                      | `src/maps/CLAUDE.md`          |
+| Train-card skin availability (cosmetics)                     | `src/skins/CLAUDE.md`         |
 | Blocks + reports (UGC compliance)                            | `src/moderation/CLAUDE.md`    |
 | Push + iOS Live Activities                                   | `src/push/CLAUDE.md`          |
 | Maintainer dashboard, permissions, audit, purge              | `src/dashboard/CLAUDE.md`     |

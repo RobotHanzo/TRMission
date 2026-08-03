@@ -26,6 +26,7 @@ import { initAds } from './src/ads/ads';
 import { useSession } from './src/store/session';
 import * as Sentry from '@sentry/react-native';
 import { useSoundSetup } from './src/hooks/useSoundSetup';
+import { useTrainCarSkinCatalog } from './src/theme/useTrainCarSkin';
 
 // Registering the deep-link prefixes lets a cold-start OAuth return (/m/callback) or a
 // trmission:// link resolve. The active OAuth flow is handled in-process by openAuthSessionAsync.
@@ -82,6 +83,8 @@ function App() {
   // Phones lock portrait; tablets rotate freely (and must survive live resizing regardless).
   useOrientationPolicy();
   useSoundSetup();
+  // Which train-card skin packs are on offer — fetched once here so a hand of cards doesn't.
+  useTrainCarSkinCatalog(!!userId);
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>

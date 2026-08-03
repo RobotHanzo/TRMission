@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import { DEFAULT_TRAIN_CAR_SKIN } from '@trm/shared';
 import { env } from '../src/config/env';
 import {
   createTestApp,
@@ -204,21 +205,24 @@ describe('auth: display preferences round-trip', () => {
       .send({ email: 'prefs@example.com', password: 'password123', displayName: 'Prefs' })
       .expect(201);
     const token = reg.body.accessToken;
+    // A PATCH names only what it changes; the response always carries the full resolved set,
+    // so an unnamed preference reads back at its default (train-car-skins.e2e covers the merge).
     const wanted = { theme: 'dark', colorBlind: true, locale: 'en', boardLayout: 'tray' };
+    const resolved = { ...wanted, trainCarSkin: DEFAULT_TRAIN_CAR_SKIN };
 
     const patched = await request(server())
       .patch('/api/v1/auth/me/preferences')
       .set('Authorization', `Bearer ${token}`)
       .send(wanted)
       .expect(200);
-    expect(patched.body.preferences).toEqual(wanted);
+    expect(patched.body.preferences).toEqual(resolved);
 
     // A fresh /me (i.e. a later sign-in) must report the same stored preferences.
     const me = await request(server())
       .get('/api/v1/auth/me')
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
-    expect(me.body.preferences).toEqual(wanted);
+    expect(me.body.preferences).toEqual(resolved);
   });
 });
 

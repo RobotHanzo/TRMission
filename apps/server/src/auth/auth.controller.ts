@@ -53,7 +53,7 @@ import {
   UpgradeSchema,
   LoginSchema,
   GoogleCredentialSchema,
-  PreferencesSchema,
+  PreferencesPatchSchema,
   AuthResultSchema,
   AccessResultSchema,
   AuthConfigSchema,
@@ -399,8 +399,14 @@ export class AuthController {
   @Patch('me/preferences')
   @UseGuards(AccessTokenGuard)
   @ApiBearerAuth('access-token')
-  @ApiOperation({ summary: 'Update display preferences (theme, colour-blind, language, layout)' })
-  @ApiBody({ schema: apiSchema(PreferencesSchema) })
+  @ApiOperation({
+    summary: 'Update display preferences (theme, colour-blind, language, layout, card skin)',
+    description:
+      'Every field is optional and applied on its own — a client that omits one leaves the ' +
+      'stored value alone rather than resetting it, so an older build cannot blank a preference ' +
+      'it predates. The response carries the full resolved set.',
+  })
+  @ApiBody({ schema: apiSchema(PreferencesPatchSchema) })
   @ApiResponse({ status: 200, schema: apiSchema(PublicUserSchema) })
   async updatePreferences(@CurrentUser() user: AuthUser, @Body() body: UpdatePreferencesDto) {
     return this.auth.updatePreferences(user.userId, body);

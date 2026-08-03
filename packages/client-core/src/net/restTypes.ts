@@ -1,7 +1,13 @@
 // Wire types for the control-plane REST API — the single source of truth for BOTH clients
 // (the union of what the server actually sends; apps/web and apps/mobile previously kept
 // drifting copies). Pure types only; the client factory lives in ./rest.
-import type { EventsMode, MapFeatureKey, ReportCategory, UserFeature } from '@trm/shared';
+import type {
+  EventsMode,
+  MapFeatureKey,
+  ReportCategory,
+  TrainCarSkin,
+  UserFeature,
+} from '@trm/shared';
 import type { TicketView } from '@trm/map-data';
 
 export type Theme = 'system' | 'light' | 'dark';
@@ -12,6 +18,9 @@ export interface UserPreferences {
   colorBlind: boolean;
   locale: Locale;
   boardLayout: BoardLayout;
+  /** Train-card skin pack. Optional so older clients (and test fixtures) can PATCH the other
+   *  four without naming it — the server merges per field and always sends it back. */
+  trainCarSkin?: TrainCarSkin;
 }
 export interface PublicUser {
   id: string;

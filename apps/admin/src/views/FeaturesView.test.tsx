@@ -19,6 +19,8 @@ vi.mock('../net/rest', async (importOriginal) => {
       putDefaultFeatures: vi.fn(),
       getOfficialMaps: vi.fn(),
       putOfficialMaps: vi.fn(),
+      getTrainCarSkins: vi.fn(),
+      putTrainCarSkins: vi.fn(),
     },
   };
 });
@@ -30,11 +32,31 @@ const mocked = api as unknown as {
   putDefaultFeatures: ReturnType<typeof vi.fn>;
   getOfficialMaps: ReturnType<typeof vi.fn>;
   putOfficialMaps: ReturnType<typeof vi.fn>;
+  getTrainCarSkins: ReturnType<typeof vi.fn>;
+  putTrainCarSkins: ReturnType<typeof vi.fn>;
 };
 
 const OFFICIAL_MAPS = [
   { mapId: 'taiwan', nameZh: '台灣本島與離島', nameEn: 'Taiwan & Outlying Islands', enabled: true },
   { mapId: 'taipei', nameZh: '大台北', nameEn: 'Greater Taipei', enabled: true },
+];
+
+// The default pack arrives `locked` — the server keeps it on regardless of what is sent.
+const SKINS = [
+  {
+    skinId: 'rollingStock',
+    nameZh: '實車圖鑑',
+    nameEn: 'Rolling stock',
+    enabled: true,
+    locked: true,
+  },
+  {
+    skinId: 'classic',
+    nameZh: '經典車廂',
+    nameEn: 'Classic carriage',
+    enabled: true,
+    locked: false,
+  },
 ];
 
 const row = (over: Partial<UserRow> = {}): UserRow => ({
@@ -75,8 +97,10 @@ describe('FeaturesView', () => {
     await screen.findByText('功能開通');
     expect(mocked.getDefaultFeatures).not.toHaveBeenCalled();
     expect(mocked.getOfficialMaps).not.toHaveBeenCalled();
+    expect(mocked.getTrainCarSkins).not.toHaveBeenCalled();
     expect(screen.queryByText('預設功能旗標')).not.toBeInTheDocument();
     expect(screen.queryByText('官方地圖')).not.toBeInTheDocument();
+    expect(screen.queryByText('車廂卡圖')).not.toBeInTheDocument();
   });
 
   it('loads and saves the default-flags panel with config.features', async () => {
@@ -87,9 +111,10 @@ describe('FeaturesView', () => {
     mocked.getDefaultFeatures.mockResolvedValue({ features: ['randomEvents'] });
     mocked.putDefaultFeatures.mockResolvedValue({ features: ['randomEvents', 'mapBuilder'] });
     mocked.getOfficialMaps.mockResolvedValue({ maps: OFFICIAL_MAPS });
+    mocked.getTrainCarSkins.mockResolvedValue({ skins: SKINS });
     render(<FeaturesView />);
     expect(await screen.findByText('預設功能旗標')).toBeInTheDocument();
-    // Two save buttons on the page now (feature defaults, then official maps) — in that order.
+    // Three save buttons now (feature defaults, official maps, card skins) — in that order.
     fireEvent.click((await screen.findAllByRole('button', { name: '儲存' }))[0]!);
     expect(mocked.putDefaultFeatures).toHaveBeenCalledWith(['randomEvents']);
   });
@@ -101,6 +126,7 @@ describe('FeaturesView', () => {
     mocked.listFeaturedUsers.mockResolvedValue({ users: [] });
     mocked.getDefaultFeatures.mockResolvedValue({ features: [] });
     mocked.getOfficialMaps.mockResolvedValue({ maps: OFFICIAL_MAPS });
+    mocked.getTrainCarSkins.mockResolvedValue({ skins: SKINS });
     mocked.putOfficialMaps.mockResolvedValue({
       maps: [OFFICIAL_MAPS[0]!, { ...OFFICIAL_MAPS[1]!, enabled: false }],
     });
@@ -109,5 +135,28 @@ describe('FeaturesView', () => {
     fireEvent.click(screen.getByLabelText('大台北'));
     fireEvent.click((await screen.findAllByRole('button', { name: '儲存' }))[1]!);
     expect(mocked.putOfficialMaps).toHaveBeenCalledWith(['taiwan']);
+  });
+
+  it('switches a skin pack off and cannot switch the default one off', async () => {
+    useSession.setState({
+      permissions: new Set(['users.read', 'users.features', 'config.features']),
+    });
+    mocked.listFeaturedUsers.mockResolvedValue({ users: [] });
+    mocked.getDefaultFeatures.mockResolvedValue({ features: [] });
+    mocked.getOfficialMaps.mockResolvedValue({ maps: OFFICIAL_MAPS });
+    mocked.getTrainCarSkins.mockResolvedValue({ skins: SKINS });
+    mocked.putTrainCarSkins.mockResolvedValue({
+      skins: [SKINS[0]!, { ...SKINS[1]!, enabled: false }],
+    });
+    render(<FeaturesView />);
+    expect(await screen.findByText('車廂卡圖')).toBeInTheDocument();
+
+    // The default pack is the fallback every disabled selection resolves to, so its box is
+    // checked-and-disabled rather than offered and then quietly ignored by the server.
+    expect(screen.getByLabelText('實車圖鑑')).toBeDisabled();
+
+    fireEvent.click(screen.getByLabelText('經典車廂'));
+    fireEvent.click((await screen.findAllByRole('button', { name: '儲存' }))[2]!);
+    expect(mocked.putTrainCarSkins).toHaveBeenCalledWith(['rollingStock']);
   });
 });

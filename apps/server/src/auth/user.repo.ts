@@ -4,7 +4,7 @@ import type { Collection, Db } from 'mongodb';
 import type { MapFeatureKey, UserFeature } from '@trm/shared';
 import { MONGO_DB } from '../db/tokens';
 import { env } from '../config/env';
-import type { Locale, PublicUser, UserPreferences } from './auth.types';
+import type { Locale, PublicUser, UserPreferences, UserPreferencesPatch } from './auth.types';
 import { DEFAULT_PREFERENCES } from './auth.types';
 import type { IdentityProvider } from './auth-config';
 import { FeatureDefaultsRepo } from './feature-defaults.repo';
@@ -14,7 +14,9 @@ export interface UserDoc {
   displayName: string;
   isGuest: boolean;
   locale?: Locale; // legacy: superseded by preferences.locale; kept for pre-unification docs
-  preferences?: UserPreferences; // optional for back-compat with pre-preferences docs
+  // Partial, not whole: docs written before a preference existed simply lack that key, and
+  // `toPublicUser` fills the gaps from DEFAULT_PREFERENCES on the way out.
+  preferences?: Partial<UserPreferences>;
   email?: string;
   passwordHash?: string;
   /** Linked OAuth identities: provider → the provider's subject id. Binding key stays `email`. */
@@ -135,12 +137,20 @@ export class UserRepo implements OnModuleInit {
     return doc;
   }
 
-  updatePreferences(userId: string, preferences: UserPreferences): Promise<UserDoc | null> {
-    return this.col.findOneAndUpdate(
-      { _id: userId },
-      { $set: { preferences } },
-      { returnDocument: 'after' },
+  /**
+   * Write only the preferences named in the patch, as dotted `preferences.<key>` paths. Not a
+   * whole-blob `$set`: a client built before a preference existed sends the older field set, and
+   * replacing the document would silently reset the fields it has never heard of. Anything still
+   * missing is filled from `DEFAULT_PREFERENCES` on the way out (`toPublicUser`).
+   */
+  updatePreferences(userId: string, preferences: UserPreferencesPatch): Promise<UserDoc | null> {
+    const $set = Object.fromEntries(
+      Object.entries(preferences)
+        .filter(([, v]) => v !== undefined)
+        .map(([k, v]) => [`preferences.${k}`, v]),
     );
+    if (Object.keys($set).length === 0) return this.findById(userId);
+    return this.col.findOneAndUpdate({ _id: userId }, { $set }, { returnDocument: 'after' });
   }
 
   /** Upgrade a guest in place (keeps the same _id and game history). */

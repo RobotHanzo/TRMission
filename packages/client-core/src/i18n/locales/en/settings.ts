@@ -11,6 +11,8 @@ export default {
   layout: 'Layout',
   layoutRail: 'Right rail',
   layoutTray: 'Bottom tray',
+  trainCarSkin: 'Train card art',
+  trainCarSkinDesc: 'Which artwork the train-car cards wear. Cosmetic — only you see it.',
   sound: 'Sound',
   volume: 'Volume',
   language: 'Language',

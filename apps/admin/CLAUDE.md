@@ -59,9 +59,11 @@ server enforces the taxonomy independently (`src/store/CLAUDE.md`).
 
 **User features** (`@trm/shared`'s `USER_FEATURES`, e.g. `mapBuilder`/`replayReview`), managed from
 the Users/Features views, gate capabilities in the _game_ app — not here. The Features view also
-carries the two global switches behind `config.features`: the default feature flags, and which
-official maps players may pick (`OfficialMapToggles`; map names come from the server so this bundle
-never pulls in the map content tables).
+carries the three global switches behind `config.features`: the default feature flags, which
+official maps players may pick (`OfficialMapToggles`), and which train-card skin packs they may
+pick (`TrainCarSkinToggles` — the default pack arrives `locked` and its checkbox is disabled).
+Both toggle lists take their names from the server, so this bundle never pulls in the map content
+or card-artwork tables.
 
 ## Testing
 

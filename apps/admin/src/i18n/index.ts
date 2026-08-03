@@ -53,6 +53,7 @@ const zhHant = {
     tutorialReset: '已重置教學狀態',
     featuresSaved: '功能開通已儲存',
     officialMapsSaved: '官方地圖開放狀態已儲存',
+    trainCarSkinsSaved: '車廂卡圖開放狀態已儲存',
     gameTerminated: '對局已強制終止',
     gameDeleted: '對局已刪除',
     roomClosed: '房間已關閉',
@@ -402,6 +403,10 @@ const zhHant = {
     mapsTitle: '官方地圖',
     mapsDesc:
       '關閉的地圖不會出現在房間設定中，也無法用來開始新對局；已進行中的對局與回放不受影響。至少須保留一張地圖。',
+    skinsTitle: '車廂卡圖',
+    skinsDesc:
+      '關閉的卡圖不會出現在玩家的設定中，已選用該卡圖的帳號會改以預設卡圖顯示，但選擇本身會保留；重新開啟即可恢復。卡圖純屬裝飾，不影響任何對局。',
+    skinsDefault: '預設，無法關閉',
   },
   feature: {
     replayReview: '重播檢視',
@@ -544,6 +549,7 @@ const en: typeof zhHant = {
     tutorialReset: 'Tutorial status reset',
     featuresSaved: 'Feature access saved',
     officialMapsSaved: 'Official map availability saved',
+    trainCarSkinsSaved: 'Train card skin availability saved',
     gameTerminated: 'Game force-terminated',
     gameDeleted: 'Game deleted',
     roomClosed: 'Room closed',
@@ -903,6 +909,12 @@ const en: typeof zhHant = {
       'A map switched off here disappears from the room settings picker and cannot start a new ' +
       'game; games already running on it, and their replays, are unaffected. At least one map ' +
       'must stay on.',
+    skinsTitle: 'Train card skins',
+    skinsDesc:
+      'A pack switched off here disappears from the player settings picker, and accounts that ' +
+      'had picked it fall back to the default artwork while keeping their choice — switching it ' +
+      'back on restores them. Skins are cosmetic and affect no game.',
+    skinsDefault: 'default, cannot be switched off',
   },
   feature: {
     replayReview: 'Replay viewing',
