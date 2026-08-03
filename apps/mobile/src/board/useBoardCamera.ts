@@ -64,7 +64,12 @@ export interface BoardLod {
 export interface BoardCamera {
   /** Reanimated transform for the Skia board <Group> (UI thread). */
   transform: DerivedValue<Transforms3d>;
-  /** Composed pan + pinch + tap gesture (double-tap zoom resolves in the JS tap arbiter). */
+  /** Composed pan + pinch + tap gesture (double-tap zoom resolves in the JS tap arbiter).
+   *  NEVER let a worklet touch `cam.anything`: the plugin captures the ROOT identifier, so
+   *  reading `cam.transform.value` inside a worklet serializes this WHOLE object to the UI
+   *  runtime — and react-native-worklets throws hard on a ComposedGesture ("Cannot copy value of
+   *  type `ComposedGesture`", which drops the entire pending job batch and takes the frame-callback
+   *  registry down with it). Destructure the shared values you need OUTSIDE the worklet. */
   gesture: ComposedGesture;
   /** Quantized zoom state driving MapSceneSkia's counter-scaling. */
   lod: BoardLod;

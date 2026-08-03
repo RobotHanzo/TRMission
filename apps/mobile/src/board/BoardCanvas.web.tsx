@@ -149,15 +149,21 @@ export function BoardCanvas({
     const live = camRef.current.currentCamera();
     if (live.span === canvasCamRef.current.span && uncovered(live)) setCanvasCam({ ...live });
   }, [uncovered]);
+  // Destructured OUT of `cam` before any worklet reads them: the plugin captures the root
+  // identifier, so `cam.transform.value` inside a worklet would serialize the whole BoardCamera
+  // (ComposedGesture included — a hard throw on native; see BoardCamera.gesture). Reanimated on
+  // web never serializes, but this host and BoardCanvas.tsx are kept deliberately in sync, so the
+  // pattern that is fatal over there must not live here either.
+  const { transform: camTransform, movingSV, zoomingSV } = cam;
   const panFrame = useSharedValue(0);
   useAnimatedReaction(
-    () => (cam.movingSV.value && !cam.zoomingSV.value ? cam.transform.value : null),
+    () => (movingSV.value && !zoomingSV.value ? camTransform.value : null),
     (v) => {
       if (v === null) return;
       panFrame.value = (panFrame.value + 1) % 10;
       if (panFrame.value === 0) runOnJS(checkMidPan)();
     },
-    [cam.movingSV, cam.zoomingSV, cam.transform, checkMidPan],
+    [movingSV, zoomingSV, camTransform, checkMidPan],
   );
 
   // ── The frame-atomic CSS baseline (see the ATOMIC SWAP invariant above) ───
@@ -180,7 +186,7 @@ export function BoardCanvas({
   // q = p·sL + tL and the canvas painted at q' = p·s + t, the wrapper needs
   // T(q') = k·q' + (tL − k·t), k = sL/s — identity whenever live == painted.
   const deltaStyle = useAnimatedStyle(() => {
-    const live = cam.transform.value as unknown as readonly [
+    const live = camTransform.value as unknown as readonly [
       { translateX: number },
       { translateY: number },
       { scale: number },
@@ -196,7 +202,7 @@ export function BoardCanvas({
       return { transform: [{ translateX: dx }, { translateY: dy }, { scale: 1 }] };
     }
     return { transform: [{ translateX: dx }, { translateY: dy }, { scale: k }] };
-  }, [cam.transform, baseSV, dpr]);
+  }, [camTransform, baseSV, dpr]);
 
   // Mouse-wheel zoom about the cursor (native wheel event — RNGH has no wheel gesture).
   const wheelHostRef = useRef<View>(null);

@@ -18,6 +18,15 @@ The stage that hosts this board (prop contract, layout tiers, drivers) is docume
   (`MID_GESTURE_LOD_RATIO` in `useBoardCamera.ts`), so track weights / markers / label tiers
   follow a pinch near-continuously. `HOME_SCALE_EQUIV = 2.4` anchors the span→scale-equivalent
   mapping. Never write JS-side styles per frame (the web's known jank source).
+- **Never let a worklet touch `cam.<anything>`.** The worklets plugin captures the ROOT identifier
+  of every member expression, so one `cam.transform.value` inside a worklet serializes the WHOLE
+  `BoardCamera` to the UI runtime — including `cam.gesture`, a `ComposedGesture` that
+  react-native-worklets refuses to copy. That throw kills the entire pending job batch, so
+  Reanimated's frame-callback registry never installs and the next unregister crashes natively
+  (`Cannot set property 'startTime' of undefined`) — i.e. the board takes the app down on mount.
+  Worklets 0.10 made this fatal; Reanimated 3 used to shallow-clone unknown class instances.
+  Destructure the shared values a worklet needs outside it, or hand the component only those
+  pieces (`RouteGlowGate` in `BoardView.tsx` takes `transform`/`currentCamera`, never `cam`).
 - **The Canvas host is platform-split** (`BoardCanvas.tsx` / `.web.tsx`): native drives the
   Skia `<Group>` transform from the camera's shared values (UI thread, per-frame, device-proven);
   web must NOT redraw per frame — see "Board gestures on web" below. Both implement the same
