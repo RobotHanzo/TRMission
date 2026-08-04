@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
-import { generateKeyPairSync, sign } from 'node:crypto';
+import { createHash, generateKeyPairSync, sign } from 'node:crypto';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -268,7 +268,6 @@ describe('applying a real bundle end to end', () => {
     const { pointSymlink } = await import('../src/selfupdate/layout');
     pointSymlink(join(webRoot, 'current'), join(webRoot, 'releases/old'));
 
-    const { createHash } = await import('node:crypto');
     const manifest = verifyManifest(
       envelope(
         validManifest({
@@ -306,6 +305,9 @@ describe('applying a real bundle end to end', () => {
     expect(readFileSync(join(webRoot, 'previous/index.html'), 'utf8')).toBe('<html>old</html>');
     // Journal + rollback marker survive until the new build proves itself.
     const paths = otaPaths(appRoot);
+    // Staging is emptied on the way out — the journal points into it, but recovery derives what is
+    // left to do from the live tree, and a completed apply has nothing left to resume.
+    expect(existsSync(join(paths.stagingDir, commit))).toBe(false);
     expect(readJournal(paths)?.commit).toBe(commit);
     expect(readState(paths)).toMatchObject({
       appliedCommit: commit,
@@ -353,5 +355,52 @@ describe('applying a real bundle end to end', () => {
     // Nothing moved: a failed verification leaves the deployment exactly as it was.
     expect(readFileSync(join(appRoot, 'apps/server/src/main.ts'), 'utf8')).toBe('old-server');
     expect(readJournal(otaPaths(appRoot))).toBeNull();
+  });
+
+  it('leaves nothing staged behind when a bundle extracts but is then refused', async () => {
+    const root = scratch();
+    // The archive stamps its own build.json with `commit`; the manifest claims a different
+    // webBuildId, so this is refused only AFTER the tarball has been downloaded and extracted.
+    const commit = 'e'.repeat(40);
+    const { bytes } = buildArchive(root, commit);
+    const manifest = verifyManifest(
+      envelope(
+        validManifest({
+          commit,
+          webBuildId: 'f'.repeat(40),
+          bundle: {
+            name: 'bundle.tar.gz',
+            url: 'https://example.test/bundle.tar.gz',
+            size: bytes.byteLength,
+            sha256: createHash('sha256').update(bytes).digest('hex'),
+          },
+        }),
+      ),
+      keys.publicKey,
+    );
+    const appRoot = join(root, 'app');
+    writeFile(join(appRoot, 'apps/server/src/main.ts'), 'old-server');
+
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (() => Promise.resolve(new Response(bytes))) as typeof fetch;
+    try {
+      await expect(
+        applyBundle({
+          manifest,
+          runningCommit: 'oldsha',
+          web: { root: join(root, 'srv-web'), shared: false },
+          paths: otaPaths(appRoot),
+        }),
+      ).rejects.toThrow(ManifestRejected);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+
+    // The extracted tree is gone: a refused bundle must not cost the app volume ~20MB per commit
+    // for the life of the container. The archive itself is dropped right after extraction.
+    const paths = otaPaths(appRoot);
+    expect(existsSync(join(paths.stagingDir, commit))).toBe(false);
+    expect(existsSync(join(paths.stagingDir, 'bundle.tar.gz'))).toBe(false);
+    expect(readFileSync(join(appRoot, 'apps/server/src/main.ts'), 'utf8')).toBe('old-server');
   });
 });

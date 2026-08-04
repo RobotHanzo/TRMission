@@ -181,7 +181,7 @@ export interface ApplyOptions {
  * `recover.ts` resumes on the next boot.
  */
 export async function applyBundle(options: ApplyOptions): Promise<void> {
-  const { manifest, web, runningCommit } = options;
+  const { manifest } = options;
   const paths = options.paths ?? otaPaths();
   const log = options.log ?? (() => {});
 
@@ -199,6 +199,24 @@ export async function applyBundle(options: ApplyOptions): Promise<void> {
     rmSync(archive, { force: true });
   }
 
+  // Everything from here on is either applied or discarded — an extracted tree that got rejected,
+  // or one whose swap was reverted, is never looked at again. Without the `finally` a refused
+  // bundle would leave its whole extracted source+web tree under .trm-ota/staging/<commit> for the
+  // life of the container, once per commit that fails validation.
+  try {
+    await applyExtracted(options, paths, workDir, log);
+  } finally {
+    rmSync(workDir, { recursive: true, force: true });
+  }
+}
+
+async function applyExtracted(
+  options: ApplyOptions,
+  paths: OtaPaths,
+  workDir: string,
+  log: (message: string) => void,
+): Promise<void> {
+  const { manifest, web, runningCommit } = options;
   const stagedServer = join(workDir, 'server');
   const stagedWeb = join(workDir, 'web');
   for (const rel of manifest.paths) {
@@ -256,6 +274,5 @@ export async function applyBundle(options: ApplyOptions): Promise<void> {
     paths,
   );
 
-  rmSync(workDir, { recursive: true, force: true });
   pruneReleases(paths.prevDir, KEEP_PREV_TREES, [journal.prevDir]);
 }

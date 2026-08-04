@@ -77,6 +77,14 @@ any increase. It means something is serving manifests this deployment's key did 
 Web goes before the server so that when the restart drops every socket — which is what makes clients
 check their build id — the new bundle is already what nginx serves.
 
+**Storage is bounded on both paths.** An apply keeps the newest `KEEP_WEB_RELEASES` (3) release dirs
+plus whatever `current`/`previous` point at, and `KEEP_PREV_TREES` (2) parked source trees; a refused
+or reverted bundle's extracted tree is dropped rather than left under `.trm-ota/staging/`. The
+**image-pull** path seeds a release too, so `docker-seed-releases.sh` runs the same newest-3 recycle
+on every boot — without it the volume gained a release dir per deploy and never gave one back. It
+also re-stamps the seeded dir's mtime, because `cp -a` carries over the image layer's timestamps and
+a just-seeded release would otherwise sort as one of the oldest.
+
 **Where the web bundles live.** The image ships them at **`/usr/share/trm-web`**; `/srv/web` holds
 only `releases/<buildId>/`, the `current`/`previous` symlinks, and the `.web-tier` sentinel, and is
 the shared volume. Keeping the baked copy _outside_ the mount point is load-bearing, not tidiness:
