@@ -3,7 +3,6 @@ import type { Db } from 'mongodb';
 import { ENGINE_VERSION } from '@trm/engine';
 import { OFFICIAL_MAPS } from '@trm/map-data';
 import { PROTOCOL_VERSION } from '@trm/proto';
-import { env } from '../config/env';
 import { MONGO_DB } from '../db/tokens';
 import { GameRegistry } from '../game/game-registry';
 import { MetricsService } from '../observability/metrics.service';
@@ -11,6 +10,7 @@ import type { GameDoc } from '../persistence/types';
 import type { RoomDoc } from '../lobby/room.repo';
 import type { UserDoc } from '../auth/user.repo';
 import type { AuthSessionDoc } from '../auth/session.repo';
+import { runningCommit } from '../selfupdate/buildInfo';
 
 /** The subset of prom-client's JSON export the overview reads (typed locally, not exported). */
 interface MetricJson {
@@ -100,7 +100,11 @@ export class DashboardService {
         protocolVersion: PROTOCOL_VERSION,
         contentHash: OFFICIAL_MAPS[0]?.hash ?? '',
         uptimeSeconds: Math.round(process.uptime()),
-        commitHash: env.gitCommit,
+        // The RUNNING commit, not the image's `GIT_COMMIT` — after a hot-applied OTA those differ,
+        // and this row is the one an operator reads to confirm the update landed. It is also what
+        // the overview compares against the web bundle's build id, so the "builds differ" badge has
+        // to see the same revision the process is actually executing (selfupdate/buildInfo.ts).
+        commitHash: runningCommit(),
       },
     };
   }

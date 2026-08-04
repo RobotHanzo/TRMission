@@ -14,7 +14,10 @@
 set -eu
 
 ROOT=${TRM_WEB_RELEASES_DIR:-/srv/web}
-BAKED=/srv/web/baked
+# Outside $ROOT on purpose: $ROOT is a volume mount point, and Docker seeds a named volume from the
+# image only while the volume is empty. A baked dir inside it would be frozen at the first deploy's
+# bundles, which would make the "fresh image" case above unreachable forever (apps/web/Dockerfile).
+BAKED=${TRM_WEB_BAKED_DIR:-/usr/share/trm-web}
 
 # The build id the Vite build stamped into build.json (busybox sed — no jq in nginx:alpine).
 BUILD_ID=$(sed -n 's/.*"buildId"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$BAKED/build.json" 2>/dev/null || true)

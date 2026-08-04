@@ -76,12 +76,21 @@ RUN --mount=type=secret,id=sentry_auth_token \
 
 FROM nginx:alpine AS run
 COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf
-# The bundles land in /srv/web/baked, NOT in nginx's document root: nginx serves from
-# /srv/web/current, a symlink the server re-points when it applies a web OTA (see nginx.conf and
-# docs/release/server-ota.md). The seed script below makes `current` exist before nginx starts, so an
-# image-only deployment with no volume mounted behaves exactly as it did before.
-COPY --from=build /app/apps/web/dist /srv/web/baked
-COPY --from=build /app/apps/admin/dist /srv/web/baked/admin
+# The bundles land in /usr/share/trm-web — NOT in nginx's document root, and deliberately NOT under
+# /srv/web. Two separate reasons:
+#
+#   * nginx serves from /srv/web/current, a symlink the server re-points when it applies a web OTA
+#     (see nginx.conf and docs/release/server-ota.md).
+#   * /srv/web is a VOLUME MOUNT POINT in every real deployment, and Docker copies an image's
+#     content into a named volume only while that volume is still EMPTY. Baked under /srv/web, the
+#     first deploy's copy would mask every later image's bundles for the life of the volume: the
+#     seed script would keep reading the FIRST build's build.json, so `current` could never move and
+#     an image pull would stop updating the web tier entirely.
+#
+# The seed script below makes `current` exist before nginx starts, so an image-only deployment with
+# no volume mounted behaves exactly as it did before.
+COPY --from=build /app/apps/web/dist /usr/share/trm-web
+COPY --from=build /app/apps/admin/dist /usr/share/trm-web/admin
 COPY apps/web/docker-seed-releases.sh /docker-entrypoint.d/20-trm-seed-releases.sh
 # chmod as its own RUN rather than `COPY --chmod`: nginx's entrypoint skips a non-executable script
 # with only a warning, and `--chmod` needs BuildKit, which a `DOCKER_BUILDKIT=0` build won't have.

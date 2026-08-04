@@ -150,7 +150,7 @@ jobs:
           rm -rf packages/proto/src/gen ota-web
           docker cp "$sid:/app/packages/proto/src/gen" packages/proto/src/gen
           docker cp "$sid:/app/.trm-deps-fingerprint" image-fingerprint.txt
-          docker cp "$wid:/srv/web/baked" ota-web
+          docker cp "$wid:/usr/share/trm-web" ota-web
           docker rm -v "$sid" "$wid" > /dev/null
 
       # The fence only works if the image's baked fingerprint and the one computed from this checkout

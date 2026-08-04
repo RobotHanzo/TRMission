@@ -77,6 +77,14 @@ any increase. It means something is serving manifests this deployment's key did 
 Web goes before the server so that when the restart drops every socket — which is what makes clients
 check their build id — the new bundle is already what nginx serves.
 
+**Where the web bundles live.** The image ships them at **`/usr/share/trm-web`**; `/srv/web` holds
+only `releases/<buildId>/`, the `current`/`previous` symlinks, and the `.web-tier` sentinel, and is
+the shared volume. Keeping the baked copy _outside_ the mount point is load-bearing, not tidiness:
+Docker seeds a named volume from the image only while that volume is still **empty**, so a baked dir
+under `/srv/web` would be frozen at the first deploy's bundles for the life of the volume —
+`docker-seed-releases.sh` would keep reading that build's `build.json`, and no image pull could ever
+move the web tier again.
+
 **Interrupted apply.** `selfupdate/recover.ts` runs from `instrument.mjs`, i.e. before anything
 imports the app graph — under ESM the whole graph is evaluated before `bootstrap()`, so a half-swapped
 tree would throw on import and the container would loop. Recovery re-runs the swap loop, which is
@@ -187,6 +195,13 @@ newest bundle on its next poll — so to _stay_ off it, publish a fix forward, o
 
 **`needs_image_pull` and nothing happens.** The commit changed dependencies, the Dockerfiles, or the
 font assets. That is the fence working. Redeploy the stack (or set `PORTAINER_WEBHOOK_URL` so CI does).
+
+**`webOta: "unavailable"` — the server updates but browsers stay on the old bundle.** The server
+cannot see `/srv/web/.web-tier`, the sentinel the nginx container writes at boot, so it refuses to
+write releases nobody would serve. The stack is missing the `trm-web-releases:/srv/web` mount on the
+**server** service (the web service alone is not enough — both need it, and on Swarm both must land
+on the same node, since it is a local volume). The boot log says so explicitly. Add the mount and
+redeploy; `status` should then read `"webOta": "ready"`.
 
 **Local dry run.**
 
