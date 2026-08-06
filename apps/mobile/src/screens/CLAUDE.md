@@ -11,6 +11,15 @@ width (`stageLayout.ts`): compact <700dp docks the HUD under a full-bleed board;
 checking the offline (P3, `../offline/CLAUDE.md`) and tutorial (P4, `../features/tutorial/CLAUDE.md`)
 callers.
 
+**The dock has no Draw tab** (issue #79; the web still splits one out). Each deck sits in the tab
+holding what it deals: the train-card deck + face-up market head the **Cards** tab above the hand,
+and the mission deck's draw button closes the **Missions** tab under the kept missions. Two things
+follow. The market stays FIRST in the Cards tab so a tutorial/demo spotlight on it is never pushed
+below the dock's fold, and the hand under it collapses to `PlayerHand`'s brief reading
+(`../components/game/CLAUDE.md`) so both fit. Whenever a beat's expected action names a deck, the
+tab it opens must match: the gate effect here and `EncyclopediaScreen`'s `HUD_SELECTOR_TAB` are the
+two places that map, and both key off the curriculum's own selector/expect strings.
+
 **Drivers** mounted once in GameStage: `useAnimationDriver` (store→store; card flights/sweeps/
 floats/banners render in `components/game/AnimationLayer.tsx` via the measured `animTargets`
 registry), `useSoundDriver` (a binding of the shared driver in `@trm/client-core/sound` over the

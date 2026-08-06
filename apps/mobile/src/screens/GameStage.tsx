@@ -20,8 +20,9 @@ import Animated, {
 } from 'react-native-reanimated';
 import {
   ArrowLeft,
+  ChevronDown,
+  ChevronUp,
   History,
-  Layers,
   MessageSquare,
   Sparkles,
   Ticket,
@@ -124,7 +125,6 @@ const DOCK_FLING_VELOCITY = 420;
 /** Tab glyphs for the phone dock (chrome-only Lucide, like the rest of the app UI). */
 const TAB_ICONS: Record<DockTabKey, LucideIcon> = {
   hand: WalletCards,
-  draw: Layers,
   missions: Ticket,
   events: Sparkles,
   players: Users,
@@ -172,6 +172,10 @@ export function GameStage({
   const pushedRejectionRef = useRef<RejectionInfo | null>(null);
 
   const [dockTab, setDockTab] = useState<DockTabKey>('hand');
+  // Issue #79: the Cards tab carries the draw market AND the hand, so the hand collapses to its
+  // brief (wrapped, glossary-sized) reading when the full-size row is more than the tier can
+  // spare. Stage state, so it survives a tab switch and a tier change.
+  const [handBrief, setHandBrief] = useState(false);
   // Compact only: collapse the dock down to its tab bar so the board gets the full window.
   // A demo clip starts collapsed — the board is the show; beats reopen it (see demoDock).
   const [dockCollapsed, setDockCollapsed] = useState(!!demo);
@@ -244,8 +248,8 @@ export function GameStage({
   };
 
   // Interactive tutorial on compact: the dock follows the narration, same rule as the demo effect
-  // below — a beat awaiting a market action must surface the Draw tab (its target would otherwise
-  // sit inside an unselected, unmounted dock panel and the learner would stall), while a
+  // below — a beat awaiting a deck action must surface the tab holding that deck (its target would
+  // otherwise sit inside an unselected, unmounted dock panel and the learner would stall), while a
   // claim/build-station/tunnel/info beat instead tucks the dock away so the spotlighted route or
   // city on the board isn't sitting underneath it, unreachable by tap. Guarded off `demo`: the
   // encyclopedia's own effect below (which additionally knows which HUD tab a beat references)
@@ -258,13 +262,14 @@ export function GameStage({
       return;
     }
     const expect = actionGate.t;
-    if (
-      expect === 'DRAW_ANY' ||
-      expect === 'DRAW_BLIND' ||
-      expect === 'DRAW_FACEUP' ||
-      expect === 'DRAW_TICKETS'
-    ) {
-      setDockTab('draw');
+    const tab =
+      expect === 'DRAW_ANY' || expect === 'DRAW_BLIND' || expect === 'DRAW_FACEUP'
+        ? 'hand'
+        : expect === 'DRAW_TICKETS'
+          ? 'missions'
+          : null;
+    if (tab) {
+      setDockTab(tab);
       // A collapsed dock would leave the beat's target off-screen — pop it back open.
       setDockCollapsed(false);
     } else {
@@ -424,26 +429,6 @@ export function GameStage({
         onDrawBlind={() => commands?.drawBlind()}
         blockFaceupLocomotives={hasActiveEvent(snapshot.randomEvents, 'ALL_SEATS_RESERVED')}
       />
-      <Pressable
-        {...drawTicketsAnchor}
-        style={({ pressed }) => [
-          styles.drawTicketsBtn,
-          { backgroundColor: tokens.ember, shadowColor: tokens.ink },
-          (!canAct || snapshot.ticketDeckShortCount === 0 || !allow.tickets) &&
-            styles.drawTicketsDisabled,
-          pressed && styles.pressed,
-        ]}
-        accessibilityRole="button"
-        disabled={!canAct || snapshot.ticketDeckShortCount === 0 || !allow.tickets}
-        onPress={() => commands?.drawTickets()}
-      >
-        <Text style={styles.drawTicketsText}>
-          {t('drawTickets')}
-          {snapshot.ticketDeckShortCount === 0
-            ? ` (${t('deckEmpty')})`
-            : ` (${snapshot.ticketDeckShortCount})`}
-        </Text>
-      </Pressable>
       {canAct && snapshot.you?.youMustPass && (
         <Pressable
           style={({ pressed }) => [
@@ -476,8 +461,30 @@ export function GameStage({
   );
   const handSection = (
     <GamePanel>
-      <TrayHead title={t('cards')} count={myPub?.handCount ?? 0} />
-      <PlayerHand hand={snapshot.you?.hand} />
+      <TrayHead
+        title={t('cards')}
+        count={myPub?.handCount ?? 0}
+        right={
+          // Issue #79: the hand collapses to its brief reading so the draw market above it stays
+          // on screen. A chevron, not a whole row — the panel head is the only chrome to spare.
+          <Pressable
+            style={({ pressed }) => [styles.headBtn, pressed && styles.pressed]}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={t(handBrief ? 'dockExpand' : 'dockCollapse')}
+            accessibilityState={{ expanded: !handBrief }}
+            testID="hand-brief-toggle"
+            onPress={() => setHandBrief((b) => !b)}
+          >
+            {handBrief ? (
+              <ChevronDown size={16} color={tokens.inkSoft} />
+            ) : (
+              <ChevronUp size={16} color={tokens.inkSoft} />
+            )}
+          </Pressable>
+        }
+      />
+      <PlayerHand hand={snapshot.you?.hand} brief={handBrief} />
       <TeamPoolPanel
         snapshot={snapshot}
         onPush={(color) => commands?.pushToTeamPool(color)}
@@ -492,6 +499,28 @@ export function GameStage({
         ticketIds={snapshot.you?.keptTicketIds ?? []}
         completedIds={me ? completedByPlayer(snapshot).get(me) : undefined}
       />
+      {/* The mission deck sits with the missions it deals (issue #79), not with the train-card
+          market — the button already states what's left in it. */}
+      <Pressable
+        {...drawTicketsAnchor}
+        style={({ pressed }) => [
+          styles.drawTicketsBtn,
+          { backgroundColor: tokens.ember, shadowColor: tokens.ink },
+          (!canAct || snapshot.ticketDeckShortCount === 0 || !allow.tickets) &&
+            styles.drawTicketsDisabled,
+          pressed && styles.pressed,
+        ]}
+        accessibilityRole="button"
+        disabled={!canAct || snapshot.ticketDeckShortCount === 0 || !allow.tickets}
+        onPress={() => commands?.drawTickets()}
+      >
+        <Text style={styles.drawTicketsText}>
+          {t('drawTickets')}
+          {snapshot.ticketDeckShortCount === 0
+            ? ` (${t('deckEmpty')})`
+            : ` (${snapshot.ticketDeckShortCount})`}
+        </Text>
+      </Pressable>
     </GamePanel>
   );
   // The countdown mounts ONCE per stage (its hook drives the warning sounds): floating over the
@@ -792,9 +821,13 @@ export function GameStage({
               <Animated.View style={[styles.dockPanelWrap, tabAnimStyle]}>
                 <ScrollView contentContainerStyle={styles.dockPanel}>
                   {dockTab === 'hand' ? (
-                    handSection
-                  ) : dockTab === 'draw' ? (
-                    drawSection
+                    // The Cards tab holds both decks-worth of train cards: the market you draw
+                    // from on top (so a tutorial spotlight on it is never pushed below the fold),
+                    // your hand — collapsible — under it.
+                    <>
+                      {drawSection}
+                      {handSection}
+                    </>
                   ) : dockTab === 'missions' ? (
                     ticketsSection
                   ) : dockTab === 'events' ? (
@@ -1010,6 +1043,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   marketBlock: { gap: 8 },
+  headBtn: { alignItems: 'center', justifyContent: 'center', width: 22, height: 22 },
   drawTicketsBtn: {
     minHeight: 46,
     borderRadius: RADIUS.md,

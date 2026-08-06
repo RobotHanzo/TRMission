@@ -51,6 +51,16 @@ describe('PlayerHand', () => {
     const { getByText } = render(<PlayerHand hand={undefined} />);
     expect(getByText('沒有手牌')).toBeTruthy(); // zh-Hant is the primary locale
   });
+
+  // Issue #79: the Cards tab carries the draw market above the hand, so the hand has a brief
+  // reading — the same cards at the tutorial glossary's size, still one per held colour.
+  const cardWidths = (el: ReturnType<typeof render>) =>
+    el.getAllByLabelText(/×\d/).map((n) => (n.props.style as { width: number }).width);
+
+  it('collapses to the glossary card size in brief mode, keeping every held colour', () => {
+    expect(cardWidths(render(<PlayerHand hand={hand} />))).toEqual([92, 92]);
+    expect(cardWidths(render(<PlayerHand hand={hand} brief />))).toEqual([56, 56]);
+  });
 });
 
 describe('CardMarket', () => {

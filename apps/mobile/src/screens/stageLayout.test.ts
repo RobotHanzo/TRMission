@@ -14,7 +14,6 @@ describe('dockTabs', () => {
   it('omits the events tab when the game has no random events', () => {
     expect(dockTabs(false).map((t) => t.key)).toEqual([
       'hand',
-      'draw',
       'missions',
       'players',
       'log',
@@ -23,16 +22,19 @@ describe('dockTabs', () => {
     expect(dockTabs(true).map((t) => t.key)).toContain('events');
   });
 
-  it('keeps the events tab between missions and players (mirrors the web dock order)', () => {
+  it('keeps the events tab between missions and players', () => {
     expect(dockTabs(true).map((t) => t.key)).toEqual([
       'hand',
-      'draw',
       'missions',
       'events',
       'players',
       'log',
       'comms',
     ]);
+  });
+
+  it('has no draw tab — each deck lives with what it deals (issue #79)', () => {
+    expect(dockTabs(true).map((t) => t.key)).not.toContain('draw');
   });
 
   it('keeps log and comms as separate tabs (log has no live-multiplayer requirement)', () => {
@@ -45,6 +47,6 @@ describe('dockTabs', () => {
     const tabs = dockTabs(true);
     expect(tabs.find((t) => t.key === 'hand')?.countSource).toBe('hand');
     expect(tabs.find((t) => t.key === 'missions')?.countSource).toBe('missions');
-    expect(tabs.find((t) => t.key === 'draw')?.countSource).toBeNull();
+    expect(tabs.find((t) => t.key === 'players')?.countSource).toBeNull();
   });
 });

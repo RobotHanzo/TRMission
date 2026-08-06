@@ -46,12 +46,19 @@ import { GameStage } from './GameStage';
 import type { DockTabKey } from './stageLayout';
 
 /** The dock tab a narration beat "talks about": an explicit HUD spotlight names its panel; an
- *  await beat performing a market action implies the draw tab. Anything else returns null and the
- *  demo dock stays tucked down to its strip — map beats own the whole window. */
+ *  await beat performing a deck action implies the tab that deck lives in. Anything else returns
+ *  null and the demo dock stays tucked down to its strip — map beats own the whole window.
+ *
+ *  Keys are the curriculum's own selector strings (TUTORIAL_ANCHORS values), so a beat's spotlight
+ *  and the tab it opens can't drift apart. The train-card market and the hand share the Cards tab
+ *  since issue #79; the mission deck's button sits with the missions. */
 const HUD_SELECTOR_TAB: Record<string, DockTabKey> = {
-  '.market': 'draw',
-  '.hand': 'hand',
-  '.tickets': 'missions',
+  '.market': 'hand',
+  '[data-anim="deck"]': 'hand',
+  '[data-anim="market-slot"]': 'hand',
+  '[data-anim="hand"]': 'hand',
+  '[data-anim="tickets"]': 'missions',
+  '[data-anim="draw-tickets"]': 'missions',
   '.trackers': 'players',
 };
 function dockTabForBeat(beat: Beat | null): DockTabKey | null {
@@ -59,13 +66,8 @@ function dockTabForBeat(beat: Beat | null): DockTabKey | null {
   if (beat.spotlight?.kind === 'hud') return HUD_SELECTOR_TAB[beat.spotlight.selector] ?? null;
   if (beat.mode === 'await') {
     const expect = beat.expect.t;
-    if (
-      expect === 'DRAW_ANY' ||
-      expect === 'DRAW_BLIND' ||
-      expect === 'DRAW_FACEUP' ||
-      expect === 'DRAW_TICKETS'
-    )
-      return 'draw';
+    if (expect === 'DRAW_ANY' || expect === 'DRAW_BLIND' || expect === 'DRAW_FACEUP') return 'hand';
+    if (expect === 'DRAW_TICKETS') return 'missions';
   }
   return null;
 }

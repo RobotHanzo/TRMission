@@ -1,6 +1,11 @@
 // The GameStage's pure layout decisions: which adaptive tier a window width lands in, and the
-// bottom-dock tab list (ports the web GameStage's dock semantics — the events tab exists only
-// when the game actually carries a random-events block).
+// bottom-dock tab list (the events tab exists only when the game actually carries a random-events
+// block).
+//
+// There is no separate `draw` tab (issue #79): the train-card deck + face-up market live in the
+// `hand` tab, beside the cards they feed, and the mission deck's draw button lives in `missions`
+// beside the missions it deals. One tab per deck, each next to what it produces — the web still
+// splits them, which is why `dockDraw` remains in the shared i18n bundle.
 //
 // `log` and `comms` are deliberately separate tabs: the action log is just a projection of events
 // that already happened, so it's available in every game (live or offline/tutorial sandbox); chat
@@ -13,7 +18,7 @@ export type StageTier = 'compact' | 'two-pane' | 'three-pane';
 export const stageTier = (widthDp: number): StageTier =>
   widthDp < 700 ? 'compact' : widthDp < 1000 ? 'two-pane' : 'three-pane';
 
-export type DockTabKey = 'hand' | 'draw' | 'missions' | 'events' | 'players' | 'log' | 'comms';
+export type DockTabKey = 'hand' | 'missions' | 'events' | 'players' | 'log' | 'comms';
 
 export interface DockTab {
   key: DockTabKey;
@@ -23,11 +28,10 @@ export interface DockTab {
   countSource: 'hand' | 'missions' | null;
 }
 
-/** The phone dock's tabs, in web order; `events` only when the game has random events. */
+/** The phone dock's tabs; `events` only when the game has random events. */
 export function dockTabs(hasEvents: boolean): DockTab[] {
   return [
     { key: 'hand', labelKey: 'cards', countSource: 'hand' },
-    { key: 'draw', labelKey: 'dockDraw', countSource: null },
     { key: 'missions', labelKey: 'tickets', countSource: 'missions' },
     ...(hasEvents ? [{ key: 'events', labelKey: 'dockEvents', countSource: null } as const] : []),
     { key: 'players', labelKey: 'dockPlayers', countSource: null },
