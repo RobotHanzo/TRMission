@@ -41,7 +41,7 @@ apps/
 
 ## Quick start
 
-Prerequisites: Node 20+ and Yarn 4 (via Corepack), plus Docker for MongoDB.
+Prerequisites: Node 22+ (`.nvmrc` pins 24) and Yarn 4 (via Corepack), plus Docker for MongoDB.
 
 ```bash
 corepack enable

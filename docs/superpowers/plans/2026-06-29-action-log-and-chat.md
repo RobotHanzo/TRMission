@@ -487,11 +487,9 @@ describe('history + chat over the hub', () => {
 
     await hub.receive('c1', encodeClient(2, { case: 'chat', value: { text: '  hi there  ' } }));
     const chat1 = f1.find((f) => f.event.case === 'chat')?.event.value as
-      | { text: string }
-      | undefined;
+      { text: string } | undefined;
     const chat2 = f2.find((f) => f.event.case === 'chat')?.event.value as
-      | { text: string }
-      | undefined;
+      { text: string } | undefined;
     expect(chat1?.text).toBe('hi there'); // trimmed
     expect(chat2?.text).toBe('hi there'); // both members receive it
 
@@ -499,8 +497,7 @@ describe('history + chat over the hub', () => {
     f2.length = 0;
     await hub.receive('c1', encodeClient(3, { case: 'chat', value: { text: 'x'.repeat(2049) } }));
     const rej = f1.find((f) => f.event.case === 'rejection')?.event.value as
-      | { code: number }
-      | undefined;
+      { code: number } | undefined;
     expect(rej?.code).toBe(RejectionCode.MALFORMED);
     expect(f2.find((f) => f.event.case === 'chat')).toBeUndefined();
 

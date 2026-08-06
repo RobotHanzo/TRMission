@@ -10,7 +10,7 @@ import { FeatureDefaultsRepo } from './feature-defaults.repo';
 import { SessionRepo } from './session.repo';
 import { TokenService } from './token.service';
 import type { MapFeatureKey } from '@trm/shared';
-import type { IssuedAuth, Locale, PublicUser, UserPreferences } from './auth.types';
+import type { IssuedAuth, Locale, PublicUser, UserPreferencesPatch } from './auth.types';
 
 /** Fixed input for the login timing-oracle mitigation's dummy verification target — see
  *  `login` below. It's never a real password; any fixed string works. */
@@ -144,7 +144,7 @@ export class AuthService {
     return this.withDefaults(user);
   }
 
-  async updatePreferences(userId: string, preferences: UserPreferences): Promise<PublicUser> {
+  async updatePreferences(userId: string, preferences: UserPreferencesPatch): Promise<PublicUser> {
     const user = await this.users.updatePreferences(userId, preferences);
     if (!user) throw new UnauthorizedException('user not found');
     return this.withDefaults(user);

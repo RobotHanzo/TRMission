@@ -1,4 +1,5 @@
-import type { MapFeatureKey, UserFeature } from '@trm/shared';
+import { DEFAULT_TRAIN_CAR_SKIN } from '@trm/shared';
+import type { MapFeatureKey, TrainCarSkin, UserFeature } from '@trm/shared';
 
 export type Locale = 'zh-Hant' | 'en';
 export type Theme = 'system' | 'light' | 'dark';
@@ -10,13 +11,28 @@ export interface UserPreferences {
   colorBlind: boolean;
   locale: Locale;
   boardLayout: BoardLayout;
+  /** Which train-card artwork pack this account renders (`@trm/shared/trainCarSkins`). */
+  trainCarSkin: TrainCarSkin;
 }
+
+/**
+ * A preferences PATCH names only what it is changing. Every field is optional so a client built
+ * before a preference existed keeps working: `UserRepo.updatePreferences` writes per field, so an
+ * older payload can no longer blank one it has never heard of.
+ */
+export type UserPreferencesPatch = {
+  // Explicit `| undefined` rather than `Partial<…>`: under `exactOptionalPropertyTypes` a zod
+  // `.partial()` DTO types every field as `T | undefined`, and an absent JSON key arrives as
+  // exactly that. The repo drops undefined values before writing.
+  [K in keyof UserPreferences]?: UserPreferences[K] | undefined;
+};
 
 export const DEFAULT_PREFERENCES: UserPreferences = {
   theme: 'system',
   colorBlind: false,
   locale: 'zh-Hant',
   boardLayout: 'rail',
+  trainCarSkin: DEFAULT_TRAIN_CAR_SKIN,
 };
 
 /** Shape attached to the request by AccessTokenGuard. */

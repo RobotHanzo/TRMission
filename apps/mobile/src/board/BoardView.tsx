@@ -223,13 +223,19 @@ function RouteGlowGate({
   armed,
   started,
   onStart,
-  cam,
+  transform,
+  currentCamera,
   vp,
 }: {
   armed: ReadonlyMap<string, number>;
   started: ReadonlyMap<string, number>;
   onStart(routeId: string, seat: number): void;
-  cam: BoardCamera;
+  // The camera arrives split into the two pieces this gate needs, NOT as the whole `BoardCamera`:
+  // the reaction below is a worklet, and a worklet reading `cam.transform.value` captures the root
+  // identifier — serializing the entire camera, ComposedGesture and all, which worklets refuses to
+  // copy (see BoardCamera.gesture). Keeping `cam` out of scope makes that unwritable here.
+  transform: BoardCamera['transform'];
+  currentCamera: BoardCamera['currentCamera'];
   vp: Viewport;
 }): null {
   const startedRef = useRef(started);
@@ -244,7 +250,7 @@ function RouteGlowGate({
       if (startedRef.current.has(routeId)) continue;
       const g = ROUTE_GEOMETRY.get(routeId);
       // No geometry to test → start it immediately; otherwise wait until it's half in view.
-      if (!g || visibleFraction(g.slots, cam.currentCamera(), vp) >= GLOW_VISIBLE_FRACTION) {
+      if (!g || visibleFraction(g.slots, currentCamera(), vp) >= GLOW_VISIBLE_FRACTION) {
         onStart(routeId, seat);
       }
     }
@@ -254,11 +260,11 @@ function RouteGlowGate({
   // Re-check as the camera moves (a follow-pan promotes the route as it slides into view)…
   const armedActive = armed.size > 0;
   useAnimatedReaction(
-    () => (armedActive ? cam.transform.value : null),
+    () => (armedActive ? transform.value : null),
     (v) => {
       if (v !== null) runOnJS(runEvaluate)();
     },
-    [armedActive, cam.transform, runEvaluate],
+    [armedActive, transform, runEvaluate],
   );
   // …and whenever the armed set changes (a claim made while the route is already on screen).
   useEffect(() => {
@@ -561,7 +567,8 @@ function BoardInner({
         armed={armedGlowRoutes}
         started={startedGlowRoutes}
         onStart={startGlow}
-        cam={cam}
+        transform={cam.transform}
+        currentCamera={cam.currentCamera}
         vp={vp}
       />
       <BoardControls

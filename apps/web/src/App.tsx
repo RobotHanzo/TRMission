@@ -8,6 +8,7 @@ import { usePageViewTracking } from './hooks/usePageViewTracking';
 import { useSoundSetup } from './hooks/useSoundSetup';
 import { useDocumentMeta } from './hooks/useDocumentMeta';
 import { useAutoReload } from './hooks/useAutoReload';
+import { useTrainCarSkinCatalog } from './theme/useTrainCarSkin';
 import { lazyChunk } from './lib/preloadRecovery';
 import { setSentryGameContext, setSentryUser } from './observability/report';
 import { HomeScreen } from './screens/HomeScreen';
@@ -75,6 +76,8 @@ export function App() {
   useSoundSetup();
   useDocumentMeta();
   useAutoReload();
+  // Which train-card skin packs are on offer — fetched once here so a hand of cards doesn't.
+  useTrainCarSkinCatalog(!!user);
 
   // '/' (and any unrecognized path, which falls back to it) never needs `authed` to decide what
   // to render — App picks landing vs. home off `user` directly — so a cold load there can paint

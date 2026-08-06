@@ -9,6 +9,7 @@ import { GameModule } from './game/game.module';
 import { LobbyModule } from './lobby/lobby.module';
 import { HistoryModule } from './history/history.module';
 import { MapsModule } from './maps/maps.module';
+import { SkinsModule } from './skins/skins.module';
 import { RatingsModule } from './ratings/ratings.module';
 import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { DashboardModule } from './dashboard/dashboard.module';
@@ -38,6 +39,7 @@ import { OpenApiHolder } from './openapi/openapi.holder';
     DatabaseModule,
     AuthModule,
     MapsModule,
+    SkinsModule,
     GameModule,
     LobbyModule,
     HistoryModule,

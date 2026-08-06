@@ -39,8 +39,7 @@ function chatText(seq: number, value: string) {
 
 const historyOf = (frames: ServerEnvelope[]) =>
   frames.find((f) => f.event.case === 'history')?.event.value as
-    | { chat: { content: { case: string; value: string } }[] }
-    | undefined;
+    { chat: { content: { case: string; value: string } }[] } | undefined;
 
 const rejectionsOf = (frames: ServerEnvelope[]) =>
   frames

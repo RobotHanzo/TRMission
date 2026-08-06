@@ -96,10 +96,12 @@
     opacity: 1;
   }
 }
-/* Tunnel reveal: big cards flip in one at a time, slowly, for suspense. */
+/* Tunnel reveal: big cards flip in one at a time, slowly, for suspense. The flip and the stagger
+   are pinned by TunnelModal (client-core's `tunnelRevealTiming`) so replay autoplay at 2×/4× can
+   run the same reveal at its rate instead of having it cut off; the fallbacks are 1×. */
 .tunnel-reveal-card {
-  animation: anim-card-flip-in 0.6s ease-out both;
-  animation-delay: calc(var(--i, 0) * 0.5s);
+  animation: anim-card-flip-in var(--reveal-flip, 0.6s) ease-out both;
+  animation-delay: calc(var(--i, 0) * var(--reveal-stagger, 0.5s));
 }
 .market-slot.is-flipping {
   animation: anim-card-flip-in 0.45s ease-out;

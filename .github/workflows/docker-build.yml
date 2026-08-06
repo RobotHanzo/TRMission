@@ -150,7 +150,7 @@ jobs:
           rm -rf packages/proto/src/gen ota-web
           docker cp "$sid:/app/packages/proto/src/gen" packages/proto/src/gen
           docker cp "$sid:/app/.trm-deps-fingerprint" image-fingerprint.txt
-          docker cp "$wid:/srv/web/baked" ota-web
+          docker cp "$wid:/usr/share/trm-web" ota-web
           docker rm -v "$sid" "$wid" > /dev/null
 
       # The fence only works if the image's baked fingerprint and the one computed from this checkout
@@ -236,4 +236,15 @@ jobs:
             echo '::warning::PORTAINER_WEBHOOK_URL is not set — redeploy the stack manually to pick this up.'
             exit 0
           fi
-          curl -fsS --max-time 120 -X POST "$PORTAINER_WEBHOOK"
+          # Portainer holds the connection open for the WHOLE redeploy rather than acking and working
+          # in the background, and a cold pull of the ~2GB server image outlasts any sane client
+          # timeout. So a timeout here means "still deploying", not "failed" — the request was
+          # accepted the moment it arrived. Only a real HTTP error (bad URL, revoked webhook) is a
+          # failure worth going red for.
+          if curl -fsS --max-time 300 -X POST "$PORTAINER_WEBHOOK"; then
+            echo 'Portainer accepted the redeploy.'
+          else
+            code=$?
+            [ "$code" = 28 ] || exit "$code"
+            echo '::notice::Portainer webhook timed out — the redeploy was accepted and is still running.'
+          fi

@@ -17,8 +17,7 @@ export type RoomVisibility = 'PUBLIC' | 'INVITE_ONLY';
 
 /** Which map a room's game will be played on. 'custom' is validated/resolved by MapsService. */
 export type MapSelector =
-  | { source: 'official'; mapId: string }
-  | { source: 'custom'; customMapId: string };
+  { source: 'official'; mapId: string } | { source: 'custom'; customMapId: string };
 
 /** Host-configured per-game settings. Rule variants flow into the engine at start; spectating,
  *  visibility, and the map selection are control-plane only. */
@@ -128,11 +127,7 @@ export interface RoomDoc {
 }
 
 export type UpdateSettingsResult =
-  | RoomDoc
-  | 'not_found'
-  | 'forbidden'
-  | 'started'
-  | 'too_many_seated';
+  RoomDoc | 'not_found' | 'forbidden' | 'started' | 'too_many_seated';
 
 /** A settings patch from the wire: each field optional and may be explicitly undefined (matches the
  *  zod `.partial()` DTO under exactOptionalPropertyTypes). Undefined values are ignored on merge. */
@@ -144,13 +139,7 @@ export type RemoveBotResult = RoomDoc | 'not_found' | 'forbidden' | 'started';
 export type KickResult = RoomDoc | 'not_found' | 'forbidden' | 'started' | 'invalid';
 export type ReseatResult = RoomDoc | 'not_found' | 'forbidden' | 'started' | 'invalid';
 export type JoinTeamResult =
-  | RoomDoc
-  | 'not_found'
-  | 'started'
-  | 'not_member'
-  | 'mode_disabled'
-  | 'invalid_team'
-  | 'already';
+  RoomDoc | 'not_found' | 'started' | 'not_member' | 'mode_disabled' | 'invalid_team' | 'already';
 export type SendChatResult = RoomDoc | 'not_found' | 'not_member' | 'rate_limited';
 export type EndVoteResult = RoomDoc | 'not_found' | 'not_member' | 'not_started';
 export type BecomeSpectatorResult =

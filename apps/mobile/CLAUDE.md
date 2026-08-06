@@ -39,11 +39,18 @@ Read the one for the area you're touching (Claude Code loads them on demand):
 
 ## Stack & pins
 
-- **Expo SDK 56** (RN 0.85, React 19.2, New Architecture, Hermes). `expo-*` modules use SDK 56's
-  unified `~56.0.x` versioning — reconcile any dep via `npx expo install --check`, not by hand.
+- **Expo SDK 57** (RN 0.86, React 19.2.3, New Architecture, Hermes). `expo-*` modules use SDK 57's
+  unified `~57.0.x` versioning — reconcile any dep via `npx expo install --check`, not by hand.
+  The SDK's `bundledNativeModules.json` is the native compatibility contract and **outranks npm
+  `latest`**: it deliberately holds several packages below their newest release (async-storage
+  2.2.0, gesture-handler ~2.32, webview 13.16.1, worklets 0.10.1, skia 2.6.2). Don't "upgrade"
+  those past the SDK.
 - **React Navigation 7** native-stack (not Expo Router — few screens, heavily custom UI).
-- **jest 29** (NOT 30): `jest-expo@56` is a jest-29 preset; a jest-30 runtime collides with its
-  jest-29 internals. Keep the whole `jest*` stack on 29.
+- **jest 29** (NOT 30): `jest-expo@57` is still a jest-29 preset (its deps pin `babel-jest`,
+  `@jest/globals` and `jest-environment-jsdom` to ^29); a jest-30 runtime collides with its
+  jest-29 internals. Keep the whole `jest*` stack on 29 — and `@testing-library/react-native` on
+  **13**, since v14 swaps the `react-test-renderer` peer for the new `test-renderer` package that
+  the jest-expo preset does not wire up.
 - **`react-native-google-mobile-ads` pinned exact to 16.3.4** (issue #50) — a Kotlin-toolchain
   collision, not a preference; `src/ads/CLAUDE.md` has the reason and the policy boundary on
   placements.

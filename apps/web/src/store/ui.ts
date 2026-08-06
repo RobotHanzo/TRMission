@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { DEFAULT_TRAIN_CAR_SKIN, isTrainCarSkin, type TrainCarSkin } from '@trm/shared';
 import { LEGAL_PATHS } from '@trm/client-core/legal';
 import type { Theme, Locale, BoardLayout, UserPreferences } from '../net/rest';
 import { disconnectGame } from '../net/connection';
@@ -145,6 +146,7 @@ const THEME_KEY = 'trm.theme';
 const COLOR_BLIND_KEY = 'trm.colorBlind';
 const LOCALE_KEY = 'trm.locale';
 const BOARD_LAYOUT_KEY = 'trm.boardLayout';
+const TRAIN_CAR_SKIN_KEY = 'trm.trainCarSkin';
 const SOUND_ENABLED_KEY = 'trm.soundEnabled';
 const SOUND_VOLUME_KEY = 'trm.soundVolume';
 const HIDE_ADS_KEY = 'trm.hideAds';
@@ -181,6 +183,14 @@ const readBoardLayout = (): BoardLayout => {
     return v && (BOARD_LAYOUTS as string[]).includes(v) ? (v as BoardLayout) : 'rail';
   } catch {
     return 'rail';
+  }
+};
+const readTrainCarSkin = (): TrainCarSkin => {
+  try {
+    const v = localStorage.getItem(TRAIN_CAR_SKIN_KEY);
+    return v && isTrainCarSkin(v) ? v : DEFAULT_TRAIN_CAR_SKIN;
+  } catch {
+    return DEFAULT_TRAIN_CAR_SKIN;
   }
 };
 const readSoundEnabled = (): boolean => {
@@ -232,6 +242,12 @@ interface UiState {
   theme: Theme;
   colorBlind: boolean;
   boardLayout: BoardLayout;
+  /** Train-card artwork pack. Account-synced like the other display prefs; what actually gets
+   *  drawn is `resolveTrainCarSkin(trainCarSkin, availableTrainCarSkins)` — see `useTrainCarSkin`. */
+  trainCarSkin: TrainCarSkin;
+  /** The packs a maintainer currently offers (`GET /skins/train-cars/enabled`); null until the
+   *  list arrives or if the request failed — treated as "offer everything this build bundles". */
+  availableTrainCarSkins: TrainCarSkin[] | null;
   /** Sound effects on/off + volume — per-device (localStorage only, never account-synced). */
   soundEnabled: boolean;
   soundVolume: number;
@@ -287,6 +303,8 @@ interface UiState {
   setTheme(theme: Theme): void;
   setColorBlind(colorBlind: boolean): void;
   setBoardLayout(boardLayout: BoardLayout): void;
+  setTrainCarSkin(trainCarSkin: TrainCarSkin): void;
+  setAvailableTrainCarSkins(skins: TrainCarSkin[] | null): void;
   setSoundEnabled(soundEnabled: boolean): void;
   setSoundVolume(soundVolume: number): void;
   setHideAds(hideAds: boolean): void;
@@ -315,6 +333,8 @@ export const useUi = create<UiState>()((set, get) => ({
   theme: readTheme(),
   colorBlind: readColorBlind(),
   boardLayout: readBoardLayout(),
+  trainCarSkin: readTrainCarSkin(),
+  availableTrainCarSkins: null,
   soundEnabled: readSoundEnabled(),
   soundVolume: readSoundVolume(),
   hideAds: readHideAds(),
@@ -640,6 +660,11 @@ export const useUi = create<UiState>()((set, get) => ({
     writeLocal(BOARD_LAYOUT_KEY, boardLayout);
     set({ boardLayout });
   },
+  setTrainCarSkin: (trainCarSkin) => {
+    writeLocal(TRAIN_CAR_SKIN_KEY, trainCarSkin);
+    set({ trainCarSkin });
+  },
+  setAvailableTrainCarSkins: (availableTrainCarSkins) => set({ availableTrainCarSkins }),
   setSoundEnabled: (soundEnabled) => {
     writeLocal(SOUND_ENABLED_KEY, soundEnabled ? '1' : '0');
     set({ soundEnabled });
@@ -656,15 +681,20 @@ export const useUi = create<UiState>()((set, get) => ({
   setFollowActing: (followActing) => set({ followActing }),
   setEncyclopediaOpen: (encyclopediaOpen) => set({ encyclopediaOpen }),
   applyPreferences: (prefs) => {
+    // A server built before this preference existed omits it — keep whatever is stored locally
+    // rather than snapping the card art back to the default on every sign-in.
+    const trainCarSkin = prefs.trainCarSkin ?? get().trainCarSkin;
     writeLocal(THEME_KEY, prefs.theme);
     writeLocal(COLOR_BLIND_KEY, prefs.colorBlind ? '1' : '0');
     writeLocal(LOCALE_KEY, prefs.locale);
     writeLocal(BOARD_LAYOUT_KEY, prefs.boardLayout);
+    writeLocal(TRAIN_CAR_SKIN_KEY, trainCarSkin);
     set({
       theme: prefs.theme,
       colorBlind: prefs.colorBlind,
       locale: prefs.locale,
       boardLayout: prefs.boardLayout,
+      trainCarSkin,
     });
   },
 }));

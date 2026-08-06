@@ -1111,14 +1111,7 @@ In `apps/web/src/store/ui.ts`:
 
 ```ts
 export type View =
-  | 'home'
-  | 'room'
-  | 'game'
-  | 'tutorial'
-  | 'login'
-  | 'loginCallback'
-  | 'history'
-  | 'replay';
+  'home' | 'room' | 'game' | 'tutorial' | 'login' | 'loginCallback' | 'history' | 'replay';
 ```
 
 2. After `const TUTORIAL_PATH = '/tutorial';` add:

@@ -2,7 +2,9 @@
 // instantly (the ui store persists on-device) and then syncs to the account — a no-op for guests.
 import { useTranslation } from 'react-i18next';
 import { Switch } from 'react-native';
-import { Languages, PanelRight, Shapes, SunMoon } from 'lucide-react-native';
+import { Languages, PanelRight, Shapes, SunMoon, TrainFront } from 'lucide-react-native';
+import type { TrainCarSkin } from '@trm/shared';
+import { trainCarSkinOptions } from '@trm/client-core/game/trainCarSkins';
 import type { BoardLayout, Locale, Theme, UserPreferences } from '../../net/rest';
 import { useGlassHeaderPad } from '../../hooks/useGlassHeaderPad';
 import { useSession } from '../../store/session';
@@ -18,17 +20,28 @@ export default function AppearanceScreen(): React.JSX.Element {
   const locale = useUi((s) => s.locale);
   const colorBlind = useUi((s) => s.colorBlind);
   const boardLayout = useUi((s) => s.boardLayout);
+  const trainCarSkin = useUi((s) => s.trainCarSkin);
+  const availableTrainCarSkins = useUi((s) => s.availableTrainCarSkins);
   const setTheme = useUi((s) => s.setTheme);
   const setLocale = useUi((s) => s.setLocale);
   const setColorBlind = useUi((s) => s.setColorBlind);
   const setBoardLayout = useUi((s) => s.setBoardLayout);
+  const setTrainCarSkin = useUi((s) => s.setTrainCarSkin);
 
   // Apply immediately for snappy feedback, then sync the full set to the account. Spreading the
   // current values keeps every preference in the payload.
   const persist = (patch: Partial<UserPreferences>): void =>
-    void savePreferences({ theme, colorBlind, locale, boardLayout, ...patch }).catch(
-      () => undefined,
-    );
+    void savePreferences({
+      theme,
+      colorBlind,
+      locale,
+      boardLayout,
+      trainCarSkin,
+      ...patch,
+    }).catch(() => undefined);
+
+  // Only the packs a maintainer currently offers; a single-pack list means nothing to choose.
+  const skinOptions = trainCarSkinOptions(availableTrainCarSkins, locale);
 
   return (
     <SettingsPage topPad={headerPad} testID="settings-appearance">
@@ -82,6 +95,20 @@ export default function AppearanceScreen(): React.JSX.Element {
           }}
           testIDPrefix="layout"
         />
+        {skinOptions.length > 1 && (
+          <ChoiceRow<TrainCarSkin>
+            icon={TrainFront}
+            label={t('settings.trainCarSkin')}
+            hint={t('settings.trainCarSkinDesc')}
+            options={skinOptions.map(({ skin, label }) => ({ value: skin, label }))}
+            value={trainCarSkin}
+            onChange={(next) => {
+              void setTrainCarSkin(next);
+              persist({ trainCarSkin: next });
+            }}
+            testIDPrefix="train-car-skin"
+          />
+        )}
         <SettingsRow
           icon={Shapes}
           label={t('settings.colorBlind')}

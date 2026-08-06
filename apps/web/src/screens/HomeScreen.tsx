@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BookOpen, ChevronRight, CirclePlus, GraduationCap, RailSymbol } from 'lucide-react';
+import { BookOpen, ChevronRight, CirclePlus, GraduationCap, TrainTrack } from 'lucide-react';
 import { useSession } from '../store/session';
 import { useUi } from '../store/ui';
 import { useAnimationsStore } from '../store/animations';
@@ -277,7 +277,7 @@ export function HomeScreen() {
             {t('createRoom')}
           </button>
           <div className="home-join">
-            <RailSymbol size={16} aria-hidden className="home-join-icon" />
+            <TrainTrack size={16} aria-hidden className="home-join-icon" />
             <input
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}

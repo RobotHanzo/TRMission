@@ -165,11 +165,7 @@ export interface GameHubOptions {
 }
 
 export type EndGameResult =
-  | 'ended'
-  | 'already_ended'
-  | 'not_found'
-  | 'invalid_player'
-  | 'persist_failed';
+  'ended' | 'already_ended' | 'not_found' | 'invalid_player' | 'persist_failed';
 
 /**
  * A persisted game that can never be brought back to life (incompatible engine major, or a

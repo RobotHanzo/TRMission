@@ -10,6 +10,9 @@ export default {
   layout: '版面配置',
   layoutRail: '右側欄',
   layoutTray: '底部牌列',
+  // 車廂卡面的外觀主題；純裝飾，只有自己看得到。
+  trainCarSkin: '車廂卡圖',
+  trainCarSkinDesc: '選擇車廂卡使用的圖樣，純裝飾，僅自己可見。',
   sound: '音效',
   volume: '音量',
   language: '語言',

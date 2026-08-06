@@ -75,7 +75,7 @@ export default function MapsScreen() {
   // A shared link (/maps?code=XXXXXXXX — what ShareStage copies) lands with the code
   // prefilled and previewed, so the recipient only has to press clone.
   useEffect(() => {
-    let fromUrl = '';
+    let fromUrl: string;
     try {
       fromUrl = new URLSearchParams(window.location.search).get('code')?.trim() ?? '';
     } catch {

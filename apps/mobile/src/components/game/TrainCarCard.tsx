@@ -4,9 +4,10 @@
 // colour-blind mode. The wild loco wears the rainbow edge via expo-linear-gradient.
 import { StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import type { CardColor } from '@trm/shared';
+import type { CardColor, TrainCarSkin } from '@trm/shared';
 import { CARD_COLOR_TOKENS, LIVERY_GRADIENT_COLORS } from '../../theme/colors';
 import { rgba } from '../../theme/shade';
+import { useTrainCarSkin } from '../../theme/useTrainCarSkin';
 import { TrainCarArt } from './TrainCarArt';
 
 interface Props {
@@ -22,10 +23,21 @@ interface Props {
 
 const CARD_W = 92;
 const ASPECT = 92 / 64; // card width : height (art + padding), matching the web proportions
-/** Height reserved under the artwork for the glyph + count chips (chip 14/15dp + a 4dp inset).
- *  The illustration is ~2.2:1 and runs the full card width, so it is height-bound in this band —
- *  too small a reserve and the vehicle's underframe sits behind the chips. */
-const ART_BOTTOM = 19;
+
+/**
+ * The artwork band, per SKIN — the packs are drawn to different proportions, so where the art
+ * sits inside the card face is presentation and stays platform-side (web's equivalent is
+ * `.rs-skin-*` in game.css).
+ *
+ * `rollingStock`: the illustration is ~2.2:1 and runs the full card width, so it is height-bound
+ * in this band — too small a bottom reserve (chip 14/15dp + a 4dp inset) and the vehicle's
+ * underframe sits behind the chips. `classic` is 132×72 and was drawn centred in the whole face
+ * with the chips overlapping its corners; these are its original insets.
+ */
+const ART_BAND: Record<TrainCarSkin, { top: number; bottom: number; side: number }> = {
+  rollingStock: { top: 8, bottom: 19, side: 0 },
+  classic: { top: 5, bottom: 0, side: 2 },
+};
 
 export function TrainCarCard({ color, count, showGlyph = true, showCount = true, size }: Props) {
   const tok = CARD_COLOR_TOKENS[color];
@@ -35,6 +47,7 @@ export function TrainCarCard({ color, count, showGlyph = true, showCount = true,
   const deep = n > 2;
   const w = size ?? CARD_W;
   const h = w / ASPECT;
+  const band = ART_BAND[useTrainCarSkin()];
 
   return (
     <View
@@ -57,7 +70,13 @@ export function TrainCarCard({ color, count, showGlyph = true, showCount = true,
         ) : (
           <View style={[styles.edge, { backgroundColor: tok.hex }]} />
         )}
-        <View style={styles.art} pointerEvents="none">
+        <View
+          style={[
+            styles.art,
+            { top: band.top, bottom: band.bottom, left: band.side, right: band.side },
+          ]}
+          pointerEvents="none"
+        >
           <TrainCarArt color={color} />
         </View>
         {showGlyph && (
@@ -90,11 +109,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.06)',
   },
   edge: { position: 'absolute', top: 0, left: 0, right: 0, height: 5 },
-  // The illustration is a side elevation at ~2.2:1 — wider than the card face — so it gets a
-  // full-bleed band pinned between the colour edge and the chip row, the same treatment the web
-  // card gives it. The glyph moved to the bottom row with the count for the same reason: at this
-  // width the art runs the full face, and a top-left chip would sit on the vehicle's nose.
-  art: { position: 'absolute', left: 0, right: 0, top: 8, bottom: ART_BOTTOM },
+  // Positioned band between the colour edge and the chip row; the four insets come from
+  // ART_BAND, per skin. The glyph sits in the bottom row with the count because the default
+  // pack's art runs the full face — a top-left chip would sit on the vehicle's nose.
+  art: { position: 'absolute' },
   glyphChip: {
     position: 'absolute',
     left: 4,

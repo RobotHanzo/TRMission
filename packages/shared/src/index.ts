@@ -13,4 +13,5 @@ export * from './ws';
 export * from './chat-presets';
 export * from './reports';
 export * from './mapFeatures';
+export * from './trainCarSkins';
 export * from './telemetry';

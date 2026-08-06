@@ -11,7 +11,7 @@
     }
   },
   "dependencies": {
-    "@bufbuild/protobuf": "^2.12.1",
+    "@bufbuild/protobuf": "^2.13.0",
     "@trm/engine": "workspace:*",
     "@trm/proto": "workspace:*",
     "@trm/shared": "workspace:*"
@@ -19,7 +19,7 @@
   "devDependencies": {
     "@trm/tsc7": "workspace:*",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
-    "vitest": "^2.1.8"
+    "vitest": "^4.1.10"
   },
   "scripts": {
     "typecheck": "tsc7 --noEmit",

@@ -2,7 +2,7 @@
 // app's proven core (in-memory access token, httpOnly refresh cookie, single-flight
 // 401→refresh→retry) plus the /dashboard endpoints. Same origin as the game, so a
 // session established in either app restores in the other.
-import type { DashboardPermission, DashboardRole, UserFeature } from '@trm/shared';
+import type { DashboardPermission, DashboardRole, TrainCarSkin, UserFeature } from '@trm/shared';
 import type { MapGeography } from '@trm/map-data';
 
 export interface PublicUser {
@@ -51,6 +51,17 @@ export interface OfficialMapRow {
   /** Community author credit — absent for TRMission-authored maps. */
   author?: string;
   enabled: boolean;
+}
+
+/** One train-card skin pack that ships with the game, and whether players may currently pick it.
+ *  Names come from the server so the dashboard bundle never pulls in the artwork tables. */
+export interface TrainCarSkinRow {
+  skinId: TrainCarSkin;
+  nameZh: string;
+  nameEn: string;
+  enabled: boolean;
+  /** The default pack — always on offer, so its toggle is rendered disabled. */
+  locked: boolean;
 }
 
 export interface UserRow {
@@ -409,6 +420,12 @@ export const api = {
   getOfficialMaps: () => req<{ maps: OfficialMapRow[] }>('GET', '/dashboard/config/official-maps'),
   putOfficialMaps: (enabledMapIds: string[]) =>
     req<{ maps: OfficialMapRow[] }>('PUT', '/dashboard/config/official-maps', { enabledMapIds }),
+  getTrainCarSkins: () =>
+    req<{ skins: TrainCarSkinRow[] }>('GET', '/dashboard/config/train-car-skins'),
+  putTrainCarSkins: (enabledSkinIds: string[]) =>
+    req<{ skins: TrainCarSkinRow[] }>('PUT', '/dashboard/config/train-car-skins', {
+      enabledSkinIds,
+    }),
 
   listGames: (opts: { status?: string; cursor?: string } = {}) =>
     req<GamesPage>('GET', `/dashboard/games${qs(opts)}`),

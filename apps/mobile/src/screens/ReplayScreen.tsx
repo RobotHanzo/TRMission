@@ -236,6 +236,7 @@ function ReplayStage({
           commands={null}
           sandbox
           frameTarget={frameTarget}
+          playbackSpeed={player.speed}
           onLeave={onLeave}
         />
       </View>

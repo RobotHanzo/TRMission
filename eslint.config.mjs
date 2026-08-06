@@ -145,6 +145,11 @@ export default tseslint.config(
       'no-restricted-globals': 'off',
       'no-restricted-properties': 'off',
       'no-restricted-syntax': 'off',
+      // The e2e specs drive the hub with `encodeClient(++seq, …)`. On the LAST frame of a spec the
+      // store-back is dead, which eslint 10 flags — but dropping it to `seq + 1` would mean the
+      // next frame anyone appends silently reuses a seq, and the hub discards a replayed
+      // client_seq as a duplicate. Keep the counter honest; the dead store is the cheap half.
+      'no-useless-assignment': 'off',
     },
   },
 );

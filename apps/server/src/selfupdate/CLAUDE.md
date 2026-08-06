@@ -38,7 +38,10 @@ on it until the next poll.
 ## Reporting a version
 
 `GIT_COMMIT` is the IMAGE's commit and is wrong after an apply. Everything version-shaped goes through
-`buildInfo.ts` — a stale Sentry `release` binds new traces to the previous build's source maps.
+`buildInfo.ts` — a stale Sentry `release` binds new traces to the previous build's source maps. The
+surfaces that report one today are `health.controller.ts` (`/version`, the mobile version gate) and
+`dashboard.service.ts` (the overview's server-build row, which the admin app also compares against the
+web bundle's build id). Reach for `env.gitCommit` only when you specifically mean the image.
 
 ## Tests
 

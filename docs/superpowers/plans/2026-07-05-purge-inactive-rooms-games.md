@@ -3135,27 +3135,14 @@ In `apps/admin/src/store/ui.ts`, replace:
 
 ```ts
 export type AdminView =
-  | 'overview'
-  | 'users'
-  | 'features'
-  | 'games'
-  | 'rooms'
-  | 'maintainers'
-  | 'audit';
+  'overview' | 'users' | 'features' | 'games' | 'rooms' | 'maintainers' | 'audit';
 ```
 
 with:
 
 ```ts
 export type AdminView =
-  | 'overview'
-  | 'users'
-  | 'features'
-  | 'games'
-  | 'rooms'
-  | 'maintainers'
-  | 'audit'
-  | 'purge';
+  'overview' | 'users' | 'features' | 'games' | 'rooms' | 'maintainers' | 'audit' | 'purge';
 ```
 
 and replace:

@@ -41,9 +41,7 @@ export interface CountryLand {
   readonly continent: string; // CONTINENT, e.g. "Asia" — used for the sidebar's grouping
   readonly rings: readonly Ring[]; // exterior ring(s) only, same Ring type as clip.ts
 }
-export const WORLD_COUNTRIES: readonly CountryLand[] = [
-  /* 177 entries */
-];
+export const WORLD_COUNTRIES: readonly CountryLand[] = [/* 177 entries */];
 ```
 
 Generation mirrors the `worldData.ts` fix from earlier today: fetch the source GeoJSON, keep only

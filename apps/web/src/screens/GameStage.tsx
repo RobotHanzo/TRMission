@@ -104,6 +104,9 @@ export interface GameStageProps {
   /** Tutorial only: fires whenever the payment-choice modal opens/closes, so the coachmark can
    *  redirect its spotlight + copy to the payment dialog once the learner's click opens it. */
   onPendingClaim?: ((kind: 'route' | 'station' | null) => void) | undefined;
+  /** Replay only: the autoplay rate, so timed reveals (the tunnel flip) run at it rather than
+   *  being cut off by the shortened gap between actions. Live play leaves this at 1×. */
+  playbackSpeed?: number | undefined;
 }
 
 export function GameStage({
@@ -123,6 +126,7 @@ export function GameStage({
   frameTarget,
   actionGate,
   onPendingClaim,
+  playbackSpeed,
 }: GameStageProps) {
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
@@ -913,6 +917,7 @@ export function GameStage({
           options={tunnelExtras}
           spectator={!tunnelMine}
           onDismiss={playback ? tunnelReveal.dismiss : undefined}
+          speed={playbackSpeed}
           onCommit={(p) => {
             commands?.resolveTunnel(true, paymentToProto(p));
             setTunnelBase(null);

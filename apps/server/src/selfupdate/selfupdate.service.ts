@@ -121,6 +121,16 @@ export class SelfUpdateService implements OnApplicationBootstrap, OnApplicationS
     this.log.log(
       `self-update armed (${currentCommit()}, fence ${this.fingerprint.slice(0, 19)}…, web ${this.web.shared ? 'ready' : 'unavailable'})`,
     );
+    // Name the cause. `web unavailable` on its own reads like a property of the feature rather than
+    // what it is — a missing volume mount — and the symptom (the server hot-updates but browsers
+    // stay on the old bundle) points nowhere near it.
+    if (!this.web.shared)
+      this.log.warn(
+        `web OTA unavailable: no .web-tier sentinel under ${this.web.root}, so this container is ` +
+          "not sharing the nginx container's release volume. Give BOTH services the " +
+          '`trm-web-releases:/srv/web` mount (docker-stack.yml). Until then an applied update ' +
+          'changes the server only — browser bundles move on an image pull.',
+      );
     this.schedule(setTimeout(() => void this.check(), FIRST_CHECK_DELAY_MS));
     if (env.selfUpdatePollMs > 0) {
       this.schedule(setInterval(() => void this.check(), env.selfUpdatePollMs));

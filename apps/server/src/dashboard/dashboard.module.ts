@@ -4,6 +4,7 @@ import { GameModule } from '../game/game.module';
 import { LobbyModule } from '../lobby/lobby.module';
 import { HistoryModule } from '../history/history.module';
 import { MapsModule } from '../maps/maps.module';
+import { SkinsModule } from '../skins/skins.module';
 import { PushModule } from '../push/push.module';
 import { DashboardConfig } from './dashboard-config';
 import { DashboardAccountRepo } from './dashboard-account.repo';
@@ -16,6 +17,7 @@ import { DashboardGamesService } from './dashboard-games.service';
 import { DashboardMaintainersService } from './dashboard-maintainers.service';
 import { DashboardFeatureDefaultsService } from './dashboard-feature-defaults.service';
 import { DashboardOfficialMapsService } from './dashboard-official-maps.service';
+import { DashboardTrainCarSkinsService } from './dashboard-train-car-skins.service';
 import { PurgeService } from './purge.service';
 import { DashboardMapsService } from './dashboard-maps.service';
 import { DashboardController } from './dashboard.controller';
@@ -24,6 +26,7 @@ import { DashboardGamesController } from './dashboard-games.controller';
 import { DashboardMaintainersController } from './dashboard-maintainers.controller';
 import { DashboardFeatureDefaultsController } from './dashboard-feature-defaults.controller';
 import { DashboardOfficialMapsController } from './dashboard-official-maps.controller';
+import { DashboardTrainCarSkinsController } from './dashboard-train-car-skins.controller';
 import { DashboardPurgeController } from './dashboard-purge.controller';
 import { DashboardMapsController } from './dashboard-maps.controller';
 import { DashboardRatingsService } from './dashboard-ratings.service';
@@ -51,6 +54,7 @@ import { DashboardPushController } from './dashboard-push.controller';
     LobbyModule,
     HistoryModule,
     MapsModule,
+    SkinsModule,
     RatingsModule,
     LeaderboardModule,
     ModerationModule,
@@ -63,6 +67,7 @@ import { DashboardPushController } from './dashboard-push.controller';
     DashboardMaintainersController,
     DashboardFeatureDefaultsController,
     DashboardOfficialMapsController,
+    DashboardTrainCarSkinsController,
     DashboardPurgeController,
     DashboardMapsController,
     DashboardRatingsController,
@@ -82,6 +87,7 @@ import { DashboardPushController } from './dashboard-push.controller';
     DashboardMaintainersService,
     DashboardFeatureDefaultsService,
     DashboardOfficialMapsService,
+    DashboardTrainCarSkinsService,
     DashboardBootstrap,
     PurgeService,
     DashboardMapsService,

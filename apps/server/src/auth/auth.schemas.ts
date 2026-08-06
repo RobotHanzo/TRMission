@@ -1,22 +1,31 @@
 import { z } from 'zod';
 import { createZodDto } from 'nestjs-zod';
-import { MAP_FEATURE_KEYS } from '@trm/shared';
+import { MAP_FEATURE_KEYS, TRAIN_CAR_SKINS } from '@trm/shared';
 
 // zod is the single source for both validation (via ZodValidationPipe + these DTOs)
 // and the OpenAPI body/response schemas (via apiSchema()).
 const locale = z.enum(['zh-Hant', 'en']);
 const theme = z.enum(['system', 'light', 'dark']);
 const boardLayout = z.enum(['rail', 'tray']);
+const trainCarSkin = z.enum(TRAIN_CAR_SKINS);
 const displayName = z.string().trim().min(1).max(24);
 const password = z.string().min(8).max(200);
 const email = z.email();
 
+/** What `/auth/me` reports back: every preference resolved, nothing optional. */
 export const PreferencesSchema = z.object({
   theme,
   colorBlind: z.boolean(),
   locale,
   boardLayout,
+  trainCarSkin,
 });
+/**
+ * What a client may PATCH. Every field is optional and the repo writes per field, so a client
+ * built before a preference existed cannot blank it by sending the older four-field blob — which
+ * is exactly what an installed mobile build does until it updates.
+ */
+export const PreferencesPatchSchema = PreferencesSchema.partial();
 
 export const GuestSchema = z.object({
   displayName: displayName.optional(),
@@ -56,7 +65,7 @@ export class RegisterDto extends createZodDto(RegisterSchema) {}
 export class UpgradeDto extends createZodDto(UpgradeSchema) {}
 export class LoginDto extends createZodDto(LoginSchema) {}
 export class GoogleCredentialDto extends createZodDto(GoogleCredentialSchema) {}
-export class UpdatePreferencesDto extends createZodDto(PreferencesSchema) {}
+export class UpdatePreferencesDto extends createZodDto(PreferencesPatchSchema) {}
 // Web sends these with NO body at all (no Content-Type ⇒ req.body is undefined), so the
 // DTO defaults to {} — otherwise the zod pipe would 400 every cookie-based refresh/logout.
 export class RefreshDto extends createZodDto(RefreshSchema.default({})) {}

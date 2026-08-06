@@ -34,26 +34,31 @@ describe('counter PRNG', () => {
 
   it('nextU32 stays within uint32 range', () => {
     let s = makeRng('range-check');
+    // Assert once on a violation count, not 3x per iteration — see the uniformity test below.
+    let outOfRange = 0;
     for (let i = 0; i < 5000; i++) {
       const [v, n] = nextU32(s);
-      expect(v).toBeGreaterThanOrEqual(0);
-      expect(v).toBeLessThanOrEqual(0xffffffff);
-      expect(Number.isInteger(v)).toBe(true);
+      if (!Number.isInteger(v) || v < 0 || v > 0xffffffff) outOfRange++;
       s = n;
     }
+    expect(outOfRange).toBe(0);
   });
 
   it('nextInt is in range and reasonably uniform', () => {
     const buckets = new Array(6).fill(0);
     let s = makeRng('dice');
     const N = 60000;
+    // Count violations and assert ONCE afterwards rather than calling expect() 2N times inside the
+    // loop: vitest's assertion machinery — not the PRNG — was ~8.5s of this file's runtime, enough
+    // to blow the default 5s timeout on a CI runner. Same coverage, every draw still checked.
+    let outOfRange = 0;
     for (let i = 0; i < N; i++) {
       const [v, n] = nextInt(s, 6);
-      expect(v).toBeGreaterThanOrEqual(0);
-      expect(v).toBeLessThan(6);
-      buckets[v]++;
+      if (!Number.isInteger(v) || v < 0 || v >= 6) outOfRange++;
+      else buckets[v]++;
       s = n;
     }
+    expect(outOfRange).toBe(0);
     // Each bucket should be within ~10% of N/6.
     for (const b of buckets) {
       expect(b).toBeGreaterThan((N / 6) * 0.9);

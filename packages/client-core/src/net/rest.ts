@@ -327,6 +327,11 @@ function buildApi(
       );
     },
 
+    // ── cosmetics ───────────────────────────────────────────────────────────
+    // Which train-card skin packs a maintainer currently offers. Ungated, like the enabled
+    // official-map list: every player's settings screen reads it.
+    enabledTrainCarSkinIds: () => req<{ skinIds: string[] }>('GET', '/skins/train-cars/enabled'),
+
     // ── custom maps ─────────────────────────────────────────────────────────
     listMaps: () => req<MapSummary[]>('GET', '/maps'),
     listOfficialMaps: () => req<OfficialMapSummary[]>('GET', '/maps/official'),

@@ -3,17 +3,54 @@ import { Phase, type GameSnapshot } from '@trm/proto';
 import type { TrainColor } from '@trm/shared';
 import type { Hand, Payment } from './payments';
 
-// Reveal timing — web's `.tunnel-reveal-card` (animations.css) and mobile's flip-in both key
+// Reveal timing at 1× — web's `.tunnel-reveal-card` (animations.css) and mobile's flip-in both key
 // off these (0.5s stagger, 0.6s flip), so the per-card sound ticks stay in sync on both.
 export const REVEAL_STAGGER_MS = 500;
 export const REVEAL_FLIP_MS = 600;
+/** Beat after the last card lands before the surcharge result is shown. */
+const REVEAL_RESULT_PAD_MS = 120;
+
+export interface TunnelRevealTiming {
+  /** Delay between consecutive cards flipping in. */
+  staggerMs: number;
+  /** How long one card's flip takes. */
+  flipMs: number;
+  /** Last card landed + the result beat — i.e. the whole reveal. */
+  totalMs: number;
+}
+
+/** A playback rate as a usable multiplier; anything odd (0, NaN, negative) means real time. */
+const rate = (speed: number): number => (Number.isFinite(speed) && speed > 0 ? speed : 1);
+
+/**
+ * The reveal's timings, divided by the playback rate.
+ *
+ * `speed` is the replay's autoplay multiplier (`REPLAY_SPEEDS`). The player shortens the hold
+ * before the next action by the same factor, so the flip, the per-card sound ticks and the
+ * result beat all have to shrink with it — otherwise 2×/4× closes the dialog partway through
+ * the reveal it is waiting on.
+ */
+export function tunnelRevealTiming(
+  revealedCount: number,
+  reducedMotion: boolean,
+  speed = 1,
+): TunnelRevealTiming {
+  if (reducedMotion) return { staggerMs: 0, flipMs: 0, totalMs: 0 };
+  const s = rate(speed);
+  const staggerMs = REVEAL_STAGGER_MS / s;
+  const flipMs = REVEAL_FLIP_MS / s;
+  return {
+    staggerMs,
+    flipMs,
+    totalMs: Math.max(0, revealedCount - 1) * staggerMs + flipMs + REVEAL_RESULT_PAD_MS / s,
+  };
+}
 
 /** How long (ms) `TunnelModal` takes to flip in `revealedCount` cards and show the surcharge
  *  result — 0 under reduced motion, where the result appears instantly. Shared with the replay
  *  player so autoplay can hold a tunnel-reveal frame on screen instead of racing ahead of it. */
-export function tunnelRevealMs(revealedCount: number, reducedMotion: boolean): number {
-  if (reducedMotion) return 0;
-  return Math.max(0, revealedCount - 1) * REVEAL_STAGGER_MS + REVEAL_FLIP_MS + 120;
+export function tunnelRevealMs(revealedCount: number, reducedMotion: boolean, speed = 1): number {
+  return tunnelRevealTiming(revealedCount, reducedMotion, speed).totalMs;
 }
 
 /**

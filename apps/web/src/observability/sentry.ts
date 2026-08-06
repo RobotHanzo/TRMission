@@ -75,8 +75,7 @@ const STACKLESS_WEBKIT_VALUES = ['The string did not match the expected pattern.
 
 export function isStacklessWebkitNoise(event: { exception?: { values?: unknown[] } }): boolean {
   const values = event.exception?.values as
-    | { value?: string; stacktrace?: { frames?: unknown[] } }[]
-    | undefined;
+    { value?: string; stacktrace?: { frames?: unknown[] } }[] | undefined;
   if (values?.length !== 1) return false;
   const only = values[0]!;
   if (!STACKLESS_WEBKIT_VALUES.includes(only.value ?? '')) return false;

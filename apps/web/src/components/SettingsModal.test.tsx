@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import type { UserFeature } from '@trm/shared';
 import '../i18n';
@@ -9,13 +10,24 @@ import { useSession } from '../store/session';
 // SettingsModal only needs the store; stub the socket teardown the ui store imports.
 vi.mock('../net/connection', () => ({ disconnectGame: vi.fn() }));
 
+// vitest 4's bare `vi.fn()` widens to Mock<Constructable | Procedure>, which no longer assigns to a
+// specific slot. Derive the signature from the store so the mock can't drift from the real one.
+type SavePreferences = ReturnType<typeof useSession.getState>['savePreferences'];
+
 describe('SettingsModal account sync', () => {
-  let saved: ReturnType<typeof vi.fn>;
+  let saved: Mock<SavePreferences>;
   beforeEach(() => {
     localStorage.clear();
-    saved = vi.fn();
+    saved = vi.fn<SavePreferences>();
     useSession.setState({ savePreferences: saved });
-    useUi.setState({ theme: 'system', colorBlind: false, locale: 'zh-Hant', boardLayout: 'rail' });
+    useUi.setState({
+      theme: 'system',
+      colorBlind: false,
+      locale: 'zh-Hant',
+      boardLayout: 'rail',
+      trainCarSkin: 'rollingStock',
+      availableTrainCarSkins: null,
+    });
   });
 
   it('saves the full preference set to the account when the language changes', () => {
@@ -28,6 +40,7 @@ describe('SettingsModal account sync', () => {
       colorBlind: false,
       locale: 'en',
       boardLayout: 'rail',
+      trainCarSkin: 'rollingStock',
     });
   });
 
@@ -42,7 +55,47 @@ describe('SettingsModal account sync', () => {
       colorBlind: false,
       locale: 'zh-Hant',
       boardLayout: 'tray',
+      trainCarSkin: 'rollingStock',
     });
+  });
+});
+
+describe('SettingsModal train-card skin picker', () => {
+  let saved: Mock<SavePreferences>;
+  beforeEach(() => {
+    localStorage.clear();
+    saved = vi.fn<SavePreferences>();
+    useSession.setState({ savePreferences: saved });
+    useUi.setState({
+      theme: 'system',
+      colorBlind: false,
+      locale: 'zh-Hant',
+      boardLayout: 'rail',
+      trainCarSkin: 'rollingStock',
+      availableTrainCarSkins: null,
+    });
+  });
+
+  it('offers the packs on offer and syncs the choice to the account', () => {
+    render(<SettingsModal onClose={() => undefined} />);
+    fireEvent.click(screen.getByRole('radio', { name: '經典車廂' }));
+
+    expect(useUi.getState().trainCarSkin).toBe('classic');
+    expect(saved).toHaveBeenCalledWith({
+      theme: 'system',
+      colorBlind: false,
+      locale: 'zh-Hant',
+      boardLayout: 'rail',
+      trainCarSkin: 'classic',
+    });
+  });
+
+  it('hides the section when a maintainer has left only the default pack on offer', () => {
+    // Nothing to choose between: one option is a control that cannot do anything.
+    useUi.setState({ availableTrainCarSkins: ['rollingStock'] });
+    render(<SettingsModal onClose={() => undefined} />);
+    expect(screen.queryByRole('radio', { name: '經典車廂' })).toBeNull();
+    expect(screen.queryByText('車廂卡圖')).toBeNull();
   });
 });
 

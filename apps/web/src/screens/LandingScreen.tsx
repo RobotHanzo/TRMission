@@ -8,9 +8,9 @@ import {
   Languages,
   Layers,
   Mountain,
-  RailSymbol,
   Ticket,
   TrainFront,
+  TrainTrack,
   Trophy,
   Users,
 } from 'lucide-react';
@@ -97,7 +97,7 @@ export function LandingScreen() {
         <div className="landing-wrap landing-hero-grid">
           <div className="landing-hero-copy">
             <p className="landing-eyebrow">
-              <RailSymbol size={14} aria-hidden />
+              <TrainTrack size={14} aria-hidden />
               {t('landing.eyebrow')}
             </p>
             <h1 className="landing-title">{t('landing.title')}</h1>

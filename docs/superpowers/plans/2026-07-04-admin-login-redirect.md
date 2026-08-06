@@ -729,13 +729,7 @@ import { create } from 'zustand';
 import i18n from '../i18n';
 
 export type AdminView =
-  | 'overview'
-  | 'users'
-  | 'features'
-  | 'games'
-  | 'rooms'
-  | 'maintainers'
-  | 'audit';
+  'overview' | 'users' | 'features' | 'games' | 'rooms' | 'maintainers' | 'audit';
 
 export type AdminTheme = 'dark' | 'light';
 export type AdminLocale = 'zh-Hant' | 'en';

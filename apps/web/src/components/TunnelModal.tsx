@@ -4,7 +4,7 @@ import type { CardColor as PbCardColor } from '@trm/proto';
 import { CARD_COLOR_TOKENS } from '../theme/colors';
 import { pbToCard } from '../game/cards';
 import type { Payment } from '../game/payments';
-import { tunnelRevealMs } from '../game/tunnel';
+import { tunnelRevealTiming } from '../game/tunnel';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import { TrainCarCard } from './TrainCarCard';
 import { soundPlayer } from '../sound/player';
@@ -20,14 +20,15 @@ interface Props {
   spectator?: boolean;
   /** Playback (replay): nothing here can resolve the tunnel, so the dialog needs a plain Close. */
   onDismiss?: (() => void) | undefined;
+  /** Playback rate the reveal runs at — replay autoplay at 2×/4× shortens the hold before the
+   *  next action by the same factor, so the flip has to keep up or it never finishes on screen. */
+  speed?: number | undefined;
   onCommit(p: Payment): void;
   onAbort(): void;
 }
 
 // Match the route-claim / station-build payment modal's card size.
 const CARD_SIZE = 104;
-// Card-placement tick per revealed tunnel card, synced to the flip stagger.
-const REVEAL_STAGGER_MS = 500;
 
 /** Describes a spend option for assistive tech, e.g. "藍 ×2 + 彩虹車頭 ×1". */
 const describe = (p: Payment): string => {
@@ -45,6 +46,7 @@ export function TunnelModal({
   playedColor,
   spectator = false,
   onDismiss,
+  speed = 1,
   onCommit,
   onAbort,
 }: Props) {
@@ -55,6 +57,8 @@ export function TunnelModal({
   const [showResult, setShowResult] = useState(reduced);
   // Fire the success/payment cue exactly once per opened tunnel.
   const resultCuePlayed = useRef(false);
+  // One rate for the whole reveal: the CSS flip below, these timers, and the per-card ticks.
+  const { staggerMs, flipMs, totalMs } = tunnelRevealTiming(revealed.length, reduced, speed);
 
   useEffect(() => {
     if (reduced) {
@@ -62,10 +66,9 @@ export function TunnelModal({
       return;
     }
     setShowResult(false);
-    const ms = tunnelRevealMs(revealed.length, reduced);
-    const timer = window.setTimeout(() => setShowResult(true), ms);
+    const timer = window.setTimeout(() => setShowResult(true), totalMs);
     return () => clearTimeout(timer);
-  }, [revealed, reduced]);
+  }, [revealed, reduced, totalMs]);
 
   // Card-placement tick per revealed tunnel card, synced to the flip stagger.
   useEffect(() => {
@@ -74,10 +77,10 @@ export function TunnelModal({
       return;
     }
     const timers = revealed.map((_, i) =>
-      window.setTimeout(() => soundPlayer.play('tunnelDraw'), i * REVEAL_STAGGER_MS),
+      window.setTimeout(() => soundPlayer.play('tunnelDraw'), i * staggerMs),
     );
     return () => timers.forEach((id) => clearTimeout(id));
-  }, [revealed, reduced]);
+  }, [revealed, reduced, staggerMs]);
 
   // Result cue once the surcharge outcome is shown.
   useEffect(() => {
@@ -91,8 +94,17 @@ export function TunnelModal({
     <div className="modal-backdrop">
       <div className="modal" role="dialog" aria-modal="true">
         <h3>{t('tunnel')}</h3>
-        {/* The three drawn cards flip in one at a time (slow, for suspense). */}
-        <div className="tunnel-reveal">
+        {/* The three drawn cards flip in one at a time (slow, for suspense) — the flip + stagger
+            are vars so replay autoplay can run the same reveal at its own rate. */}
+        <div
+          className="tunnel-reveal"
+          style={
+            {
+              '--reveal-flip': `${flipMs}ms`,
+              '--reveal-stagger': `${staggerMs}ms`,
+            } as CSSProperties
+          }
+        >
           {revealed.map((c, i) => {
             const color = pbToCard(c);
             if (!color) return null;

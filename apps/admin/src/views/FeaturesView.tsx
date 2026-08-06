@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { UserFeature } from '@trm/shared';
-import { api, type OfficialMapRow, type UserRow } from '../net/rest';
+import { api, type OfficialMapRow, type TrainCarSkinRow, type UserRow } from '../net/rest';
 import { useSession } from '../store/session';
 import { AccountSelectorModal } from '../components/AccountSelectorModal';
 import { FeatureToggles } from '../components/FeatureToggles';
 import { OfficialMapToggles } from '../components/OfficialMapToggles';
+import { TrainCarSkinToggles } from '../components/TrainCarSkinToggles';
 import { Drawer } from '../components/Drawer';
 import { Copyable } from '../components/CopyButton';
 import { shortId } from '../lib/fmt';
@@ -19,6 +20,7 @@ export function FeaturesView() {
   const [editing, setEditing] = useState<UserRow | null>(null);
   const [defaults, setDefaults] = useState<UserFeature[] | null>(null);
   const [officialMaps, setOfficialMaps] = useState<OfficialMapRow[] | null>(null);
+  const [skins, setSkins] = useState<TrainCarSkinRow[] | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -37,6 +39,7 @@ export function FeaturesView() {
     if (!canEditDefaults) return;
     void api.getDefaultFeatures().then((r) => setDefaults(r.features));
     void api.getOfficialMaps().then((r) => setOfficialMaps(r.maps));
+    void api.getTrainCarSkins().then((r) => setSkins(r.skins));
   }, [canEditDefaults]);
 
   return (
@@ -56,6 +59,14 @@ export function FeaturesView() {
           <h2>{t('features.mapsTitle')}</h2>
           <p className="oc-muted">{t('features.mapsDesc')}</p>
           <OfficialMapToggles initial={officialMaps} onSaved={setOfficialMaps} />
+        </section>
+      )}
+
+      {canEditDefaults && skins && (
+        <section>
+          <h2>{t('features.skinsTitle')}</h2>
+          <p className="oc-muted">{t('features.skinsDesc')}</p>
+          <TrainCarSkinToggles initial={skins} onSaved={setSkins} />
         </section>
       )}
 

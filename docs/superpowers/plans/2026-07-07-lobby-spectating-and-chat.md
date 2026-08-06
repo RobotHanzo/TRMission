@@ -239,12 +239,7 @@ Add new result types next to the existing ones (after `export type SendChatResul
 
 ```ts
 export type BecomeSpectatorResult =
-  | RoomDoc
-  | 'not_found'
-  | 'started'
-  | 'not_member'
-  | 'only_member'
-  | 'spectating_disabled';
+  RoomDoc | 'not_found' | 'started' | 'not_member' | 'only_member' | 'spectating_disabled';
 export type BecomePlayerResult = RoomDoc | 'not_found' | 'started' | 'not_spectator' | 'full';
 ```
 
@@ -827,11 +822,9 @@ describe('spectator chat', () => {
     );
 
     const memberChat = fMember.find((f) => f.event.case === 'chat')?.event.value as
-      | { playerId: string; content: { case: string; value: string } }
-      | undefined;
+      { playerId: string; content: { case: string; value: string } } | undefined;
     const specChat = fSpec.find((f) => f.event.case === 'chat')?.event.value as
-      | { playerId: string; content: { case: string; value: string } }
-      | undefined;
+      { playerId: string; content: { case: string; value: string } } | undefined;
     expect(memberChat?.playerId).toBe('watcher');
     expect(memberChat?.content).toEqual({ case: 'text', value: 'hi from the stands' });
     expect(specChat?.content).toEqual({ case: 'text', value: 'hi from the stands' });
