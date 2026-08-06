@@ -111,6 +111,34 @@ export default tseslint.config(
       ],
     },
   },
+  // Stale-chunk recovery: every lazy route must carry the contract, structurally.
+  // A bare `React.lazy` hands the module mapper whatever a cancelled `vite:preloadError` resolved
+  // with — `undefined` — and the mapper throws a crash screen at a tab that was already reloading
+  // (TRMISSION-WEB-7). `lazyChunk` is that contract; the docs said "always use it", which is exactly
+  // the kind of rule this repo enforces in the linter instead. See apps/web/src/lib/CLAUDE.md.
+  {
+    files: ['apps/web/src/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'react',
+              importNames: ['lazy'],
+              message:
+                'Use lazyChunk() from lib/preloadRecovery — bare React.lazy has no stale-deploy/flaky-network recovery (TRMISSION-WEB-7/8).',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  // preloadRecovery.ts IS the contract, so it is the one place that wraps React.lazy itself.
+  {
+    files: ['apps/web/src/lib/preloadRecovery.ts'],
+    rules: { 'no-restricted-imports': 'off' },
+  },
   // NestJS DI resolves constructor dependencies from emitted decorator metadata, which
   // requires injected classes to be VALUE imports. consistent-type-imports can't see
   // that usage, so it is disabled here; verbatimModuleSyntax still enforces correctness.

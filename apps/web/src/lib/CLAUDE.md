@@ -13,7 +13,8 @@ error through, because reloading is no longer the fix. `preventDefault()` and th
 `index.html` at 200.
 
 **`lazyChunk()` is the other half of that pair, and every lazy route in `App.tsx` must load through
-it** (never bare `React.lazy`). `location.reload()` doesn't stop the microtasks already queued, so
+it** — `no-restricted-imports` bans `lazy` from `react` everywhere under `apps/web/src` except this
+file, so that is a lint error, not a convention. `location.reload()` doesn't stop the microtasks already queued, so
 the cancelled import still resolved — with `undefined` — and the module mapper threw on the way out
 (TRMISSION-WEB-7). It leaves the promise permanently pending once a reload is in flight instead, and
 retries a failed import **once** before surfacing it, so a phone changing networks mid-game gets a
