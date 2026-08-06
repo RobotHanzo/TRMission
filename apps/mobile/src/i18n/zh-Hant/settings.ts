@@ -19,7 +19,7 @@ export default {
   theme: '主題',
   layoutHint: '對局畫面把控制面板放在哪一側。',
   // 音效與震動
-  hapticsHint: '搶下路線、隧道翻牌、完成任務、對局結束，以及下拉重新整理時，手機會震一下。',
+  hapticsHint: '輪到你、搶下路線、隧道翻牌、完成任務、對局結束，以及下拉重新整理時，手機會震一下。',
   haptics: '震動回饋',
   // 通知
   notifications: '推播通知',

@@ -158,7 +158,9 @@ export function GameStage({
   const tier = stageTier(width);
   useAnimationDriver();
   useSoundDriver(sandbox);
-  useHaptics();
+  // `!!commands && !demo` ⇒ a game the viewer is actually taking turns in (live, offline, tutorial),
+  // which is the only place the your-turn nudge belongs — replay/encyclopedia clips just watch.
+  useHaptics(!!commands && !demo);
   // Tutorial spotlight anchor for the draw-tickets button (a no-op outside the tutorial provider).
   const drawTicketsAnchor = useTutorialAnchor(TUTORIAL_ANCHORS.drawTickets);
 

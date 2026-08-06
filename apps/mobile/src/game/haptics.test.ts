@@ -6,11 +6,17 @@ import {
   TicketCompletedSchema,
   GameEndedSchema,
   CardDrawnBlindSchema,
+  TurnStartedSchema,
 } from '@trm/proto';
 import { cuesForEvents } from './haptics';
 
 const ev = (kase: string, schema: never) =>
   create(GameEventSchema, { event: { case: kase as never, value: create(schema, {} as never) } });
+
+const turnOf = (playerId: string) =>
+  create(GameEventSchema, {
+    event: { case: 'turnStarted', value: create(TurnStartedSchema, { playerId }) },
+  });
 
 describe('cuesForEvents', () => {
   it('maps exactly the four spec beats and ignores everything else', () => {
@@ -31,5 +37,15 @@ describe('cuesForEvents', () => {
 
   it('empty batch → no cues', () => {
     expect(cuesForEvents([])).toEqual([]);
+  });
+
+  it('buzzes for the viewer’s own turn only', () => {
+    const events = [turnOf('p2'), turnOf('me')];
+    expect(cuesForEvents(events, 'me')).toEqual(['your-turn']);
+  });
+
+  it('no viewer (replay / demo clip) → turnStarted never buzzes', () => {
+    const events = [turnOf('p2'), turnOf('me'), ev('routeClaimed', RouteClaimedSchema as never)];
+    expect(cuesForEvents(events)).toEqual(['route-claim']);
   });
 });
