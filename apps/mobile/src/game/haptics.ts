@@ -2,11 +2,7 @@ import type { GameEvent } from '@trm/proto';
 
 /** The four haptic beats from the spec (§5), plus the your-turn nudge (issue #78). */
 export type HapticCue =
-  | 'route-claim'
-  | 'tunnel-reveal'
-  | 'ticket-complete'
-  | 'game-end'
-  | 'your-turn';
+  'route-claim' | 'tunnel-reveal' | 'ticket-complete' | 'game-end' | 'your-turn';
 
 const CUE_BY_CASE: Partial<Record<string, HapticCue>> = {
   routeClaimed: 'route-claim',
