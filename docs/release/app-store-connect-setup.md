@@ -52,6 +52,11 @@ generates is a snapshot of whatever capabilities are enabled at that moment.
 
 - Platform: iOS
 - Name: `TRMission 台鐵任務` (matches `fastlane/metadata/ios/*/name.txt`)
+  - **Guideline 2.3.8**: whatever you put here, the localized listing names and the on-device label
+    (`app.config.ts` → `name`, today `台鐵任務 TRMission`) must stay recognisably the same app.
+    Review rejected 0.2.x for exactly this: the primary-language listing read `台鐵任務` while the
+    home screen read `TRMission`. The device label now carries both halves, so no listing rename is
+    required — but if you ever change one side, change the other in the same release.
 - Primary language: Chinese (Traditional)
 - Bundle ID: select `dev.robothanzo.trmission` (from Step 2)
 - SKU: any unique string, e.g. `trmission-ios`

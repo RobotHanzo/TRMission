@@ -82,9 +82,12 @@ platform :ios do
     end
 
     # Workspace/scheme names verified against prebuild's rename logic (@expo/cli
-    # renameTemplateAppName: HelloWorld → IOSConfig.XcodeUtils.sanitizedName(name); "TRMission"
-    # is already alphanumeric so it passes through unchanged); mobile-ios.yml also asserts the
-    # workspace exists right after `pod install` so a template change fails loudly there.
+    # renameTemplateAppName: HelloWorld → IOSConfig.XcodeUtils.sanitizedName(name)). The app's
+    # display name is bilingual ("台鐵任務 TRMission", App Store Guideline 2.3.8 — see app.config.ts)
+    # and sanitizedName strips every non-word character, so it still resolves to "TRMission" here.
+    # Renaming the app to Chinese ALONE would sanitize to the literal "app" and break these paths;
+    # app.config.test.ts pins the invariant, and mobile-ios.yml also asserts the workspace exists
+    # right after `pod install` so a template change fails loudly there.
     gym(
       workspace: "ios/TRMission.xcworkspace",
       scheme: "TRMission",

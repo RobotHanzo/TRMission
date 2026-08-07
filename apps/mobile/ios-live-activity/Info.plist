@@ -4,8 +4,10 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<!-- Kept in step with the app's display name (app.config.ts `name`) so the extension never
+	     shows a second, different brand in Settings. -->
 	<key>CFBundleDisplayName</key>
-	<string>TRMission</string>
+	<string>台鐵任務 TRMission</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>

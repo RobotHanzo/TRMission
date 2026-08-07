@@ -175,7 +175,21 @@ const ADMOB_SKADNETWORK_IDS = [
 ];
 
 const config: ExpoConfig = {
-  name: 'TRMission',
+  // The name the OS shows under the icon (CFBundleDisplayName / Android app_name). It MUST contain
+  // the store listing's name: App Review rejected 'TRMission' under Guideline 2.3.8 because the
+  // marketplace name in the app's primary language is 台鐵任務 and a device label of 'TRMission'
+  // gave users nothing to match it against. Bilingual — not 台鐵任務 alone — for two reasons:
+  //   * it is also "sufficiently similar" to the OTHER listings, which lead with the Latin brand
+  //     (App Store en-US `TRMission 台鐵任務`; Play zh-TW is this exact string) —
+  //     fastlane/metadata/{ios,android}/*/{name,title}.txt, and
+  //   * the Xcode project/scheme/PRODUCT_NAME are `IOSConfig.XcodeUtils.sanitizedName(name)`, which
+  //     strips every non-`\w` character: '台鐵任務 TRMission' → 'TRMission' (unchanged, so the
+  //     hardcoded ios/TRMission.xcworkspace + scheme in fastlane/Fastfile keep resolving), but
+  //     '台鐵任務' → '' → the fallback literal 'app', which would rename the whole project and
+  //     break every iOS lane. Keep an ASCII token in this string; app.config.test.ts pins it.
+  // Home-screen labels truncate at ~12 characters, so what a user actually reads is 台鐵任務 —
+  // the listing name — with the Latin half visible in Settings, Spotlight and the App Store.
+  name: '台鐵任務 TRMission',
   slug: 'trmission',
   scheme: 'trmission', // trmission:// OAuth deep-link fallback (P0 accepts it)
   version: APP_VERSION,
