@@ -315,6 +315,22 @@ jobs:
             exit 1
           fi
 
+      # The per-locale app names (app.config.ts `locales`) are what keeps the device label equal to
+      # each store listing's name — App Store Guideline 2.3.8, which this app has already been
+      # rejected under once. Expo writes them as InfoPlist.strings under <lang>.lproj; if that ever
+      # silently stops happening the binary just falls back to `name` and review catches it instead
+      # of us. app.config.test.ts pins the strings themselves — only a real prebuild proves the files.
+      - name: Verify the localized app names were written
+        run: |
+          for lang in zh-Hant en; do
+            strings="apps/mobile/ios/TRMission/Supporting/$lang.lproj/InfoPlist.strings"
+            if ! grep -q "CFBundleDisplayName" "$strings" 2>/dev/null; then
+              echo "::error::$strings is missing CFBundleDisplayName — the app.config.ts locales entry did not reach the bundle; the app would fall back to one name in every language"
+              ls -R apps/mobile/ios/TRMission/Supporting || true
+              exit 1
+            fi
+          done
+
       # The Live Activity widget extension (issue #43) is injected into the CNG project by
       # plugins/withLiveActivity.js. If a future Expo template change makes that plugin a silent
       # no-op, the build would still succeed and ship an app whose Dynamic Island card simply never

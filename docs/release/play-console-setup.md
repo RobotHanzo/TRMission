@@ -24,9 +24,12 @@ Package name throughout: `dev.robothanzo.trmission` (`apps/mobile/app.config.ts`
 
 Play Console → **Create app**:
 
-- App name: `TRMission 台鐵任務` (matches `fastlane/metadata/android/*/title.txt`; the launcher label
-  from `app.config.ts` → `name` is the zh-TW title verbatim — keep listing and device label in step,
-  same rule App Review enforces as Guideline 2.3.8, see `app-store-connect-setup.md` Step 3)
+- App name: `TRMission 台鐵任務` (matches `fastlane/metadata/android/*/title.txt`). The launcher label
+  is localized to match — `app.config.ts` → `locales` writes `app_name` into
+  `res/values-b+<lang>/strings.xml` (zh-Hant `台鐵任務`, en `TRMission 台鐵任務`), with `name` as the
+  fallback for every other language. Keep listing and label in step when either changes; it is the
+  same rule App Review enforces as Guideline 2.3.8 (`app-store-connect-setup.md` Step 3), and
+  `app.config.test.ts` checks the labels against the committed titles.
 - Default language: `zh-TW` (Traditional Chinese) — the zh-Hant set is the primary listing
   (`docs/superpowers/plans/2026-07-06-mobile-p6-release-compliance.md`, Task 9)
 - App or game: **App**

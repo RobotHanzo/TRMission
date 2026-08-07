@@ -175,21 +175,37 @@ const ADMOB_SKADNETWORK_IDS = [
 ];
 
 const config: ExpoConfig = {
-  // The name the OS shows under the icon (CFBundleDisplayName / Android app_name). It MUST contain
-  // the store listing's name: App Review rejected 'TRMission' under Guideline 2.3.8 because the
-  // marketplace name in the app's primary language is 台鐵任務 and a device label of 'TRMission'
-  // gave users nothing to match it against. Bilingual — not 台鐵任務 alone — for two reasons:
-  //   * it is also "sufficiently similar" to the OTHER listings, which lead with the Latin brand
-  //     (App Store en-US `TRMission 台鐵任務`; Play zh-TW is this exact string) —
-  //     fastlane/metadata/{ios,android}/*/{name,title}.txt, and
+  // The DEFAULT name the OS shows under the icon (CFBundleDisplayName / Android app_name) — the
+  // per-locale labels are in `locales` below, and this is what every locale not listed there falls
+  // back to. It MUST contain the store listing's name: App Review rejected 'TRMission' under
+  // Guideline 2.3.8 because the marketplace name in the app's primary language is 台鐵任務 and a
+  // device label of 'TRMission' gave users nothing to match it against. Bilingual — not 台鐵任務
+  // alone — for two reasons:
+  //   * a fallback has to satisfy 2.3.8 against BOTH listings at once, and they disagree on which
+  //     half leads (App Store en-US `TRMission 台鐵任務`, zh-Hant `台鐵任務`; Play zh-TW is this
+  //     exact string) — fastlane/metadata/{ios,android}/*/{name,title}.txt, and
   //   * the Xcode project/scheme/PRODUCT_NAME are `IOSConfig.XcodeUtils.sanitizedName(name)`, which
   //     strips every non-`\w` character: '台鐵任務 TRMission' → 'TRMission' (unchanged, so the
   //     hardcoded ios/TRMission.xcworkspace + scheme in fastlane/Fastfile keep resolving), but
   //     '台鐵任務' → '' → the fallback literal 'app', which would rename the whole project and
   //     break every iOS lane. Keep an ASCII token in this string; app.config.test.ts pins it.
-  // Home-screen labels truncate at ~12 characters, so what a user actually reads is 台鐵任務 —
-  // the listing name — with the Latin half visible in Settings, Spotlight and the App Store.
   name: '台鐵任務 TRMission',
+  // Per-locale device labels, each EQUAL to that locale's store listing name. 2.3.8 is a
+  // listing-vs-device comparison, so matching them locale-for-locale is the strongest answer to it:
+  // the sources are fastlane/metadata/ios/{en-US,zh-Hant}/name.txt, and app.config.test.ts reads
+  // those files and asserts the equality — a listing rename that isn't mirrored here fails there.
+  // Expo writes these into `<lang>.lproj/InfoPlist.strings` (iOS) and `res/values-b+<lang>/strings.xml`
+  // (Android; the BCP-47 resource qualifier, API 21+). A locale NOT listed falls back to `name`
+  // above — the second reason that string must stay bilingual.
+  // Welcome side effect: the App Store product page derives its "Languages" list from the .lproj
+  // folders in the bundle, so the listing now advertises the two languages the UI actually ships.
+  locales: {
+    'zh-Hant': { ios: { CFBundleDisplayName: '台鐵任務' }, android: { app_name: '台鐵任務' } },
+    en: {
+      ios: { CFBundleDisplayName: 'TRMission 台鐵任務' },
+      android: { app_name: 'TRMission 台鐵任務' },
+    },
+  },
   slug: 'trmission',
   scheme: 'trmission', // trmission:// OAuth deep-link fallback (P0 accepts it)
   version: APP_VERSION,
