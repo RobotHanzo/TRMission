@@ -51,7 +51,9 @@ export interface AnalyticsEvents {
   rating_submit: { stars: number };
   rematch_vote: { wants: boolean };
   play_again: Record<string, never>;
-  discord_click: { source: 'welcome' | 'endgame' | 'header' | 'landing' };
+  discord_click: { source: 'welcome' | 'endgame' | 'header' | 'landing' | 'support' };
+  // support page (issue #80) — the category only; the message itself never leaves for analytics
+  support_submit: { category: string };
   // onboarding
   tutorial_begin: { scope: 'full' | 'core' };
   tutorial_complete: Record<string, never>;
@@ -116,6 +118,7 @@ const SCREEN_TO_PATH: Record<View, string> = {
   maps: '/maps',
   mapEditor: '/maps/:id/edit',
   deleteAccount: '/account/delete',
+  support: '/support',
   privacy: '/privacy',
   terms: '/terms',
 };
@@ -140,6 +143,7 @@ const SCREEN_TO_TITLE: Record<View, string> = {
   maps: 'Custom maps',
   mapEditor: 'Map editor',
   deleteAccount: 'Delete account',
+  support: 'Support',
   privacy: 'Privacy policy',
   terms: 'Terms of service',
 };

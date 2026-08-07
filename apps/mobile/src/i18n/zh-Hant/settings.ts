@@ -40,6 +40,8 @@ export default {
   deleteFootnote: '刪除後無法復原。',
   // 廣告與隱私
   adsFootnote: '我們只在瀏覽畫面顯示廣告，對局進行中不會。',
+  // 支援與說明（在應用程式內瀏覽器開啟網頁版 /support）
+  support: '支援與說明',
   // 關於
   about: '關於',
   version: '版本',

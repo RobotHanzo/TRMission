@@ -4,9 +4,10 @@ import { RatingsRepo } from './ratings.repo';
 import { RatingsThrottlerGuard } from './ratings-throttle.guard';
 import { AuthModule } from '../auth/auth.module';
 import { HistoryModule } from '../history/history.module';
+import { SupportModule } from '../support/support.module';
 
 @Module({
-  imports: [AuthModule, HistoryModule],
+  imports: [AuthModule, HistoryModule, SupportModule],
   controllers: [RatingsController],
   providers: [RatingsRepo, RatingsThrottlerGuard],
   exports: [RatingsRepo],

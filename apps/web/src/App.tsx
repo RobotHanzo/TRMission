@@ -54,6 +54,8 @@ const DeleteAccountScreen = lazyChunk(
   () => import('./screens/DeleteAccountScreen'),
   (m) => m.DeleteAccountScreen,
 );
+// Public, but off the landing/login funnel — a visitor only reaches /support deliberately.
+const SupportScreen = lazyChunk(() => import('./screens/SupportScreen'));
 
 export function App() {
   const { t, i18n } = useTranslation();
@@ -190,6 +192,7 @@ export function App() {
             {view === 'history' && <HistoryScreen />}
             {view === 'leaderboard' && <LeaderboardScreen />}
             {view === 'deleteAccount' && <DeleteAccountScreen />}
+            {view === 'support' && <SupportScreen />}
             {view === 'privacy' && <PrivacyScreen />}
             {view === 'terms' && <TermsScreen />}
             {view === 'maps' && <MapsScreen />}

@@ -1,0 +1,120 @@
+/* The public support page (issue #80). Plain reading layout on top of the shared `.card`/`.stack`
+   primitives — the only real additions are form controls (<select>/<textarea> aren't styled
+   globally, only <input> is) and the two-up channel/field grids. */
+
+.support-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-2);
+}
+.support-title {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-2);
+  margin: 0;
+}
+.support-lede {
+  margin: 0;
+  max-width: 62ch;
+}
+.support-head p {
+  margin: 0;
+}
+
+/* ── FAQ ─────────────────────────────────────────────────────────────────────── */
+.support-faq {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-4);
+}
+.support-faq-item dt {
+  font-weight: 600;
+  margin-bottom: var(--tr-space-1);
+}
+.support-faq-item dd {
+  margin: 0;
+  color: var(--tr-ink-soft);
+  max-width: 68ch;
+}
+
+.support-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--tr-space-3);
+  padding-top: var(--tr-space-2);
+  border-top: 1px solid var(--tr-line);
+}
+/* `.link` sets align-self: flex-start for column stacks; inside this row it must not shrink. */
+.support-links .link {
+  align-self: auto;
+}
+
+/* ── Contact channels ────────────────────────────────────────────────────────── */
+.support-channels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--tr-space-4);
+}
+.support-channel {
+  display: flex;
+  gap: var(--tr-space-3);
+  align-items: flex-start;
+}
+.support-channel h4 {
+  margin: 0 0 var(--tr-space-1);
+}
+.support-channel p {
+  margin: 0 0 var(--tr-space-2);
+}
+.support-channel-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--tr-surface-2);
+  color: var(--tr-blue);
+}
+.support-email {
+  font-family: var(--tr-font-mono);
+}
+
+/* ── Form ────────────────────────────────────────────────────────────────────── */
+.support-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tr-space-1);
+  min-width: 0;
+}
+.support-field label {
+  font-weight: 600;
+  font-size: 0.95em;
+}
+.support-field-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--tr-space-4);
+}
+.support-field select,
+.support-field textarea {
+  font: inherit;
+  padding: var(--tr-space-2) var(--tr-space-3);
+  border: 1px solid var(--tr-line);
+  border-radius: var(--tr-radius-sm);
+  background: var(--tr-surface);
+  color: var(--tr-ink);
+  width: 100%;
+}
+.support-field textarea {
+  resize: vertical;
+  min-height: 7em;
+}
+.support-field input:disabled,
+.support-field select:disabled,
+.support-field textarea:disabled {
+  opacity: 0.6;
+}

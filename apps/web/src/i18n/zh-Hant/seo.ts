@@ -12,6 +12,7 @@ export default {
     game: '對局進行中 · 台鐵任務 TRMission',
     maps: '自訂地圖 · 台鐵任務 TRMission',
     mapEditor: '地圖編輯器 · 台鐵任務 TRMission',
+    support: '支援與說明 · 台鐵任務 TRMission',
     privacy: '隱私權政策 · 台鐵任務 TRMission',
     terms: '服務條款 · 台鐵任務 TRMission',
     deleteAccount: '刪除帳號 · 台鐵任務 TRMission',
@@ -20,6 +21,8 @@ export default {
     home: '免費線上多人鐵道桌遊：收集車廂卡、佔領台灣城市之間的路線、完成任務卡。支援 2–5 人連線對戰、組隊模式、機器人陪練、觀戰與對局回放。',
     login: '登入台鐵任務 — 以訪客、電子郵件、Google 或 Discord 帳號開始遊戲。',
     tutorial: '5 分鐘互動教學：學會抽車廂卡、佔領路線與任務計分。免登入即可開始。',
+    support:
+      '台鐵任務的支援頁面：常見問題、聯絡表單、Discord 社群與電子郵件——回報問題、帳號協助或提出建議。',
     privacy: '台鐵任務的隱私權政策：我們收集哪些資料、如何使用，以及如何刪除帳號與資料。',
     terms: '台鐵任務的服務條款：帳號規範、使用規則、使用者產生內容、免責聲明與聯絡方式。',
   },

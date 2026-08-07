@@ -32,6 +32,9 @@ import type {
   RoomSettings,
   RoomView,
   SharedMapView,
+  SupportFormConfig,
+  SupportRequest,
+  SupportResult,
   TicketResult,
   UserPreferences,
 } from './restTypes';
@@ -379,5 +382,13 @@ function buildApi(
       gameId?: string;
       roomCode?: string;
     }) => req<{ id: string }>('POST', '/reports/player', body),
+
+    // ── support (issue #80; Apple 1.5's "support URL") ──────────────────────
+    // Both routes work signed OUT — someone who cannot sign in is exactly the person who needs
+    // support. A token is sent when there is one, and the server stamps the account onto the
+    // message. `supportConfig` reports whether the deployment has an inbox at all; the form is
+    // hidden (leaving the e-mail + Discord fallbacks) when it doesn't.
+    supportConfig: () => req<SupportFormConfig>('GET', '/support/config'),
+    submitSupport: (body: SupportRequest) => req<SupportResult>('POST', '/support', body),
   };
 }

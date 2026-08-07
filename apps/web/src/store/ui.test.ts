@@ -89,6 +89,21 @@ describe('ui store routing', () => {
     expect(path()).toBe('/privacy');
   });
 
+  it('enterSupport pushes /support and sets the view', () => {
+    useUi.getState().enterSupport();
+    expect(useUi.getState().view).toBe('support');
+    expect(path()).toBe('/support');
+  });
+
+  // The App Store / Play support URL: someone who cannot sign in is exactly who needs this page,
+  // so a signed-out cold load must render it rather than bounce to /login.
+  it('syncFromUrl on /support renders the support page while signed out', () => {
+    window.history.replaceState(null, '', '/support');
+    useUi.getState().syncFromUrl(false);
+    expect(useUi.getState().view).toBe('support');
+    expect(path()).toBe('/support');
+  });
+
   it('enterTerms pushes /terms and sets the view', () => {
     useUi.getState().enterTerms();
     expect(useUi.getState().view).toBe('terms');

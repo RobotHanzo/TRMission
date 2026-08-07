@@ -16,6 +16,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { AccountModule } from './account/account.module';
 import { PushModule } from './push/push.module';
 import { ModerationModule } from './moderation/moderation.module';
+import { SupportModule } from './support/support.module';
 import { OgModule } from './og/og.module';
 import { SelfUpdateModule } from './selfupdate/selfupdate.module';
 import { ObservabilityModule } from './observability/observability.module';
@@ -49,6 +50,7 @@ import { OpenApiHolder } from './openapi/openapi.holder';
     AccountModule,
     PushModule,
     ModerationModule,
+    SupportModule,
     OgModule,
     SelfUpdateModule,
   ],

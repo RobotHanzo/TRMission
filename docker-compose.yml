@@ -119,6 +119,10 @@ services:
       # Maintainer dashboard: comma-separated users._id values (NOT emails) granted the owner
       # role at boot (accounts must already be registered; served at /admin/ by the web container).
       DASHBOARD_OWNER_IDS: ${DASHBOARD_OWNER_IDS:-}
+      # Support form + app ratings (issue #80): the Discord webhook both are delivered to. It is
+      # the only inbox for support requests, so unset ⇒ /support reports the form unavailable
+      # (e-mail + Discord invite still shown) and rating notifications are skipped.
+      SUPPORT_DISCORD_WEBHOOK_URL: ${SUPPORT_DISCORD_WEBHOOK_URL:-}
       # Sentry (issue #44) — entirely opt-in: an unset DSN means the SDK is never initialised.
       # SENTRY_TRACES_SAMPLE_RATE is 0–1 (default 0.1); /metrics and /healthz are never traced.
       SENTRY_DSN: ${SENTRY_DSN:-}

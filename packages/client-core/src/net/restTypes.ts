@@ -5,6 +5,7 @@ import type {
   EventsMode,
   MapFeatureKey,
   ReportCategory,
+  SupportCategory,
   TrainCarSkin,
   UserFeature,
 } from '@trm/shared';
@@ -139,6 +140,24 @@ export interface RatingResult {
   stars: number;
   text?: string;
   createdAt: string;
+}
+/** Whether this deployment's support form has an inbox to deliver to (a Discord webhook). */
+export interface SupportFormConfig {
+  formEnabled: boolean;
+}
+/** What the sender fills in. `email` is optional — a guest may have none — but without it the
+ *  maintainers have no way to answer, which the page says plainly. */
+export interface SupportRequest {
+  category: SupportCategory;
+  subject: string;
+  message: string;
+  email?: string;
+  name?: string;
+  platform?: string;
+  appVersion?: string;
+}
+export interface SupportResult {
+  delivered: boolean;
 }
 export interface HistoryPlayer {
   userId: string;

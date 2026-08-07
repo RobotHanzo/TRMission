@@ -199,7 +199,7 @@ export class OgService {
   /** Only the public, indexable pages — rooms/replays/shared maps are capability URLs
    *  that come and go; listing them would just churn the index. */
   sitemapXml(baseUrl: string): string {
-    const urls = ['/', '/tutorial', '/login', '/privacy', '/terms']
+    const urls = ['/', '/tutorial', '/login', '/support', '/privacy', '/terms']
       .map((p) => `  <url><loc>${escapeXml(baseUrl + p)}</loc></url>`)
       .join('\n');
     return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;

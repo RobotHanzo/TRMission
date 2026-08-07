@@ -198,6 +198,10 @@ promotional_text,keywords,privacy_url,support_url}.txt` are already committed. E
   exists (not set up yet — App Store Connect's own UI is the fastest path for a first submission).
   `promotional_text` is the only one that can be changed **without** a new build, so keep
   time-bound copy (a season, an event) there rather than in `description`.
+- **Support URL must be `/support`, not `/`.** Apple rejected the submission under guideline 1.5
+  because the URL led to the game rather than to somewhere a user can ask a question (issue #80).
+  `support_url.txt` now points at the help page — FAQ, contact form, e-mail, and Discord — and the
+  same value belongs in Play's Store listing → Contact details → Website.
 - **Only advertise ungated features.** `mapBuilder`, `replayReview` and `randomEvents` are
   per-account grants (`@trm/shared`'s `USER_FEATURES`) and the map builder is hidden outright
   without one, so a reviewer's fresh account sees none of them. The committed copy therefore does

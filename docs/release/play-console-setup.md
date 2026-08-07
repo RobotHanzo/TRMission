@@ -92,6 +92,9 @@ rather than improvising in the Console:
   child audience would pull the app into the Families ads programme and its certified-SDK list.
 - **EU DSA**: declare **non-trader** status.
 - **Privacy policy URL**: `https://<production origin>/privacy`.
+- **Website** (Store listing → Contact details): `https://<production origin>/support` — the help
+  page (issue #80), NOT the game's front door. Apple rejected the iOS submission under guideline
+  1.5 for pointing its Support URL at `/`, and Play's contact block is the same field.
 - Support email: a real monitored mailbox (this also has to replace the
   `PLACEHOLDER-SUPPORT-EMAIL` in `apps/web/src/screens/PrivacyScreen.tsx`, per Task 9 Step 5 — a
   separate small commit, not a Console step).

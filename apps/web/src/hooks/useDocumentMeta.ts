@@ -13,6 +13,7 @@ const CANONICAL: Partial<Record<View, string>> = {
   home: '/',
   login: '/login',
   tutorial: '/tutorial',
+  support: '/support',
   privacy: '/privacy',
   terms: '/terms',
 };
@@ -34,6 +35,7 @@ const TITLE_KEY: Record<View, string> = {
   maps: 'seo.titles.maps',
   mapEditor: 'seo.titles.mapEditor',
   deleteAccount: 'seo.titles.deleteAccount',
+  support: 'seo.titles.support',
   privacy: 'seo.titles.privacy',
   terms: 'seo.titles.terms',
 };
@@ -43,6 +45,7 @@ const DESC_KEY: Partial<Record<View, string>> = {
   login: 'seo.descriptions.login',
   loginCallback: 'seo.descriptions.login',
   tutorial: 'seo.descriptions.tutorial',
+  support: 'seo.descriptions.support',
   privacy: 'seo.descriptions.privacy',
   terms: 'seo.descriptions.terms',
 };

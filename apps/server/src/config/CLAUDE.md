@@ -26,5 +26,6 @@ error reporting and tracing off entirely (`../observability/CLAUDE.md`).
 | Push/APNs/FCM                    | `../push/CLAUDE.md`      |
 | `DASHBOARD_OWNER_IDS` + purge    | `../dashboard/CLAUDE.md` |
 | Mobile version gate + deep links | `../health/CLAUDE.md`    |
+| Support form + ratings webhook   | `../support/CLAUDE.md`   |
 
 Adding a var means adding it here **and** documenting it in the owning area's doc.

@@ -50,6 +50,7 @@ export function LandingScreen() {
   const enterLogin = useUi((s) => s.enterLogin);
   const enterPrivacy = useUi((s) => s.enterPrivacy);
   const enterTerms = useUi((s) => s.enterTerms);
+  const enterSupport = useUi((s) => s.enterSupport);
   const booting = useSession((s) => s.booting);
 
   // Landing impression — the top of the acquisition funnel (mirrors welcome_shown). App now
@@ -210,6 +211,9 @@ export function LandingScreen() {
             <a className="link" href="/account/delete">
               {t('landing.account.deleteCta')}
             </a>
+            <button className="link" onClick={enterSupport}>
+              {t('support.title')}
+            </button>
           </div>
         </div>
       </section>
@@ -236,6 +240,7 @@ export function LandingScreen() {
           <BrandBanner size="header" />
           <p className="landing-footer-tagline muted">{t('tagline')}</p>
           <div className="landing-footer-links">
+            <button onClick={enterSupport}>{t('support.title')}</button>
             <button onClick={enterTerms}>{t('termsOfService')}</button>
             <button onClick={enterPrivacy}>{t('landing.account.privacyCta')}</button>
             <button onClick={joinDiscord}>

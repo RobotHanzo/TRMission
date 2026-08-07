@@ -6,6 +6,7 @@ import { AccessTokenGuard } from '../auth/access-token.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
 import type { AuthUser } from '../auth/auth.types';
 import { HistoryRepo } from '../history/history.repo';
+import { SupportNotifier } from '../support/support.notifier';
 import { RatingsRepo } from './ratings.repo';
 import { RatingsThrottlerGuard } from './ratings-throttle.guard';
 import { RatingResultSchema, SubmitRatingDto, SubmitRatingSchema } from './ratings.schemas';
@@ -18,6 +19,7 @@ export class RatingsController {
   constructor(
     private readonly ratings: RatingsRepo,
     private readonly history: HistoryRepo,
+    private readonly notifier: SupportNotifier,
   ) {}
 
   @Post()
@@ -43,6 +45,16 @@ export class RatingsController {
       body.stars,
       body.text,
     );
+    // Mirror the review into the maintainers' Discord (issue #80). Fire-and-forget by design:
+    // the rating is already durable above and readable in the dashboard, so a webhook outage
+    // must never turn a player's submission into an error.
+    this.notifier.rating({
+      stars: doc.stars,
+      ...(doc.text ? { text: doc.text } : {}),
+      gameId: doc.gameId,
+      roomId: doc.roomId,
+      sender: { userId: user.userId, displayName: user.displayName, isGuest: user.isGuest },
+    });
     return {
       id: doc._id,
       stars: doc.stars,

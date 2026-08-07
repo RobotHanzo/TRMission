@@ -29,6 +29,7 @@ env vars.
 | Custom maps, share codes, `mapContents`                      | `src/maps/CLAUDE.md`          |
 | Train-card skin availability (cosmetics)                     | `src/skins/CLAUDE.md`         |
 | Blocks + reports (UGC compliance)                            | `src/moderation/CLAUDE.md`    |
+| Support form + the ratings/support Discord webhook           | `src/support/CLAUDE.md`       |
 | Push + iOS Live Activities                                   | `src/push/CLAUDE.md`          |
 | Maintainer dashboard, permissions, audit, purge              | `src/dashboard/CLAUDE.md`     |
 | Mobile version gate + deep-link well-knowns                  | `src/health/CLAUDE.md`        |

@@ -10,8 +10,17 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Bell, ChevronRight, Info, Palette, ShieldCheck, Volume2 } from 'lucide-react-native';
+import {
+  Bell,
+  ChevronRight,
+  Info,
+  LifeBuoy,
+  Palette,
+  ShieldCheck,
+  Volume2,
+} from 'lucide-react-native';
 import { APP_VERSION } from '../config';
+import { openSupport } from '../support';
 import type { SettingsStackParamList } from '../navigation';
 import { useSettings } from '../store/settings';
 import { useSession } from '../store/session';
@@ -122,6 +131,14 @@ export function SettingsScreen({ navigation }: Props): React.JSX.Element {
           testID="settings-nav-privacy"
           title={t('settings.adsGroup')}
           onPress={() => navigation.navigate('SettingsPrivacy')}
+        />
+        {/* Not a pushed page: the help content IS the web app's /support page (one source for
+            the FAQ + contact form, per app), opened in an in-app browser like the legal docs. */}
+        <NavRow
+          icon={LifeBuoy}
+          testID="settings-nav-support"
+          title={t('settings.support')}
+          onPress={openSupport}
         />
         <NavRow
           icon={Info}

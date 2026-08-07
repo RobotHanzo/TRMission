@@ -29,6 +29,7 @@ import landing from './landing';
 import lobby from './lobby';
 import log from './log';
 import seo from './seo';
+import support from './support';
 import ui from './ui';
 
 // Mirrors ../zh-Hant/index.ts (the satisfies clause keeps the two languages key-identical).
@@ -60,5 +61,6 @@ export default {
   history,
   leaderboard,
   deleteAccount,
+  support,
   builder,
 } satisfies TranslationShape<typeof zhHant>;

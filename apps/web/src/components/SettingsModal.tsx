@@ -7,6 +7,7 @@ import {
   Moon,
   PanelRight,
   PanelBottom,
+  LifeBuoy,
   X,
   type LucideIcon,
 } from 'lucide-react';
@@ -60,6 +61,7 @@ export function SettingsModal({ onClose }: Props) {
   const setSoundVolume = useUi((s) => s.setSoundVolume);
   const hideAds = useUi((s) => s.hideAds);
   const setHideAds = useUi((s) => s.setHideAds);
+  const enterSupport = useUi((s) => s.enterSupport);
   const savePreferences = useSession((s) => s.savePreferences);
   // The ad opt-out toggle only appears for accounts granted the `adFree` feature (from the
   // maintainer dashboard); AdSlot enforces the same feature check before honouring the preference.
@@ -216,6 +218,21 @@ export function SettingsModal({ onClose }: Props) {
             <Switch checked={hideAds} onChange={chooseHideAds} label={t('hideAds')} />
           </section>
         )}
+
+        {/* The desktop header is an icon row with no room left, so this is where a signed-in
+            player finds help — the phone header menu carries the same entry. */}
+        <section className="setting">
+          <button
+            type="button"
+            className="link"
+            onClick={() => {
+              onClose();
+              enterSupport();
+            }}
+          >
+            <LifeBuoy size={14} aria-hidden /> {t('support.title')}
+          </button>
+        </section>
       </div>
     </div>
   );

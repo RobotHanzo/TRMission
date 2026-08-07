@@ -59,6 +59,11 @@ export const env = {
   /** Fraction of requests traced (0–1, clamped). Raw string — parsed by `telemetrySampleRate`. */
   sentryTracesSampleRate: process.env.SENTRY_TRACES_SAMPLE_RATE,
 
+  // Support + ratings (src/support). The Discord webhook is the maintainers' inbox for the
+  // public support form AND for in-app star ratings; unset ⇒ the form advertises itself as
+  // unavailable (it has no other store) and rating notifications are simply skipped.
+  supportDiscordWebhookUrl: process.env.SUPPORT_DISCORD_WEBHOOK_URL ?? '',
+
   // Mobile push (src/push). Each platform enables only when ALL of its credentials are set.
   fcmProjectId: process.env.FCM_PROJECT_ID ?? '',
   fcmClientEmail: process.env.FCM_CLIENT_EMAIL ?? '',

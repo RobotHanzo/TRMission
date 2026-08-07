@@ -8,6 +8,7 @@ import {
   User,
   BookOpen,
   History,
+  LifeBuoy,
   Map as MapIcon,
   Menu,
   Trophy,
@@ -36,6 +37,7 @@ export function AppHeader() {
   const enterLeaderboard = useUi((s) => s.enterLeaderboard);
   const enterMaps = useUi((s) => s.enterMaps);
   const enterLogin = useUi((s) => s.enterLogin);
+  const enterSupport = useUi((s) => s.enterSupport);
   const openEncyclopedia = useUi((s) => s.setEncyclopediaOpen);
   const user = useSession((s) => s.user);
   const booting = useSession((s) => s.booting);
@@ -221,6 +223,13 @@ export function AppHeader() {
                   })}
                 >
                   <DiscordGlyph size={16} /> {t('discord')}
+                </button>
+                <button
+                  className="header-menu-item"
+                  role="menuitem"
+                  onClick={menuAct(enterSupport)}
+                >
+                  <LifeBuoy size={16} aria-hidden /> {t('support.title')}
                 </button>
                 <button
                   className="header-menu-item"

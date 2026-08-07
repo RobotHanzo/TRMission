@@ -22,7 +22,9 @@ that can disagree with the server.
   `/login?redirect=<original>` and `navigateAfterAuth()` resumes that target on success (replaces
   the old implicit "keep the URL + resume" effect). OAuth lands on `/login/callback`, where the
   refresh cookie set by the server callback drives the normal `restore()` path (no token ever in
-  the URL).
+  the URL). `/support`, `/privacy` and `/terms` are the **public** routes: never auth-gated,
+  because they are the URLs the app stores are given (`/support` is the App Store / Play support
+  contact, so someone who cannot sign in must still reach it).
 
 ## Moderation (`moderation.ts`, Apple 1.2 / Play UGC)
 

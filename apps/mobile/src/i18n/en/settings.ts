@@ -46,6 +46,8 @@ export default {
   deleteFootnote: 'Deleting cannot be undone.',
   // Ads & privacy
   adsFootnote: 'Ads appear on browsing screens only, never during a game.',
+  // Help & support (opens the web app's /support page in an in-app browser)
+  support: 'Help & support',
   // About
   about: 'About',
   version: 'Version',

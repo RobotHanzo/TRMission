@@ -26,6 +26,12 @@ import {
   MobileLinksConfig,
   type MobileLinksConfigOverrides,
 } from '../src/config/mobile-links.config';
+import { SupportConfig, type SupportConfigOverrides } from '../src/support/support.config';
+import {
+  DISCORD_WEBHOOK,
+  type DiscordMessage,
+  type DiscordWebhook,
+} from '../src/support/discord-webhook';
 
 export interface TestApp {
   app: INestApplication;
@@ -50,6 +56,10 @@ export interface TestAppOptions {
   dashboardConfig?: DashboardConfigOverrides;
   /** Override MobileLinksConfig (deep-link verification files) without touching env. */
   mobileLinks?: MobileLinksConfigOverrides;
+  /** Override SupportConfig — chiefly to turn the support form on (a webhook URL is set). */
+  supportConfig?: SupportConfigOverrides;
+  /** Stub the Discord webhook so support/rating e2e never leaves the process. */
+  discordWebhook?: DiscordWebhook;
   /**
    * Reuse an already-running MongoMemoryServer instead of spawning a new `mongod` process.
    * Specs that boot several TestApps (e.g. one per auth-config variant) should share one —
@@ -90,6 +100,12 @@ export async function createTestApp(opts: TestAppOptions = {}): Promise<TestApp>
     builder = builder
       .overrideProvider(MobileLinksConfig)
       .useValue(new MobileLinksConfig(opts.mobileLinks));
+  if (opts.supportConfig)
+    builder = builder
+      .overrideProvider(SupportConfig)
+      .useValue(new SupportConfig(opts.supportConfig));
+  if (opts.discordWebhook)
+    builder = builder.overrideProvider(DISCORD_WEBHOOK).useValue(opts.discordWebhook);
 
   const moduleRef = await builder.compile();
 
@@ -162,6 +178,17 @@ export class FakeAppleTokenRevoker implements AppleTokenRevoker {
   async revoke(code: string): Promise<boolean> {
     this.calls.push(code);
     return this.result;
+  }
+}
+
+/** A controllable stand-in for the support/ratings Discord webhook: records what was sent, or
+ *  throws when `fail` is set (the outage path the support route must surface as a 502). */
+export class FakeDiscordWebhook implements DiscordWebhook {
+  sent: DiscordMessage[] = [];
+  fail = false;
+  async send(message: DiscordMessage): Promise<void> {
+    if (this.fail) throw new Error('fake discord webhook failed');
+    this.sent.push(message);
   }
 }
 

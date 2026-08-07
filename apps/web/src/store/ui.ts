@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { DEFAULT_TRAIN_CAR_SKIN, isTrainCarSkin, type TrainCarSkin } from '@trm/shared';
 import { LEGAL_PATHS } from '@trm/client-core/legal';
+import { SUPPORT_PATH } from '@trm/client-core/links';
 import type { Theme, Locale, BoardLayout, UserPreferences } from '../net/rest';
 import { disconnectGame } from '../net/connection';
 import { isAdminTarget, goToAdmin } from '../lib/adminApp';
@@ -27,6 +28,7 @@ export type View =
   | 'maps'
   | 'mapEditor'
   | 'deleteAccount'
+  | 'support'
   | 'privacy'
   | 'terms';
 
@@ -105,6 +107,7 @@ export const isHomeColdLoadPath = (): boolean => {
     replayIdFromPath() ||
     path === MAPS_PATH ||
     mapEditorIdFromPath() ||
+    path === SUPPORT_PATH ||
     path === PRIVACY_PATH ||
     path === TERMS_PATH ||
     path === DELETE_ACCOUNT_PATH ||
@@ -291,6 +294,9 @@ interface UiState {
   /** A user-initiated trip to /login (landing CTA / header button) — PUSHED, so Back returns
    *  to where they were (navigateLogin's replace semantics are for auth-gate redirects only). */
   enterLogin(): void;
+  /** Open the public support page in-app (it is also cold-loadable at /support — the URL the
+   *  app stores are given as this game's support contact). */
+  enterSupport(): void;
   /** Open the public privacy policy in-app (it is also cold-loadable at /privacy). */
   enterPrivacy(): void;
   /** Open the public terms of service in-app (it is also cold-loadable at /terms). */
@@ -411,6 +417,11 @@ export const useUi = create<UiState>()((set, get) => ({
     disconnectGame();
     pushPath(LOGIN_PATH);
     set({ view: 'login', roomCode: null, gameId: null, ticket: null, replayGameId: null });
+  },
+  enterSupport: () => {
+    disconnectGame();
+    pushPath(SUPPORT_PATH);
+    set({ view: 'support', roomCode: null, gameId: null, ticket: null, replayGameId: null });
   },
   enterPrivacy: () => {
     disconnectGame();
@@ -599,6 +610,13 @@ export const useUi = create<UiState>()((set, get) => ({
       }
       disconnectGame();
       set({ view: 'mapEditor', editingMapId, roomCode: null, gameId: null, ticket: null });
+      return;
+    }
+    // Public support page — reachable signed out, and it must stay that way: it is the App Store
+    // / Play support URL, and someone who cannot sign in is exactly who needs it.
+    if (path === SUPPORT_PATH) {
+      disconnectGame();
+      set({ view: 'support', roomCode: null, gameId: null, ticket: null, replayGameId: null });
       return;
     }
     // Public privacy policy — reachable signed out (store listings link straight here).

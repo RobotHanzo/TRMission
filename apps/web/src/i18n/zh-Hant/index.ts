@@ -27,6 +27,7 @@ import landing from './landing';
 import lobby from './lobby';
 import log from './log';
 import seo from './seo';
+import support from './support';
 import ui from './ui';
 
 // Composes the zh-Hant translation table from the shared namespaces (client-core) and the
@@ -60,5 +61,6 @@ export default {
   history,
   leaderboard,
   deleteAccount,
+  support,
   builder,
 };
