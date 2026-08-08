@@ -5095,7 +5095,7 @@ __metadata:
     "@trm/tsc7": "workspace:*"
     "@types/cookie-parser": "npm:^1.4.10"
     "@types/express": "npm:^5.0.6"
-    "@types/node": "npm:^24.13.3"
+    "@types/node": "npm:^26.1.2"
     "@types/supertest": "npm:^7.2.1"
     "@types/ws": "npm:^8.18.1"
     cookie-parser: "npm:^1.4.7"
@@ -5507,12 +5507,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^24.13.3":
-  version: 24.13.3
-  resolution: "@types/node@npm:24.13.3"
+"@types/node@npm:^26.1.2":
+  version: 26.1.2
+  resolution: "@types/node@npm:26.1.2"
   dependencies:
-    undici-types: "npm:~7.18.0"
-  checksum: 10/cfa6ed1e16c4624d1e83b09aeb72a2f50a7e17d837bf5a1259a52e346f33a693afd289402d3b6118ce3abea7aff35f2a4f13a0284b96bc5807a50f0e22e1ec77
+    undici-types: "npm:~8.3.0"
+  checksum: 10/2dd6d75b80c006deab4e381acc8cb2e3d634f10141f05fd6cadaabddd80a95f04aef7b00a574bd8fd5e08e940b899c23b91dd09a70b11a34a2762203b5eea25e
   languageName: node
   linkType: hard
 
@@ -14431,7 +14431,7 @@ __metadata:
   resolution: "trmission@workspace:."
   dependencies:
     "@eslint/js": "npm:^10.0.1"
-    "@types/node": "npm:^24.13.3"
+    "@types/node": "npm:^26.1.2"
     eslint: "npm:^10.8.0"
     prettier: "npm:^3.9.6"
     turbo: "npm:^2.10.8"
@@ -14623,13 +14623,6 @@ __metadata:
   version: 1.5.0
   resolution: "uint8array-extras@npm:1.5.0"
   checksum: 10/94fd56a2dda6a7445f5176f301f491814c87757d38e4b3c932299ab54d69ec504830e5d5c18ffa20cf694a69a210315be8b4a2c9952c6334da817ea2d2e1dce0
-  languageName: node
-  linkType: hard
-
-"undici-types@npm:~7.18.0":
-  version: 7.18.2
-  resolution: "undici-types@npm:7.18.2"
-  checksum: 10/e61a5918f624d68420c3ca9d301e9f15b61cba6e97be39fe2ce266dd6151e4afe424d679372638826cb506be33952774e0424141200111a9857e464216c009af
   languageName: node
   linkType: hard
 

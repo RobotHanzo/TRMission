@@ -50,7 +50,7 @@
     "@trm/tsc7": "workspace:*",
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
-    "@types/node": "^24.13.3",
+    "@types/node": "^26.1.2",
     "@types/supertest": "^7.2.1",
     "@types/ws": "^8.18.1",
     "mongodb-memory-server": "^11.2.0",
