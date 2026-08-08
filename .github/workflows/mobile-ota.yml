@@ -23,7 +23,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-yarn
       # proto codegen must exist before any workspace build (src/gen is gitignored).
       - run: yarn workspace @trm/proto generate
@@ -187,7 +187,7 @@ jobs:
             --packageRunner npx-native-only \
             --outputDir dist \
             --message "${{ github.ref_name }}"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ota-bundle-${{ github.run_number }}
           path: |

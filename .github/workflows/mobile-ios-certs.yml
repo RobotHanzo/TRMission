@@ -28,7 +28,7 @@ jobs:
     # gates mobile-ios.yml to releases is irrelevant at this frequency.
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.3'

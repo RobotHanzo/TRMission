@@ -20,10 +20,10 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-yarn
       # Same jest/babel transform cache the whole-repo CI keeps warm (see ci.yml).
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: apps/mobile/.jest-cache
           key: jest-mobile-${{ runner.os }}-${{ hashFiles('yarn.lock', 'apps/mobile/babel.config.js') }}-${{ github.sha }}

@@ -17,11 +17,11 @@ jobs:
   typecheck:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-yarn
 
       - name: Cache Turbo task cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .turbo
           key: turbo-${{ runner.os }}-${{ github.job }}-${{ github.sha }}
@@ -33,7 +33,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-yarn
 
       # `yarn lint` is a plain `eslint .`, not turbo-orchestrated, so it doesn't get proto's
@@ -50,11 +50,11 @@ jobs:
   test-engine:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-yarn
 
       - name: Cache Turbo task cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .turbo
           key: turbo-${{ runner.os }}-${{ github.job }}-${{ github.sha }}
@@ -66,7 +66,7 @@ jobs:
           yarn turbo run test test:pure --filter=@trm/engine --
           --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: test-results-engine
@@ -76,11 +76,11 @@ jobs:
   test-server:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-yarn
 
       - name: Cache Turbo task cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .turbo
           key: turbo-${{ runner.os }}-${{ github.job }}-${{ github.sha }}
@@ -88,7 +88,7 @@ jobs:
             turbo-${{ runner.os }}-${{ github.job }}-
 
       - name: Cache mongodb-memory-server binary
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/mongodb-binaries
           key: mongodb-binaries-${{ runner.os }}-${{ hashFiles('yarn.lock') }}
@@ -101,7 +101,7 @@ jobs:
           yarn turbo run test test:pure --filter=@trm/server --
           --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: test-results-server
@@ -111,11 +111,11 @@ jobs:
   test-web:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-yarn
 
       - name: Cache Turbo task cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .turbo
           key: turbo-${{ runner.os }}-${{ github.job }}-${{ github.sha }}
@@ -127,7 +127,7 @@ jobs:
           yarn turbo run test test:pure --filter=@trm/web --
           --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: test-results-web
@@ -138,11 +138,11 @@ jobs:
   test-rest:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-yarn
 
       - name: Cache Turbo task cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .turbo
           key: turbo-${{ runner.os }}-${{ github.job }}-${{ github.sha }}
@@ -153,7 +153,7 @@ jobs:
       # that transform costs minutes — and because RN components require lazily, the cost lands
       # inside test bodies, which is what pushed the tutorial walkthrough past its timeout.
       - name: Cache jest transform cache (mobile)
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: apps/mobile/.jest-cache
           key: jest-mobile-${{ runner.os }}-${{ hashFiles('yarn.lock', 'apps/mobile/babel.config.js') }}-${{ github.sha }}
@@ -168,7 +168,7 @@ jobs:
           --filter=@trm/admin --filter=@trm/bots --filter=@trm/client-core --filter=@trm/mobile --
           --reporter=default --reporter=junit --outputFile.junit=test-results/junit.xml
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: test-results-rest
@@ -180,14 +180,14 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: test-results-*
           path: test-results
           merge-multiple: true
 
       - name: Report test results
-        uses: mikepenz/action-junit-report@v4
+        uses: mikepenz/action-junit-report@v6
         with:
           report_paths: 'test-results/**/junit.xml'
           detailed_summary: true

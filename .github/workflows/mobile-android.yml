@@ -52,7 +52,7 @@ jobs:
       CCACHE_COMPILERCHECK: content
       CCACHE_SLOPPINESS: time_macros,include_file_mtime,include_file_ctime
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # ubuntu-latest ships ~70GB of preinstalled tooling this JS/Android/Ruby pipeline never
       # touches (.NET, Haskell, CodeQL, Docker images, ...), leaving only ~14GB free. Compiling
@@ -212,7 +212,7 @@ jobs:
       # Deferred until after prebuild: android/ is CNG output (gitignored, never committed — see the
       # top-of-file note) and doesn't exist until the prebuild step above runs. setup-java provides
       # the JDK only; Gradle caching moves to setup-gradle below.
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
@@ -222,7 +222,7 @@ jobs:
       # `--build-cache` flag (below) reads, keyed on task INPUTS rather than file mtimes — so task
       # outputs (Kotlin/Java compile, resource merge, dex) survive across runs. The per-ABI CMake
       # native compile stays ccache's job.
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
 
       - name: Decode the release keystore
         run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release.keystore"
@@ -292,7 +292,7 @@ jobs:
             -Pandroid.injected.signing.key.alias="${{ secrets.ANDROID_KEY_ALIAS }}" \
             -Pandroid.injected.signing.key.password="${{ secrets.ANDROID_KEY_PASSWORD }}"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: trmission-release-aab
           path: apps/mobile/android/app/build/outputs/bundle/release/*.aab
