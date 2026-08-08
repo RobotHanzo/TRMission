@@ -72,7 +72,7 @@ jobs:
       CCACHE_DEPEND: 'true'
       CCACHE_INODECACHE: 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Compile cache for everything still built from source — expo-modules-core, codegen output,
       # and the autolinked pods; RN core + its third-party deps come prebuilt via the RCT_* flags
@@ -226,7 +226,7 @@ jobs:
       # the build-time re-extract described in the strip step below would put it straight back into
       # a shipped .app. Bump the namespace again if anything else ever poisons a cached Pods tree.
       - name: Cache CocoaPods
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/Library/Caches/CocoaPods
@@ -410,7 +410,7 @@ jobs:
           ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
           APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: trmission-release-ipa
           path: apps/mobile/build/*.ipa
