@@ -1,0 +1,203 @@
+# Dependabot version updates.
+# Options reference: https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference
+#
+# Grouping here is load-bearing, not cosmetic. Several dependency sets in this repo are only
+# correct as a UNIT (see the root CLAUDE.md "Load-bearing decisions"), so a PR that moves one
+# member alone is broken by construction. Groups are evaluated top-down and the FIRST group whose
+# patterns match a dependency wins — order matters when patterns overlap.
+version: 2
+
+updates:
+  # ───────────────────────────────────────────────────────────────────────────────────────────
+  # npm — one entry for the whole Yarn 4 workspace. Dependabot resolves against the root
+  # yarn.lock and edits whichever workspace manifests declare the dependency, so per-package
+  # entries would only duplicate the same PRs.
+  # ───────────────────────────────────────────────────────────────────────────────────────────
+  - package-ecosystem: npm
+    directory: '/'
+    schedule:
+      interval: weekly
+      day: monday
+      time: '09:00'
+      timezone: Asia/Taipei
+    open-pull-requests-limit: 8
+    commit-message:
+      prefix: chore(deps)
+      prefix-development: chore(deps-dev)
+
+    ignore:
+      # react is pinned EXACTLY and must be byte-identical in web + admin + mobile: react is a
+      # peerDependency of @trm/client-core, and a second nested copy splits module identity and
+      # breaks hooks. Minor/patch moves land together via the `react` group below; a MAJOR is a
+      # coordinated migration across three apps, not a Dependabot PR.
+      - dependency-name: react
+        update-types: [version-update:semver-major]
+      - dependency-name: react-dom
+        update-types: [version-update:semver-major]
+      - dependency-name: react-test-renderer
+        update-types: [version-update:semver-major]
+
+      # An Expo SDK bump is a native release: `expo install --fix`, a full prebuild, and a new OTA
+      # runtimeVersion fingerprint that fences every already-installed binary. Driven by hand from
+      # apps/mobile. React Native's minor IS its major (0.86 → 0.87 is a breaking release), and
+      # @react-native/jest-preset is pinned to the same exact version, so only patches are allowed.
+      - dependency-name: expo
+        update-types: [version-update:semver-major]
+      - dependency-name: react-native
+        update-types: [version-update:semver-major, version-update:semver-minor]
+
+      # The TS toolchain rides preview channels through npm aliases (`typescript` →
+      # @typescript/typescript6, `@trm/tsc7` → typescript@7), pinned in lockstep across every
+      # workspace. Alias resolution is a Dependabot rough edge and these move by hand anyway.
+      - dependency-name: typescript
+      - dependency-name: '@typescript/native'
+
+    groups:
+      # Must move as one — see the ignore note above.
+      react:
+        patterns:
+          - react
+          - react-dom
+          - react-test-renderer
+          - '@types/react'
+          - '@types/react-dom'
+
+      # The Expo SDK 57 compatibility matrix. Individually bumping any member both risks the
+      # matrix and shifts the OTA fingerprint, so they land as a single reviewable PR.
+      expo-sdk:
+        patterns:
+          - expo
+          - expo-*
+          - jest-expo
+          - '@expo/*'
+          - '@expo-google-fonts/*'
+          - react-native
+          - react-native-*
+          - '@react-native/*'
+          - '@react-native-async-storage/*'
+          - '@react-native-community/*'
+          - '@react-native-google-signin/*'
+          - '@react-navigation/*'
+          - '@bottom-tabs/*'
+          - '@shopify/react-native-skia'
+          - '@rnrepo/*'
+
+      # Pinned as ONE unit (root CLAUDE.md): vitest 4 requires vite ≥6 and @vitejs/plugin-react 6
+      # requires vite 8, so bumping any one alone breaks the other two.
+      vite-vitest:
+        patterns:
+          - vite
+          - vitest
+          - '@vitejs/*'
+          - '@vitest/*'
+
+      # NestJS releases its packages in lockstep; a split version set breaks DI at runtime.
+      nestjs:
+        patterns:
+          - '@nestjs/*'
+          - nestjs-zod
+
+      # One Sentry SDK version line across server / web / admin / mobile keeps the shared
+      # telemetry denylist (@trm/shared telemetry.ts) wired the same way on every surface.
+      sentry:
+        patterns:
+          - '@sentry/*'
+
+      # protobuf-es runtime + codegen must agree, or @trm/proto's generated code drifts from the
+      # runtime that reads it.
+      protobuf:
+        patterns:
+          - '@bufbuild/*'
+
+      linting:
+        patterns:
+          - eslint
+          - eslint-*
+          - '@eslint/*'
+          - typescript-eslint
+          - prettier
+
+      types:
+        patterns:
+          - '@types/*'
+
+      # Catch-all: everything else, split dev/prod, minor+patch batched. Majors still get their
+      # own PR so a breaking change is never buried in a batch.
+      dev-minor-and-patch:
+        dependency-type: development
+        update-types: [minor, patch]
+      prod-minor-and-patch:
+        dependency-type: production
+        update-types: [minor, patch]
+
+  # ───────────────────────────────────────────────────────────────────────────────────────────
+  # GitHub Actions — workflow files under "/" plus the composite action, which Dependabot only
+  # sees if its own directory is listed (the glob is why this uses `directories`, not `directory`).
+  # ───────────────────────────────────────────────────────────────────────────────────────────
+  - package-ecosystem: github-actions
+    directories:
+      - '/' # .github/workflows/*.yml
+      - '/.github/actions/*' # setup-yarn composite action
+    schedule:
+      interval: weekly
+      day: monday
+      time: '09:00'
+      timezone: Asia/Taipei
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: ci(deps)
+    groups:
+      github-actions:
+        patterns: ['*']
+
+  # ───────────────────────────────────────────────────────────────────────────────────────────
+  # Docker base images in the two Dockerfiles.
+  # ───────────────────────────────────────────────────────────────────────────────────────────
+  - package-ecosystem: docker
+    directories:
+      - '/apps/server' # node:24-slim
+      - '/apps/web' # node:24-slim + nginx:alpine
+    schedule:
+      interval: weekly
+      day: monday
+      time: '09:00'
+      timezone: Asia/Taipei
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: build(deps)
+    ignore:
+      # The Node major is the runtime contract: it has to move together with .nvmrc, the root
+      # `engines.node`, and CI's setup-node. A lone image bump would silently split them.
+      - dependency-name: node
+        update-types: [version-update:semver-major]
+    groups:
+      docker-base-images:
+        patterns: ['*']
+
+  # ───────────────────────────────────────────────────────────────────────────────────────────
+  # docker-compose.yml service images. prom/prometheus and grafana/grafana track `latest` and are
+  # therefore not updatable by Dependabot — pin them to a tag if you want update PRs for those.
+  # ───────────────────────────────────────────────────────────────────────────────────────────
+  - package-ecosystem: docker-compose
+    directory: '/'
+    schedule:
+      interval: weekly
+      day: monday
+      time: '09:00'
+      timezone: Asia/Taipei
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: build(deps)
+    ignore:
+      # A MongoDB major is a server-side migration (feature compatibility version, driver
+      # support), deliberately pinned at 7.
+      - dependency-name: mongo
+        update-types: [version-update:semver-major]
+    groups:
+      compose-images:
+        patterns: ['*']
+# Not configured on purpose:
+#   bundler   — apps/mobile/Gemfile declares an unconstrained `gem "fastlane"` and no Gemfile.lock
+#               is tracked, so there is no pinned version for Dependabot to bump.
+#   gradle /  — apps/mobile/{android,ios} are generated by `expo prebuild` (CNG) and gitignored;
+#   cocoapods   those dependency versions come from the Expo SDK group above.

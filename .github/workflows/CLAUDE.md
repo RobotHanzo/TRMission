@@ -2,6 +2,7 @@
 
 `ci.yml` (whole-repo turbo gates) and `docker-build.yml` cover the web/server stack. The mobile
 lanes below are self-managed signing with **no EAS** — app context: `apps/mobile/CLAUDE.md`.
+Dependency bumps land through `../dependabot.yml` (see **Dependency updates** at the bottom).
 
 ## Mobile lanes
 
@@ -149,3 +150,25 @@ Seed the match repo by dispatching `mobile-ios-certs` once the App ID + ASC key 
 (`docs/release/app-store-connect-setup.md` Steps 2–6); the build lane consumes it read-only. The
 Xcode workspace/scheme names (`TRMission`) are verified against prebuild's rename logic and
 asserted in-workflow right after `pod install`.
+
+## Dependency updates (`../dependabot.yml`)
+
+Four ecosystems, all weekly on Monday: **npm** (one entry at `/` — Dependabot resolves the whole
+Yarn 4 workspace from the root lockfile), **github-actions**, **docker** (both Dockerfiles), and
+**docker-compose** (root compose images). Two things to know before editing it:
+
+- **The groups are load-bearing, not noise reduction.** `react` (exact-pinned and identical across
+  web/admin/mobile), `expo-sdk` (the SDK 57 compat matrix — an individual bump also shifts the OTA
+  runtimeVersion fingerprint), and `vite-vitest` (vite 8 ⇄ vitest 4 ⇄ plugin-react 6) are only
+  correct as units. Majors are ignored on `react*`, `expo`, `react-native` (whose _minor_ is a
+  breaking release), and the `node`/`mongo` images; those are hand-driven migrations. Groups match
+  top-down, first hit wins.
+- **The `github-actions` entry must list every directory holding action files.** `/` only covers
+  `.github/workflows/`; `.github/actions/*` is listed separately for the composite action. Add a
+  directory when you add one, or its `uses:` pins go stale silently.
+
+Dependabot-triggered runs get **no Actions secrets** (Dependabot has its own secret store) and a
+read-only `GITHUB_TOKEN` unless a workflow's own `permissions:` block grants more — `ci.yml`
+declares `checks: write` for the junit reporter. Neither PR gate (`ci.yml`, `mobile-ci.yml`) reads a
+secret, so keep it that way or Dependabot PRs start failing on a gate that has nothing to do with
+the bump.
