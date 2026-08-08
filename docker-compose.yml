@@ -185,7 +185,7 @@ services:
     # mobile-ota.yml is pinned to the SAME version: they ship from one repo and only work in matched
     # pairs (docs/mobile/ota.md). The env below is the stateless-mode contract — v3 keeps serving
     # clients that send no app id by falling back to EXPO_APP_ID, which is what local dev builds are.
-    image: ghcr.io/axelmarciano/expo-open-ota:v3.0.5
+    image: ghcr.io/axelmarciano/expo-open-ota:v3.1.1
     environment:
       # Public origin clients reach this server at (updates.url = <BASE_URL>/manifest).
       BASE_URL: ${TRM_OTA_BASE_URL:-http://localhost:3005}
