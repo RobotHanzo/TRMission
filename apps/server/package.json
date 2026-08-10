@@ -56,7 +56,7 @@
     "mongodb-memory-server": "^11.2.0",
     "supertest": "^7.2.2",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
-    "unplugin-swc": "^1.5.9",
+    "unplugin-swc": "^1.5.10",
     "vitest": "^4.1.10"
   }
 }
