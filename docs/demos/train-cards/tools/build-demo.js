@@ -192,7 +192,7 @@ section { margin-top: 44px; }
     <p class="eyebrow">TRMission · 車廂插畫替換提案</p>
     <h1>車廂卡改用實車插畫<span class="en">Train cards, re-skinned with the rolling-stock artwork</span></h1>
     <p class="deck">
-      九種車廂卡（八色 + 彩虹車頭）各自對應一款車輛插畫，取自 <b>台鐵任務-車廂.svg</b>。
+      九種車廂卡（八色 + 彩虹車頭）各自對應一款車輛插畫，取自 <b>鐵島企劃-車廂.svg</b>。
       黃色卡改用 <b>610型</b>（<b>610.svg</b>），<b>不使用阿里山號</b>。
       卡面框線、色帶、色盲符號與張數標籤沿用 <code>apps/web</code> 現行樣式，只替換車輛圖。
     </p>

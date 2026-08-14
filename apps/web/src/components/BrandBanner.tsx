@@ -13,7 +13,7 @@ export function BrandBanner({ size = 'header', as: Tag = 'div', className }: Bra
     <Tag className={`brand-banner brand-banner--${size} ${className ?? ''}`}>
       <img className="brand-banner-icon" src="/icon.svg" width={64} height={64} alt="" />
       <span className="brand-banner-text">
-        <span className="brand-banner-zh">台鐵任務</span>
+        <span className="brand-banner-zh">鐵島企劃</span>
         <span className="brand-banner-en">TRMISSION</span>
       </span>
     </Tag>

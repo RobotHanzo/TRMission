@@ -77,7 +77,7 @@ export function BrandWordmark({ size = 'header' }: { size?: 'header' | 'hero' })
       <View style={{ gap: 3 }}>
         <Text
           style={{
-            // Web hardcodes this hex too — the 台鐵任務 line stays this ember in both themes.
+            // Web hardcodes this hex too — the 鐵島企劃 line stays this ember in both themes.
             color: '#e55509',
             fontWeight: '700',
             fontSize: zhSize,
@@ -86,7 +86,7 @@ export function BrandWordmark({ size = 'header' }: { size?: 'header' | 'hero' })
             transform: [{ skewX: '-6deg' }],
           }}
         >
-          台鐵任務
+          鐵島企劃
         </Text>
         <Text
           style={{

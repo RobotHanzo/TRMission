@@ -25,7 +25,7 @@ describe('LoginScreen', () => {
     render(<LoginScreen />);
 
     const heading = await screen.findByRole('heading', { level: 1 });
-    expect(heading).toHaveTextContent('台鐵任務');
+    expect(heading).toHaveTextContent('鐵島企劃');
     expect(heading).toHaveTextContent('TRMISSION');
   });
 

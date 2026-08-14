@@ -10,7 +10,7 @@ export function buildOpenApiDocument(app: INestApplication): OpenAPIObject {
   const config = new DocumentBuilder()
     .setTitle('TRMission API')
     .setDescription(
-      '台鐵任務 — REST control plane (auth, lobby, match history). ' +
+      '鐵島企劃 — REST control plane (auth, lobby, match history). ' +
         'Realtime gameplay is protobuf-over-WebSocket at /ws and is not described here.',
     )
     .setVersion('1')

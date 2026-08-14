@@ -19,8 +19,8 @@ describe('runtime shims (simulating Hermes)', () => {
         require('./shims');
       });
       expect(typeof globalThis.TextDecoder).toBe('function');
-      const bytes = new TextEncoder().encode('台鐵任務');
-      expect(new globalThis.TextDecoder('utf-8').decode(bytes)).toBe('台鐵任務');
+      const bytes = new TextEncoder().encode('鐵島企劃');
+      expect(new globalThis.TextDecoder('utf-8').decode(bytes)).toBe('鐵島企劃');
     } finally {
       globalThis.TextDecoder = saved;
     }

@@ -324,7 +324,7 @@ function buildCar(car, sheet, prefix) {
 }
 
 /* ── emit ──────────────────────────────────────────────────────────────────── */
-const sheet = readSheet('台鐵任務-車廂.svg');
+const sheet = readSheet('鐵島企劃-車廂.svg');
 const y610 = readSheet(YELLOW.file);
 const PREFIX = {
   RED: 'r',

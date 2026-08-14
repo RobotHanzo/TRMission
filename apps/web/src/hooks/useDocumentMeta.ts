@@ -109,7 +109,7 @@ export function useDocumentMeta(): void {
       script.textContent = JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'VideoGame',
-        name: '台鐵任務 TRMission',
+        name: '鐵島企劃 TRMission',
         alternateName: 'TRMission',
         url: `${origin}/`,
         image: `${origin}/api/v1/og/site.png`,

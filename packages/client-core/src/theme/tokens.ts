@@ -31,7 +31,7 @@ export interface ChromeTokens {
   line: string;
   danger: string;
   ok: string;
-  /** TRMISSION wordmark — the 台鐵任務 line stays orange in both themes. */
+  /** TRMISSION wordmark — the 鐵島企劃 line stays orange in both themes. */
   brandNavy: string;
   // Cartography (board map)
   sea: string;

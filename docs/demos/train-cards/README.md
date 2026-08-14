@@ -72,7 +72,7 @@ artwork untouched.
 
 The source sheets are `packages/client-core/assets/art/`:
 
-- `台鐵任務-車廂.svg` — the nine-up sheet
+- `鐵島企劃-車廂.svg` — the nine-up sheet
 - `610.svg` — the yellow replacement
 
 ## Regenerating

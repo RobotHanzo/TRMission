@@ -12,7 +12,7 @@ export function FlyingCard({ color, width }: { color: CardColor | null; width?: 
       <>
         <Train className="flying-card-cover-mark" size={26} aria-hidden />
         <span className="flying-card-cover-name" aria-hidden>
-          台鐵任務
+          鐵島企劃
         </span>
       </>
     );

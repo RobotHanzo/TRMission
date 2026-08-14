@@ -36,7 +36,7 @@ describe('app display name', () => {
   // The label for any locale with no `locales` entry of its own, so it has to stand on its own
   // against both listings.
   it('falls back to a label carrying the listing name (Guideline 2.3.8)', () => {
-    expect(appConfig.name).toContain('台鐵任務');
+    expect(appConfig.name).toContain('鐵島企劃');
   });
 
   it.each([

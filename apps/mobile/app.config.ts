@@ -178,18 +178,18 @@ const config: ExpoConfig = {
   // The DEFAULT name the OS shows under the icon (CFBundleDisplayName / Android app_name) — the
   // per-locale labels are in `locales` below, and this is what every locale not listed there falls
   // back to. It MUST contain the store listing's name: App Review rejected 'TRMission' under
-  // Guideline 2.3.8 because the marketplace name in the app's primary language is 台鐵任務 and a
-  // device label of 'TRMission' gave users nothing to match it against. Bilingual — not 台鐵任務
+  // Guideline 2.3.8 because the marketplace name in the app's primary language is 鐵島企劃 and a
+  // device label of 'TRMission' gave users nothing to match it against. Bilingual — not 鐵島企劃
   // alone — for two reasons:
   //   * a fallback has to satisfy 2.3.8 against BOTH listings at once, and they disagree on which
-  //     half leads (App Store en-US `TRMission 台鐵任務`, zh-Hant `台鐵任務`; Play zh-TW is this
+  //     half leads (App Store en-US `TRMission 鐵島企劃`, zh-Hant `鐵島企劃`; Play zh-TW is this
   //     exact string) — fastlane/metadata/{ios,android}/*/{name,title}.txt, and
   //   * the Xcode project/scheme/PRODUCT_NAME are `IOSConfig.XcodeUtils.sanitizedName(name)`, which
-  //     strips every non-`\w` character: '台鐵任務 TRMission' → 'TRMission' (unchanged, so the
+  //     strips every non-`\w` character: '鐵島企劃 TRMission' → 'TRMission' (unchanged, so the
   //     hardcoded ios/TRMission.xcworkspace + scheme in fastlane/Fastfile keep resolving), but
-  //     '台鐵任務' → '' → the fallback literal 'app', which would rename the whole project and
+  //     '鐵島企劃' → '' → the fallback literal 'app', which would rename the whole project and
   //     break every iOS lane. Keep an ASCII token in this string; app.config.test.ts pins it.
-  name: '台鐵任務 TRMission',
+  name: '鐵島企劃 TRMission',
   // Per-locale device labels, each EQUAL to that locale's store listing name. 2.3.8 is a
   // listing-vs-device comparison, so matching them locale-for-locale is the strongest answer to it:
   // the sources are fastlane/metadata/ios/{en-US,zh-Hant}/name.txt, and app.config.test.ts reads
@@ -200,10 +200,10 @@ const config: ExpoConfig = {
   // Welcome side effect: the App Store product page derives its "Languages" list from the .lproj
   // folders in the bundle, so the listing now advertises the two languages the UI actually ships.
   locales: {
-    'zh-Hant': { ios: { CFBundleDisplayName: '台鐵任務' }, android: { app_name: '台鐵任務' } },
+    'zh-Hant': { ios: { CFBundleDisplayName: '鐵島企劃' }, android: { app_name: '鐵島企劃' } },
     en: {
-      ios: { CFBundleDisplayName: 'TRMission 台鐵任務' },
-      android: { app_name: 'TRMission 台鐵任務' },
+      ios: { CFBundleDisplayName: 'TRMission 鐵島企劃' },
+      android: { app_name: 'TRMission 鐵島企劃' },
     },
   },
   slug: 'trmission',

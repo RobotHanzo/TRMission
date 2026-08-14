@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-// TRMission (台鐵任務) wire protocol — shared enums + messages.
+// TRMission (鐵島企劃) wire protocol — shared enums + messages.
 //
 // This package is the single source of truth for the realtime wire format
 // (protobuf over WebSocket, ADR A1). It deliberately has NO dependency on the

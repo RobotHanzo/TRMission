@@ -20,7 +20,7 @@ checks — this package has no platform APIs to check.
   `SoundPlayer` contract (Web Audio vs expo-audio); the cue table, event→cue model, `useSoundDriver`
   and `useSoundSetup` are all shared. Adding a cue means dropping the mp3 here, adding a `CUES` row,
   and adding one asset import per app.
-- `assets/art/` — the authored **rolling-stock sheets** (`台鐵任務-車廂.svg` + `610.svg`). These are
+- `assets/art/` — the authored **rolling-stock sheets** (`鐵島企劃-車廂.svg` + `610.svg`). These are
   build-time input, never shipped: `tools/trainCarArt.mjs` compiles them into
   `src/art/skins/rollingStock.ts`.
 

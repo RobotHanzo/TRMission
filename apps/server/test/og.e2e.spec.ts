@@ -449,8 +449,8 @@ describe('card-svg text helpers', () => {
     expect(escapeXml(`<b>&"'`)).toBe('&lt;b&gt;&amp;&quot;&apos;');
   });
   it('estimates CJK wider than latin and truncates with an ellipsis', () => {
-    expect(estimateWidth('台鐵', 10)).toBeGreaterThan(estimateWidth('ab', 10));
-    const fitted = fitText('台鐵任務台鐵任務台鐵任務', 30, 120);
+    expect(estimateWidth('鐵島', 10)).toBeGreaterThan(estimateWidth('ab', 10));
+    const fitted = fitText('鐵島企劃鐵島企劃鐵島企劃', 30, 120);
     expect(fitted.endsWith('…')).toBe(true);
     expect(estimateWidth(fitted, 30)).toBeLessThanOrEqual(120);
   });

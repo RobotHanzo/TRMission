@@ -5,7 +5,7 @@ import { home, room } from '@trm/client-core/i18n/locales/zh-Hant';
 // tutorial re-entry lives on the home screen).
 export default {
   ...home,
-  title: '台鐵任務',
+  title: '鐵島企劃',
   /** The bottom tab bar's label for this screen (HomeTabs). */
   tab: '首頁',
   greeting: '嗨，{{name}}',

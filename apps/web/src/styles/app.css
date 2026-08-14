@@ -27,7 +27,7 @@
   cursor: pointer;
 }
 
-/* Fixed bilingual logotype (icon + stacked 台鐵任務 / TRMISSION wordmark), shared by the app
+/* Fixed bilingual logotype (icon + stacked 鐵島企劃 / TRMISSION wordmark), shared by the app
    header and the welcome screen's hero — see BrandBanner.tsx. Unlike t('appName'), this doesn't
    switch with locale: it's the brand mark, not a translated label. */
 .brand-banner {

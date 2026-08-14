@@ -11,5 +11,5 @@ export default {
   confirm: '永久刪除帳號',
   maintainerBlocked: '此帳號仍具有維護者權限，請先在管理後台撤銷後再刪除。',
   doneTitle: '帳號已刪除',
-  doneBody: '你的帳號與個人資料已移除。感謝你搭乘台鐵任務。',
+  doneBody: '你的帳號與個人資料已移除。感謝你搭乘《鐵島企劃》。',
 };

@@ -13,9 +13,9 @@ describe('sha256Hex', () => {
   });
 
   it('handles multi-byte UTF-8 (CJK) deterministically', () => {
-    // 台鐵任務 — same bytes everywhere → same hash.
-    expect(sha256Hex('台鐵任務')).toBe(sha256Hex('台鐵任務'));
-    expect(sha256Hex('台鐵任務')).toHaveLength(64);
+    // 鐵島企劃 — same bytes everywhere → same hash.
+    expect(sha256Hex('鐵島企劃')).toBe(sha256Hex('鐵島企劃'));
+    expect(sha256Hex('鐵島企劃')).toHaveLength(64);
   });
 });
 

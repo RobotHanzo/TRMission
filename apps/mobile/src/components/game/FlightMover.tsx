@@ -112,7 +112,7 @@ export function FlightMover({ flight }: { flight: Flight }) {
         // …an opponent's (or a blind) draw shows a branded card-back.
         <View style={styles.cover}>
           <Train color="#fff" size={26} />
-          <Text style={styles.coverName}>台鐵任務</Text>
+          <Text style={styles.coverName}>鐵島企劃</Text>
         </View>
       )}
     </Animated.View>

@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-TRMission (台鐵任務) is a multiplayer web board game: a **clean-room reimplementation of the
+TRMission (鐵島企劃) is a multiplayer web board game: a **clean-room reimplementation of the
 _mechanics_** of _Ticket to Ride: Europe_, re-themed onto Taiwan's railways. The map, city graph,
 all artwork, the colour palette, and the rules wording are **original** — only the underlying
 mechanics and real Taiwanese place-names are reused. The rulebook PDF is a mechanical reference

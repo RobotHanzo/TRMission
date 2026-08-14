@@ -2,7 +2,7 @@ import i18n from './index';
 
 describe('i18n bootstrap', () => {
   it('defaults to zh-Hant and can switch to en', async () => {
-    expect(i18n.t('home.title')).toBe('台鐵任務');
+    expect(i18n.t('home.title')).toBe('鐵島企劃');
     await i18n.changeLanguage('en');
     expect(i18n.t('home.title')).toBe('TRMission');
     await i18n.changeLanguage('zh-Hant');

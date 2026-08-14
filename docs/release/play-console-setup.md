@@ -24,9 +24,9 @@ Package name throughout: `dev.robothanzo.trmission` (`apps/mobile/app.config.ts`
 
 Play Console → **Create app**:
 
-- App name: `TRMission 台鐵任務` (matches `fastlane/metadata/android/*/title.txt`). The launcher label
+- App name: `TRMission 鐵島企劃` (matches `fastlane/metadata/android/*/title.txt`). The launcher label
   is localized to match — `app.config.ts` → `locales` writes `app_name` into
-  `res/values-b+<lang>/strings.xml` (zh-Hant `台鐵任務`, en `TRMission 台鐵任務`), with `name` as the
+  `res/values-b+<lang>/strings.xml` (zh-Hant `鐵島企劃`, en `TRMission 鐵島企劃`), with `name` as the
   fallback for every other language. Keep listing and label in step when either changes; it is the
   same rule App Review enforces as Guideline 2.3.8 (`app-store-connect-setup.md` Step 3), and
   `app.config.test.ts` checks the labels against the committed titles.

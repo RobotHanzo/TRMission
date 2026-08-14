@@ -44,19 +44,19 @@ export type RoomCodeResolver = (gameId: string) => Promise<string | null>;
 
 const STRINGS: Record<PushKind, Record<PushLocale, { title: string; body: string }>> = {
   your_turn: {
-    'zh-Hant': { title: '台鐵任務', body: '輪到你了！' },
+    'zh-Hant': { title: '鐵島企劃', body: '輪到你了！' },
     en: { title: 'TRMission', body: "It's your turn!" },
   },
   game_started: {
-    'zh-Hant': { title: '台鐵任務', body: '對局開始了！' },
+    'zh-Hant': { title: '鐵島企劃', body: '對局開始了！' },
     en: { title: 'TRMission', body: 'Your game has started!' },
   },
   game_over: {
-    'zh-Hant': { title: '台鐵任務', body: '對局結束了，來看看結果吧！' },
+    'zh-Hant': { title: '鐵島企劃', body: '對局結束了，來看看結果吧！' },
     en: { title: 'TRMission', body: 'The game is over — see the results!' },
   },
   game_paused: {
-    'zh-Hant': { title: '台鐵任務', body: '對局暫停中，等你回來繼續！' },
+    'zh-Hant': { title: '鐵島企劃', body: '對局暫停中，等你回來繼續！' },
     en: { title: 'TRMission', body: 'Your game is paused — come back to resume!' },
   },
 };

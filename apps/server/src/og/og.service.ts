@@ -26,7 +26,7 @@ import {
   type ReplayCardPlayer,
 } from './card-svg';
 
-const SITE_TITLE = '台鐵任務 TRMission';
+const SITE_TITLE = '鐵島企劃 TRMission';
 const SITE_DESCRIPTION =
   '搶佔台灣鐵道路線 — 鋪設路線、連接城市、完成任務。A railway board game set in Taiwan: claim routes, link cities, complete missions.';
 
@@ -139,7 +139,7 @@ export class OgService {
       return {
         title: `加入房間 ${view.code} · ${SITE_TITLE}`,
         description:
-          `${host ? `${host.displayName} 邀請你加入台鐵任務！` : '邀請你加入台鐵任務！'}` +
+          `${host ? `${host.displayName} 邀請你加入鐵島企劃！` : '邀請你加入鐵島企劃！'}` +
           `${view.members.length}/${view.maxPlayers} 位玩家${mapBit}. Join the game at room code ${view.code}.`,
         imagePath: `/api/v1/og/room/${encodeURIComponent(view.code)}.png`,
         path,

@@ -1,7 +1,7 @@
 // Web-only app chrome and generic UI atoms (the cross-app atoms live in
 // @trm/client-core/i18n/locales/*/common).
 export default {
-  appName: '台鐵任務',
+  appName: '鐵島企劃',
   discord: 'Discord 社群',
   settings: '設定',
   menu: '選單',

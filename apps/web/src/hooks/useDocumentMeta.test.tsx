@@ -25,7 +25,7 @@ describe('useDocumentMeta', () => {
 
   it('indexable pages get a title, canonical, no robots meta — home also gets JSON-LD', () => {
     render(<Probe />);
-    expect(document.title).toContain('台鐵任務');
+    expect(document.title).toContain('鐵島企劃');
     expect(canonical()?.getAttribute('href')).toBe(`${window.location.origin}/`);
     expect(robotsMeta()).toBeNull();
     const ld = JSON.parse(jsonLd()?.textContent ?? '{}');

@@ -27,7 +27,7 @@ export const CARD_H = 630;
  * upstream file's own default, not something this file controls. `NotoSansTC-Banner750.ttf`
  * is a static instantiation of the same Noto Sans TC file pinned to wght=750 (via
  * `fonttools varLib.instancer --static`, same OFL licence — see LICENSES), used only for the
- * BrandBanner's 台鐵任務 line so it actually matches the live component's real 750-weight
+ * BrandBanner's 鐵島企劃 line so it actually matches the live component's real 750-weight
  * display treatment instead of silently rendering Thin. Archivo needed no such instance: its
  * baked default already matches the component's 600-weight `TRMISSION` line.
  */
@@ -36,7 +36,7 @@ export const OG_FONT_FILES: string[] = [
   join(FONTS_DIR, 'NotoSansTC-Variable.ttf'), // F_SANS — CJK + Latin display/body
   join(FONTS_DIR, 'CascadiaCode-Regular.ttf'), // F_MONO — labels, codes, numbers
   join(FONTS_DIR, 'Archivo-Variable.ttf'), // F_LATIN — the BrandBanner TRMISSION wordmark
-  join(FONTS_DIR, 'NotoSansTC-Banner750.ttf'), // F_SANS_BANNER — the BrandBanner 台鐵任務 line
+  join(FONTS_DIR, 'NotoSansTC-Banner750.ttf'), // F_SANS_BANNER — the BrandBanner 鐵島企劃 line
 ];
 
 // Brand tokens mirrored from apps/web/src/styles/tokens.css (light theme — social
@@ -52,7 +52,7 @@ const LINE = '#d9d0be';
 const READY_GREEN = '#1f8a5b';
 const AVATAR_HUMAN = '#8b8377';
 const AVATAR_BOT = '#5b6168';
-/** apps/web/src/components/BrandBanner.tsx wordmark colours — the 台鐵任務 line stays this
+/** apps/web/src/components/BrandBanner.tsx wordmark colours — the 鐵島企劃 line stays this
  *  orange (icon.svg's own accent) and TRMISSION stays brand navy, independent of the card's
  *  own ember accent. */
 const BANNER_ORANGE = '#e55509';
@@ -73,7 +73,7 @@ const F_SANS = "'Noto Sans TC',sans-serif";
 const F_MONO = "'Cascadia Code',monospace";
 const F_LATIN = "'Archivo',sans-serif";
 /** True 750-weight static instance — see `OG_FONT_FILES`'s comment for why this exists
- *  separately from `F_SANS` (only the BrandBanner's 台鐵任務 line needs real bold; every other
+ *  separately from `F_SANS` (only the BrandBanner's 鐵島企劃 line needs real bold; every other
  *  card text stays on the Thin-by-default `F_SANS` plus its faux-bold stroke, unchanged). */
 const F_SANS_BANNER = "'Noto Sans TC Banner',sans-serif";
 
@@ -210,7 +210,7 @@ interface Banner {
 }
 
 /**
- * The BrandBanner lockup (apps/web's icon.svg + stacked 台鐵任務／TRMISSION wordmark),
+ * The BrandBanner lockup (apps/web's icon.svg + stacked 鐵島企劃／TRMISSION wordmark),
  * reproduced as inline geometry: the CSS `skewX(-6deg)` on each line becomes an SVG
  * `skewX(-6)` transform, letter-spacing is carried over from the component's em values.
  * Shrinks (icon and both text lines scale together) until it fits `maxWidth`, so it never
@@ -236,7 +236,7 @@ function brandBanner(x: number, y: number, targetIconSize: number, maxWidth: num
     const zhSize = iconSize * (48 / 80);
     const enSize = iconSize * (16 / 80);
     const zhSpacing = zhSize * 0.056;
-    const zhWidth = estimateWidth('台鐵任務', zhSize) + zhSpacing * 3;
+    const zhWidth = estimateWidth('鐵島企劃', zhSize) + zhSpacing * 3;
     return { iconSize, gap, zhSize, enSize, zhSpacing, zhWidth, total: iconSize + gap + zhWidth };
   };
   let m = measure(targetIconSize);
@@ -260,7 +260,7 @@ function brandBanner(x: number, y: number, targetIconSize: number, maxWidth: num
   // keeps text()'s plain default treatment like every other piece of text on every other card.
   const markup =
     `<g transform="translate(${x} ${y}) scale(${m.iconSize / 120})">${ICON_MARK}</g>` +
-    `<g transform="translate(${textX} ${zhBaseline}) skewX(-6)">${text(0, 0, m.zhSize, BANNER_ORANGE, '台鐵任務', { spacing: m.zhSpacing, font: F_SANS_BANNER, boldStroke: 0 })}</g>` +
+    `<g transform="translate(${textX} ${zhBaseline}) skewX(-6)">${text(0, 0, m.zhSize, BANNER_ORANGE, '鐵島企劃', { spacing: m.zhSpacing, font: F_SANS_BANNER, boldStroke: 0 })}</g>` +
     `<g transform="translate(${zhCenterX} ${enBaseline}) skewX(-6)">${text(0, 0, m.enSize, BANNER_NAVY, 'TRMISSION', { anchor: 'middle', spacing: enSpacing, font: F_LATIN })}</g>`;
 
   return { width: m.iconSize + m.gap + m.zhWidth, height: m.iconSize, markup };

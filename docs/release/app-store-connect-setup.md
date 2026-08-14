@@ -51,11 +51,11 @@ generates is a snapshot of whatever capabilities are enabled at that moment.
 [appstoreconnect.apple.com](https://appstoreconnect.apple.com) → **My Apps → + → New App**:
 
 - Platform: iOS
-- Name: `TRMission 台鐵任務` (matches `fastlane/metadata/ios/*/name.txt`)
+- Name: `TRMission 鐵島企劃` (matches `fastlane/metadata/ios/*/name.txt`)
   - **Guideline 2.3.8** — the listing name and the on-device label are compared, and Review rejected
-    0.2.x for exactly this: the primary-language listing read `台鐵任務` while the home screen read
+    0.2.x for exactly this: the primary-language listing read `鐵島企劃` while the home screen read
     `TRMission`. `app.config.ts` now answers it per locale: `locales` sets the device label to each
-    listing's name verbatim (zh-Hant `台鐵任務`, en `TRMission 台鐵任務`), and `name` is the
+    listing's name verbatim (zh-Hant `鐵島企劃`, en `TRMission 鐵島企劃`), and `name` is the
     bilingual fallback for every other language. **So renaming a listing here means editing
     `name.txt` AND `app.config.ts` in the same release** — `app.config.test.ts` compares the two and
     fails if they drift.

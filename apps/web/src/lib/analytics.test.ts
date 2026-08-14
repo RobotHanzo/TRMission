@@ -73,7 +73,7 @@ describe('analytics.track', () => {
   it('trackPageView never leaks the room code from document.title', () => {
     const spy = vi.fn();
     (window as unknown as Win).zaraz = { track: spy };
-    document.title = 'Room ABCD · TRMission 台鐵任務';
+    document.title = 'Room ABCD · TRMission 鐵島企劃';
     for (const view of ALL_VIEWS) trackPageView(view);
     expect(spy).toHaveBeenCalledTimes(ALL_VIEWS.length);
     for (const [, params] of spy.mock.calls) {
@@ -85,9 +85,9 @@ describe('analytics.track', () => {
   it('trackPageView sends a constant per-screen title', () => {
     const spy = vi.fn();
     (window as unknown as Win).zaraz = { track: spy };
-    document.title = 'Room ABCD · TRMission 台鐵任務';
+    document.title = 'Room ABCD · TRMission 鐵島企劃';
     trackPageView('room');
-    document.title = 'Game in progress · TRMission 台鐵任務';
+    document.title = 'Game in progress · TRMission 鐵島企劃';
     trackPageView('room');
     expect(spy.mock.calls[0]![1]).toEqual(spy.mock.calls[1]![1]);
     expect(spy).toHaveBeenCalledWith(

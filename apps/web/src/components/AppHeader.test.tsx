@@ -41,7 +41,7 @@ describe('AppHeader brand + leave confirmation (desktop)', () => {
     useSession.setState({ user: { ...signedIn } });
     useUi.setState({ view: 'history' });
     render(<AppHeader />);
-    fireEvent.click(screen.getByRole('button', { name: /台鐵任務/ }));
+    fireEvent.click(screen.getByRole('button', { name: /鐵島企劃/ }));
     expect(useUi.getState().view).toBe('home');
     expect(screen.queryByRole('dialog')).toBeNull();
   });
@@ -50,7 +50,7 @@ describe('AppHeader brand + leave confirmation (desktop)', () => {
     useSession.setState({ user: { ...signedIn } });
     useUi.setState({ view: 'room', roomCode: 'ABCD' });
     render(<AppHeader />);
-    fireEvent.click(screen.getByRole('button', { name: /台鐵任務/ }));
+    fireEvent.click(screen.getByRole('button', { name: /鐵島企劃/ }));
     expect(useUi.getState().view).toBe('room');
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: '確認' }));
@@ -62,7 +62,7 @@ describe('AppHeader brand + leave confirmation (desktop)', () => {
     useUi.setState({ view: 'game' });
     useGame.setState({ snapshot: gameSnap() });
     render(<AppHeader />);
-    fireEvent.click(screen.getByRole('button', { name: /台鐵任務/ }));
+    fireEvent.click(screen.getByRole('button', { name: /鐵島企劃/ }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: '取消' }));
     expect(screen.queryByRole('dialog')).toBeNull();
