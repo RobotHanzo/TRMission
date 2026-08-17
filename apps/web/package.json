@@ -23,13 +23,13 @@
     "@trm/shared": "workspace:*",
     "canvas-confetti": "^1.9.4",
     "i18next": "^26.3.6",
-    "immer": "^11.1.15",
-    "lucide-react": "^1.28.0",
+    "immer": "^11.1.16",
+    "lucide-react": "^1.29.0",
     "polygon-clipping": "^0.15.7",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-i18next": "^17.0.11",
-    "react-zoom-pan-pinch": "^4.0.3",
+    "react-zoom-pan-pinch": "^4.0.4",
     "zustand": "^5.0.14"
   },
   "devDependencies": {
