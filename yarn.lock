@@ -1195,38 +1195,45 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bufbuild/protobuf@npm:2.13.0, @bufbuild/protobuf@npm:^2.13.0":
+"@bufbuild/protobuf@npm:2.14.0":
+  version: 2.14.0
+  resolution: "@bufbuild/protobuf@npm:2.14.0"
+  checksum: 10/ade3c53a9defee6ce4a96068ca3a84e0ecbd5114f67459c15623ce56f904738b002e1dbbcaaa07ea90b9b4820d5f92d220a0e9f4a6cbcd8491166cb92d1b0445
+  languageName: node
+  linkType: hard
+
+"@bufbuild/protobuf@npm:^2.13.0":
   version: 2.13.0
   resolution: "@bufbuild/protobuf@npm:2.13.0"
   checksum: 10/e9585e15422eb92a1d394408b330647543d256c27152e71cde1de14ccb3ec268a809ddb017e7347a97850e400351c3d37e28ea3887a4148b985a3bba347fbd57
   languageName: node
   linkType: hard
 
-"@bufbuild/protoc-gen-es@npm:^2.13.0":
-  version: 2.13.0
-  resolution: "@bufbuild/protoc-gen-es@npm:2.13.0"
+"@bufbuild/protoc-gen-es@npm:^2.14.0":
+  version: 2.14.0
+  resolution: "@bufbuild/protoc-gen-es@npm:2.14.0"
   dependencies:
-    "@bufbuild/protobuf": "npm:2.13.0"
-    "@bufbuild/protoplugin": "npm:2.13.0"
+    "@bufbuild/protobuf": "npm:2.14.0"
+    "@bufbuild/protoplugin": "npm:2.14.0"
   peerDependencies:
-    "@bufbuild/protobuf": 2.13.0
+    "@bufbuild/protobuf": 2.14.0
   peerDependenciesMeta:
     "@bufbuild/protobuf":
       optional: true
   bin:
     protoc-gen-es: bin/protoc-gen-es
-  checksum: 10/05a126627b575e5e712f7c33dc7be99423f99e3044ed3d6c67066437755a2776cc79b3c68a260c953fafe0272fc33fb9450faa8a2d45bc4de6b137d654f00d03
+  checksum: 10/27bb06a9e48151e280535e85b57d88484075c395ba22ba9280564d33b0d26b62cdc579aba34d84fba644b50925bfb0a524fcbde1458052fa86a2879f6d795f89
   languageName: node
   linkType: hard
 
-"@bufbuild/protoplugin@npm:2.13.0":
-  version: 2.13.0
-  resolution: "@bufbuild/protoplugin@npm:2.13.0"
+"@bufbuild/protoplugin@npm:2.14.0":
+  version: 2.14.0
+  resolution: "@bufbuild/protoplugin@npm:2.14.0"
   dependencies:
-    "@bufbuild/protobuf": "npm:2.13.0"
+    "@bufbuild/protobuf": "npm:2.14.0"
     "@typescript/vfs": "npm:^1.6.2"
     typescript: "npm:5.4.5"
-  checksum: 10/f70120b35920bf3ac8395ca9ee94ead25cd78432a978347a58a45d3b28c96cce437dd6a77daa0228bf8e7dde54fdb13709c2b514bc33ba9311bb2378b4250fd7
+  checksum: 10/9f582c5037710b92547aef7f04be285f9d8fe241a46481c1fc76decfcc9d72f938d9cd8fedce6a66f90e5fbd6e9a6dd26dba55d72625e1adbee83103a7086ebf
   languageName: node
   linkType: hard
 
@@ -2769,9 +2776,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/testing@npm:^11.1.28":
-  version: 11.1.28
-  resolution: "@nestjs/testing@npm:11.1.28"
+"@nestjs/testing@npm:^11.1.29":
+  version: 11.1.29
+  resolution: "@nestjs/testing@npm:11.1.29"
   dependencies:
     tslib: "npm:2.8.1"
   peerDependencies:
@@ -2784,7 +2791,7 @@ __metadata:
       optional: true
     "@nestjs/platform-express":
       optional: true
-  checksum: 10/3630154e06671805fcbf2179ff912d6063b56fd19eb2fb43e8ff497186e670cf56e4e4066c0878bc75fbb79dcae1a70c27c9ffa6f1adf367229d8a204801b18c
+  checksum: 10/7de03c0dbb63fbbc40583a759aab65b5c316fa2f6e1f142f554511fe14045dbb64256d8f319b3111145e57631ab883757f8c2c30a0e2950ef0d01a3c4102c48e
   languageName: node
   linkType: hard
 
@@ -3576,18 +3583,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native/jest-preset@npm:0.86.2":
-  version: 0.86.2
-  resolution: "@react-native/jest-preset@npm:0.86.2"
+"@react-native/jest-preset@npm:0.87.0":
+  version: 0.87.0
+  resolution: "@react-native/jest-preset@npm:0.87.0"
   dependencies:
     "@jest/create-cache-key-function": "npm:^29.7.0"
-    "@react-native/js-polyfills": "npm:0.86.2"
+    "@react-native/js-polyfills": "npm:0.87.0"
     babel-jest: "npm:^29.7.0"
     jest-environment-node: "npm:^29.7.0"
     regenerator-runtime: "npm:^0.13.2"
   peerDependencies:
     react: ^19.2.3
-  checksum: 10/5b8b434fedee7982ae891145dad6b8a0f34b5d0fa0e6398196ea7df6f98b805a392da13253dde701a751534ecd20ea9a56b9b58d51641acc25d3fcc1ebca7429
+  checksum: 10/a030b2a75e99562404decca6066a5c79ed6e3e4a3c1192cba4bc43cea8ca4e1620325d15f94817ef9415dc2b816ae591d4bdac14cb82cb517c485ed683a99129
   languageName: node
   linkType: hard
 
@@ -3602,6 +3609,13 @@ __metadata:
   version: 0.86.2
   resolution: "@react-native/js-polyfills@npm:0.86.2"
   checksum: 10/3c076d314c4e220e7722ceb6e03020433607e0ff330ed43d22b8013da134926a9a267d4dd82776256e780c3bf4452b5fded9b1c05ac8604669813c4bc70a7889
+  languageName: node
+  linkType: hard
+
+"@react-native/js-polyfills@npm:0.87.0":
+  version: 0.87.0
+  resolution: "@react-native/js-polyfills@npm:0.87.0"
+  checksum: 10/5a01b5eb0c804446255c790352dbbd59f38d4fb66257d8df02af1bd4cc92404e5bb5ba948b91775025005a971460e2a11665074d20ec3c20ab171d0d1db3ee20
   languageName: node
   linkType: hard
 
@@ -4015,7 +4029,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/pluginutils@npm:^5.3.0":
+"@rollup/pluginutils@npm:^5.4.0":
   version: 5.4.0
   resolution: "@rollup/pluginutils@npm:5.4.0"
   dependencies:
@@ -4801,9 +4815,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/jest-dom@npm:^7.0.0":
-  version: 7.0.0
-  resolution: "@testing-library/jest-dom@npm:7.0.0"
+"@testing-library/jest-dom@npm:^7.0.1":
+  version: 7.0.1
+  resolution: "@testing-library/jest-dom@npm:7.0.1"
   dependencies:
     "@adobe/css-tools": "npm:^4.4.0"
     aria-query: "npm:^5.0.0"
@@ -4813,7 +4827,11 @@ __metadata:
     redent: "npm:^3.0.0"
   peerDependencies:
     "@testing-library/dom": ">=10 <11"
-  checksum: 10/ec6d50550d7ec87f60a19f1719d87e2d73a050fed4938f13d846d30639f85bd903e5aff2eaecbb1a9e67f3c71c98148b46edd4f77b15ca17c91f655f9c54f92b
+    vitest: ">= 0.32"
+  peerDependenciesMeta:
+    vitest:
+      optional: true
+  checksum: 10/0770454b47da9370e59cda691f797c0442e53caefcd412c504b33c7a9bee099c8a9e7d1f07f7eae8d380ea52c34a5d70139e875480a57f729588068edc78f57b
   languageName: node
   linkType: hard
 
@@ -4888,7 +4906,7 @@ __metadata:
     "@sentry/react": "npm:^10.69.0"
     "@sentry/vite-plugin": "npm:^5.4.0"
     "@testing-library/dom": "npm:^10.4.1"
-    "@testing-library/jest-dom": "npm:^7.0.0"
+    "@testing-library/jest-dom": "npm:^7.0.1"
     "@testing-library/react": "npm:^16.3.2"
     "@trm/map-data": "workspace:*"
     "@trm/shared": "workspace:*"
@@ -4996,7 +5014,7 @@ __metadata:
     "@react-native-async-storage/async-storage": "npm:2.2.0"
     "@react-native-community/netinfo": "npm:12.0.1"
     "@react-native-google-signin/google-signin": "npm:^16.1.4"
-    "@react-native/jest-preset": "npm:0.86.2"
+    "@react-native/jest-preset": "npm:0.87.0"
     "@react-navigation/bottom-tabs": "npm:^7.18.15"
     "@react-navigation/elements": "npm:^2.9.37"
     "@react-navigation/native": "npm:^7.3.15"
@@ -5073,7 +5091,7 @@ __metadata:
   dependencies:
     "@bufbuild/buf": "npm:^1.72.0"
     "@bufbuild/protobuf": "npm:^2.13.0"
-    "@bufbuild/protoc-gen-es": "npm:^2.13.0"
+    "@bufbuild/protoc-gen-es": "npm:^2.14.0"
     "@trm/tsc7": "workspace:*"
     typescript: "npm:@typescript/typescript6@^6.0.2"
     vitest: "npm:^4.1.10"
@@ -5090,7 +5108,7 @@ __metadata:
     "@nestjs/jwt": "npm:^11.0.2"
     "@nestjs/platform-express": "npm:^11.1.28"
     "@nestjs/swagger": "npm:^11.4.6"
-    "@nestjs/testing": "npm:^11.1.28"
+    "@nestjs/testing": "npm:^11.1.29"
     "@nestjs/throttler": "npm:^6.5.0"
     "@node-rs/argon2": "npm:^2.0.2"
     "@resvg/resvg-js": "npm:^2.6.2"
@@ -5106,7 +5124,7 @@ __metadata:
     "@trm/tsc7": "workspace:*"
     "@types/cookie-parser": "npm:^1.4.10"
     "@types/express": "npm:^5.0.6"
-    "@types/node": "npm:^26.1.2"
+    "@types/node": "npm:^26.2.0"
     "@types/supertest": "npm:^7.2.1"
     "@types/ws": "npm:^8.18.1"
     cookie-parser: "npm:^1.4.7"
@@ -5121,7 +5139,7 @@ __metadata:
     rxjs: "npm:^7.8.2"
     supertest: "npm:^7.2.2"
     typescript: "npm:@typescript/typescript6@^6.0.2"
-    unplugin-swc: "npm:^1.5.10"
+    unplugin-swc: "npm:^1.5.11"
     vitest: "npm:^4.1.10"
     ws: "npm:^8.21.2"
     zod: "npm:^4.4.3"
@@ -5156,7 +5174,7 @@ __metadata:
     "@sentry/react": "npm:^10.69.0"
     "@sentry/vite-plugin": "npm:^5.4.0"
     "@testing-library/dom": "npm:^10.4.1"
-    "@testing-library/jest-dom": "npm:^7.0.0"
+    "@testing-library/jest-dom": "npm:^7.0.1"
     "@testing-library/react": "npm:^16.3.2"
     "@trm/client-core": "workspace:*"
     "@trm/codec": "workspace:*"
@@ -5186,44 +5204,44 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@turbo/darwin-64@npm:2.10.8":
-  version: 2.10.8
-  resolution: "@turbo/darwin-64@npm:2.10.8"
+"@turbo/darwin-64@npm:2.10.9":
+  version: 2.10.9
+  resolution: "@turbo/darwin-64@npm:2.10.9"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@turbo/darwin-arm64@npm:2.10.8":
-  version: 2.10.8
-  resolution: "@turbo/darwin-arm64@npm:2.10.8"
+"@turbo/darwin-arm64@npm:2.10.9":
+  version: 2.10.9
+  resolution: "@turbo/darwin-arm64@npm:2.10.9"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@turbo/linux-64@npm:2.10.8":
-  version: 2.10.8
-  resolution: "@turbo/linux-64@npm:2.10.8"
+"@turbo/linux-64@npm:2.10.9":
+  version: 2.10.9
+  resolution: "@turbo/linux-64@npm:2.10.9"
   conditions: (os=android | os=linux) & cpu=x64
   languageName: node
   linkType: hard
 
-"@turbo/linux-arm64@npm:2.10.8":
-  version: 2.10.8
-  resolution: "@turbo/linux-arm64@npm:2.10.8"
+"@turbo/linux-arm64@npm:2.10.9":
+  version: 2.10.9
+  resolution: "@turbo/linux-arm64@npm:2.10.9"
   conditions: (os=android | os=linux) & cpu=arm64
   languageName: node
   linkType: hard
 
-"@turbo/windows-64@npm:2.10.8":
-  version: 2.10.8
-  resolution: "@turbo/windows-64@npm:2.10.8"
+"@turbo/windows-64@npm:2.10.9":
+  version: 2.10.9
+  resolution: "@turbo/windows-64@npm:2.10.9"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
 
-"@turbo/windows-arm64@npm:2.10.8":
-  version: 2.10.8
-  resolution: "@turbo/windows-arm64@npm:2.10.8"
+"@turbo/windows-arm64@npm:2.10.9":
+  version: 2.10.9
+  resolution: "@turbo/windows-arm64@npm:2.10.9"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
@@ -5518,12 +5536,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^26.1.2":
-  version: 26.1.2
-  resolution: "@types/node@npm:26.1.2"
+"@types/node@npm:^26.2.0":
+  version: 26.2.0
+  resolution: "@types/node@npm:26.2.0"
   dependencies:
     undici-types: "npm:~8.3.0"
-  checksum: 10/2dd6d75b80c006deab4e381acc8cb2e3d634f10141f05fd6cadaabddd80a95f04aef7b00a574bd8fd5e08e940b899c23b91dd09a70b11a34a2762203b5eea25e
+  checksum: 10/3829dd8c82e7d4858f3cc946ec9e5133c9fa39a0a9173874a6392230665121b42dac1b134e5e10ee132a5487293708c77df253cf41a125e9fd838cc3af72d700
   languageName: node
   linkType: hard
 
@@ -14429,10 +14447,10 @@ __metadata:
   resolution: "trmission@workspace:."
   dependencies:
     "@eslint/js": "npm:^10.0.1"
-    "@types/node": "npm:^26.1.2"
+    "@types/node": "npm:^26.2.0"
     eslint: "npm:^10.8.0"
     prettier: "npm:^3.9.6"
-    turbo: "npm:^2.10.8"
+    turbo: "npm:^2.10.9"
     typescript: "npm:@typescript/typescript6@^6.0.2"
     typescript-eslint: "npm:^8.66.0"
     vitest: "npm:^4.1.10"
@@ -14455,16 +14473,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"turbo@npm:^2.10.8":
-  version: 2.10.8
-  resolution: "turbo@npm:2.10.8"
+"turbo@npm:^2.10.9":
+  version: 2.10.9
+  resolution: "turbo@npm:2.10.9"
   dependencies:
-    "@turbo/darwin-64": "npm:2.10.8"
-    "@turbo/darwin-arm64": "npm:2.10.8"
-    "@turbo/linux-64": "npm:2.10.8"
-    "@turbo/linux-arm64": "npm:2.10.8"
-    "@turbo/windows-64": "npm:2.10.8"
-    "@turbo/windows-arm64": "npm:2.10.8"
+    "@turbo/darwin-64": "npm:2.10.9"
+    "@turbo/darwin-arm64": "npm:2.10.9"
+    "@turbo/linux-64": "npm:2.10.9"
+    "@turbo/linux-arm64": "npm:2.10.9"
+    "@turbo/windows-64": "npm:2.10.9"
+    "@turbo/windows-arm64": "npm:2.10.9"
   dependenciesMeta:
     "@turbo/darwin-64":
       optional: true
@@ -14480,7 +14498,7 @@ __metadata:
       optional: true
   bin:
     turbo: bin/turbo
-  checksum: 10/a6b1f9abc9f7fb54efbdcbaa909faf189dfcfd3b86f1988af26d808d7ee7d45e7eb869ba8f6df608d9ba0e4f19e24a723a4bc80e85f77e36b755b01b7bc973c8
+  checksum: 10/b278e7754bcfb4a5741df7fd1f27854f5dffc80ae7ee9ca5a13fe5429204186486f35d45bec7f9f7c503ba3a5e14256b4813a38cff72b6acdc29505854ec7db9
   languageName: node
   linkType: hard
 
@@ -14690,28 +14708,56 @@ __metadata:
   languageName: node
   linkType: hard
 
-"unplugin-swc@npm:^1.5.10":
-  version: 1.5.10
-  resolution: "unplugin-swc@npm:1.5.10"
+"unplugin-swc@npm:^1.5.11":
+  version: 1.5.11
+  resolution: "unplugin-swc@npm:1.5.11"
   dependencies:
-    "@rollup/pluginutils": "npm:^5.3.0"
+    "@rollup/pluginutils": "npm:^5.4.0"
     load-tsconfig: "npm:^0.2.5"
-    unplugin: "npm:^2.3.11"
+    unplugin: "npm:^3.3.0"
   peerDependencies:
     "@swc/core": ^1.2.108
-  checksum: 10/57365874a1a2a2d29c09e06ff5b3d0bb043802b618dff86afb163080358d9ee0b1a4354950f1540bbca62390f2c1b1be1026b7611a132893707bd0e928cd7227
+  checksum: 10/230b8c4f4edbd6d462434d32c4bf361e53fc35c7143af5e61a415e661be54096655731430ab2cb5f2e01fceadcccf80340090ba5dc9d31987031aabb74e08818
   languageName: node
   linkType: hard
 
-"unplugin@npm:^2.3.11":
-  version: 2.3.11
-  resolution: "unplugin@npm:2.3.11"
+"unplugin@npm:^3.3.0":
+  version: 3.3.0
+  resolution: "unplugin@npm:3.3.0"
   dependencies:
     "@jridgewell/remapping": "npm:^2.3.5"
-    acorn: "npm:^8.15.0"
-    picomatch: "npm:^4.0.3"
+    picomatch: "npm:^4.0.4"
     webpack-virtual-modules: "npm:^0.6.2"
-  checksum: 10/7b4adbfaac8894e8491c452c0b67c612b57e103761e842d9013ebea89a4ae92a78df4ec0aa30e5e3eaaefd47dd287973d5a662271624b7346a15d9236d257f9d
+  peerDependencies:
+    "@farmfe/core": "*"
+    "@rspack/core": "*"
+    bun-types-no-globals: "*"
+    esbuild: "*"
+    rolldown: "*"
+    rollup: "*"
+    unloader: "*"
+    vite: "*"
+    webpack: "*"
+  peerDependenciesMeta:
+    "@farmfe/core":
+      optional: true
+    "@rspack/core":
+      optional: true
+    bun-types-no-globals:
+      optional: true
+    esbuild:
+      optional: true
+    rolldown:
+      optional: true
+    rollup:
+      optional: true
+    unloader:
+      optional: true
+    vite:
+      optional: true
+    webpack:
+      optional: true
+  checksum: 10/162aa991dcc464c124bee401c30e35fb579cccdba0a7a6c0b5f8c615532e08059a256d9d33450373f4b804508a4c01bfc8bd07a2e2143e31ff51b911dbf57952
   languageName: node
   linkType: hard
 
