@@ -61,6 +61,8 @@ export interface AnalyticsEvents {
   // the signed-out public homepage — its impression is the top of the acquisition funnel
   landing_shown: Record<string, never>;
   landing_cta_click: { target: 'tutorial' | 'login' };
+  /** A click on the App Store lockup — the same funnel, leaving for the iOS app instead. */
+  app_store_click: { source: 'landing_hero' | 'landing_footer' };
   encyclopedia_open: Record<string, never>;
   // replay
   replay_open: { source: 'history' | 'link' };

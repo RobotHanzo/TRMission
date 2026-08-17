@@ -32,6 +32,13 @@ with the `gameId`/`roomCode` the reporter is looking at, read from `../store/ui.
 display-only for moderators and never an authorization input. Blocking doctrine:
 `../store/CLAUDE.md`.
 
+`AppStoreBadge.tsx` is the "Download on the App Store" lockup on the landing hero and footer. The
+four SVGs in `../assets/app-store/` are **Apple's own artwork, unmodified** — the deliberate
+exception to the no-copied-artwork rule above. The only choices it makes are the language and the
+black/white lockup (dark theme takes the white one); never recolour, filter, or scale it
+non-uniformly. Its target is `APP_STORE_URL` (`@trm/client-core/links`) — the `/ios` vanity redirect
+in `apps/web/nginx.conf`, so the storefront and app id rotate there, not in client code.
+
 `AppErrorBoundary.tsx` wraps `<App/>` in `main.tsx`. Without it an uncaught render throw blanks the
 page. Inline styles + strings read defensively off the i18n singleton, because the crash screen has
 to survive the stylesheet or i18n being the thing that broke.

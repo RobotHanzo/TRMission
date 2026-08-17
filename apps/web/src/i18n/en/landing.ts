@@ -14,6 +14,9 @@ export default {
     playDest: 'Multiplayer',
     playMeta: 'Play as a guest or with an account',
   },
+  appStore: {
+    lede: 'Also on iPhone and iPad',
+  },
   how: {
     title: 'Each turn, pick one of three',
     lede: 'On your turn you take exactly one action. Restock your hand, grab a route, or gamble on a new mission — the trade-off is the strategy.',

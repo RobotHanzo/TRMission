@@ -3,6 +3,8 @@
 export default {
   appName: '鐵島企劃',
   discord: 'Discord 社群',
+  // Must read exactly like the words inside Apple's lockup for this language.
+  appStoreBadgeAlt: '從 App Store 下載',
   settings: '設定',
   menu: '選單',
   back: '返回',

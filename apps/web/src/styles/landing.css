@@ -214,6 +214,32 @@ button.landing-departure:hover .landing-departure-arrow {
   color: var(--dep-hover-ink);
 }
 
+/* ── App Store lockup ──
+   Apple's artwork is used as-is: no background, border, filter or recolour on the image, and the
+   only sizing is a uniform scale by height. The link is a plain inline-block so the badge's own
+   margin is the clear space the identity guidelines ask for. */
+.app-store-badge {
+  display: inline-block;
+  line-height: 0;
+  border-radius: var(--tr-radius-sm); /* focus ring only — the artwork has its own corners */
+}
+.app-store-badge img {
+  display: block;
+  height: 40px;
+  width: auto;
+}
+.landing-store {
+  display: flex;
+  align-items: center;
+  gap: var(--tr-space-4);
+  flex-wrap: wrap;
+  margin-top: var(--tr-space-4);
+}
+.landing-store-lede {
+  margin: 0;
+  font-size: 13px;
+}
+
 /* ── The board panel: the real map framed like a station wall map ── */
 .landing-board {
   position: relative;
@@ -456,6 +482,9 @@ a.link {
   margin: 0;
   font-size: 13px;
 }
+.landing-footer-store {
+  align-self: flex-start; /* a flex column would otherwise stretch the link across the footer */
+}
 .landing-footer-links {
   display: flex;
   gap: var(--tr-space-3);
@@ -488,6 +517,9 @@ a.link {
   }
   .landing-hero-copy > :nth-child(4) {
     animation-delay: 0.18s;
+  }
+  .landing-hero-copy > :nth-child(5) {
+    animation-delay: 0.24s;
   }
   .landing-board {
     animation: landing-rise 0.55s ease 0.2s both;

@@ -40,6 +40,16 @@ describe('LandingScreen (signed-out /)', () => {
     expect(screen.getByRole('button', { name: /加入 Discord$/ })).toBeInTheDocument();
   });
 
+  it('offers the App Store lockup in the hero and the footer, via the /ios vanity link', () => {
+    render(<LandingScreen />);
+    const badges = screen.getAllByRole('link', { name: '從 App Store 下載' });
+    expect(badges).toHaveLength(2);
+    for (const badge of badges) {
+      expect(badge).toHaveAttribute('href', 'https://trmission.robothanzo.dev/ios');
+      expect(badge).toHaveAttribute('rel', 'noopener noreferrer');
+    }
+  });
+
   it('links the privacy policy and account deletion (OAuth homepage requirements)', () => {
     render(<LandingScreen />);
     fireEvent.click(screen.getAllByRole('button', { name: '隱私權政策' })[0]!);

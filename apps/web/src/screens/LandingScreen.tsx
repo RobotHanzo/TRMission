@@ -19,6 +19,7 @@ import { useSession } from '../store/session';
 import { MapBackdrop } from '../components/MapBackdrop';
 import { BrandBanner } from '../components/BrandBanner';
 import { AdSlot } from '../components/AdSlot';
+import { AppStoreBadge } from '../components/AppStoreBadge';
 import { DiscordGlyph } from '../components/icons/DiscordGlyph';
 import { openDiscord } from '../discord';
 import { track } from '../lib/analytics';
@@ -132,6 +133,13 @@ export function LandingScreen() {
                 <ArrowRight className="landing-departure-arrow" size={18} aria-hidden />
               </button>
             </div>
+
+            {/* The third way to board: the iOS app. Outside the departures panel — Apple's lockup
+                has its own required clear space and can't take the board's amber styling. */}
+            <div className="landing-store">
+              <p className="landing-store-lede muted">{t('landing.appStore.lede')}</p>
+              <AppStoreBadge source="landing_hero" />
+            </div>
           </div>
 
           {/* The real board (same MapScene the game renders), framed as a station wall map. */}
@@ -239,6 +247,7 @@ export function LandingScreen() {
         <div className="landing-wrap landing-footer-inner">
           <BrandBanner size="header" />
           <p className="landing-footer-tagline muted">{t('tagline')}</p>
+          <AppStoreBadge source="landing_footer" className="landing-footer-store" />
           <div className="landing-footer-links">
             <button onClick={enterSupport}>{t('support.title')}</button>
             <button onClick={enterTerms}>{t('termsOfService')}</button>

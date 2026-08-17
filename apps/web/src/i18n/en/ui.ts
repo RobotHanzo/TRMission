@@ -4,6 +4,7 @@ import type zh from '../zh-Hant/ui';
 export default {
   appName: 'TRMission',
   discord: 'Discord Community',
+  appStoreBadgeAlt: 'Download on the App Store',
   settings: 'Settings',
   menu: 'Menu',
   back: 'Back',

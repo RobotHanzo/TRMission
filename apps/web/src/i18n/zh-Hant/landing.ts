@@ -12,6 +12,9 @@ export default {
     playDest: '多人對戰',
     playMeta: '訪客或帳號皆可遊玩',
   },
+  appStore: {
+    lede: 'iPhone 與 iPad 也能玩',
+  },
   how: {
     title: '每回合，三選一',
     lede: '輪到你時，從三種行動中挑一種。要補牌、搶路線，還是賭一張新任務——取捨就是策略。',
