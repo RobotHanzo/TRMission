@@ -5057,7 +5057,7 @@ __metadata:
     react-native-screens: "npm:~4.26.0"
     react-native-svg: "npm:15.15.5"
     react-native-web: "npm:^0.21.2"
-    react-native-webview: "npm:13.16.1"
+    react-native-webview: "npm:14.0.1"
     react-native-worklets: "npm:0.11.3"
     react-test-renderer: "npm:19.2.8"
     sf-symbols-typescript: "npm:^2.2.0"
@@ -12991,16 +12991,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-webview@npm:13.16.1":
-  version: 13.16.1
-  resolution: "react-native-webview@npm:13.16.1"
+"react-native-webview@npm:14.0.1":
+  version: 14.0.1
+  resolution: "react-native-webview@npm:14.0.1"
   dependencies:
     escape-string-regexp: "npm:^4.0.0"
     invariant: "npm:2.2.4"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10/3b97550ccc7ad3f205342a9bdea31c83b2d8b9ab011d76a30a8b8f7a2738a0579238b1502bd0101e6210b3af6037dca8cf38276ad1705687d72a8fd3ed0138dd
+  checksum: 10/dc7591657aa699c843cf3af6b354748c1bca7050c30854d3832bbaced0113237bbf470c51bed50c49877941b4d8c45540cf485cb9455a6956b618c7cd63bd74e
   languageName: node
   linkType: hard
 
