@@ -2,6 +2,16 @@
 
 App-wide context: `apps/web/CLAUDE.md`.
 
+## `mobileApp.ts` — who gets the "get the app" sheet
+
+`detectMobilePlatform()` answers **"is there a public store listing for this device?"**, not "is this
+a phone": it returns `'ios'` for an iPhone/iPad (including iPadOS's default desktop-mode UA, which
+claims to be a Mac — the touch-points test is what catches it) and `null` for everything else.
+**Android is deliberately excluded** while the Play listing is an internal-testing track, since a
+Play link answers "item not found" for non-testers; the module comments the one-line change that
+lights it up. The dismissal (`trm.appPromptDismissed`) is per-device and permanent — declining OR
+leaving for the store both count as answered. `MobileAppPrompt.tsx` is the only consumer.
+
 ## `preloadRecovery.ts` — surviving a redeploy, and a flaky network
 
 Installed from `main.tsx`; answers Vite's `vite:preloadError`. Every route is a lazy chunk, so a tab

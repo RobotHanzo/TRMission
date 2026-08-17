@@ -214,20 +214,9 @@ button.landing-departure:hover .landing-departure-arrow {
   color: var(--dep-hover-ink);
 }
 
-/* ── App Store lockup ──
-   Apple's artwork is used as-is: no background, border, filter or recolour on the image, and the
-   only sizing is a uniform scale by height. The link is a plain inline-block so the badge's own
-   margin is the clear space the identity guidelines ask for. */
-.app-store-badge {
-  display: inline-block;
-  line-height: 0;
-  border-radius: var(--tr-radius-sm); /* focus ring only — the artwork has its own corners */
-}
-.app-store-badge img {
-  display: block;
-  height: 40px;
-  width: auto;
-}
+/* The `.app-store-badge` lockup rules live in app.css — the badge is app-wide chrome now (the
+   landing hero/footer plus the mobile "get the app" sheet), and app.css is the stylesheet that
+   loads for every view. */
 .landing-store {
   display: flex;
   align-items: center;

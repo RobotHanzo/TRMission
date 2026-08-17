@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useUi, isHomeColdLoadPath } from './store/ui';
 import { useHasFeature, useSession } from './store/session';
 import { AppHeader } from './components/AppHeader';
+import { MobileAppPrompt } from './components/MobileAppPrompt';
 import { useLeaveWarning } from './hooks/useLeaveWarning';
 import { usePageViewTracking } from './hooks/usePageViewTracking';
 import { useSoundSetup } from './hooks/useSoundSetup';
@@ -210,6 +211,9 @@ export function App() {
           <EncyclopediaModal onClose={() => setEncyclopediaOpen(false)} />
         </Suspense>
       )}
+      {/* Mobile browsers get one dismissible "the app exists" sheet; it decides for itself whether
+          this device and view qualify, and renders nothing anywhere else. */}
+      <MobileAppPrompt />
     </div>
   );
 }

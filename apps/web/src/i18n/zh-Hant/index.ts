@@ -15,6 +15,7 @@ import {
   settings,
   tutorial,
 } from '@trm/client-core/i18n/locales/zh-Hant';
+import appPrompt from './appPrompt';
 import authWeb from './auth';
 import builder from './builder';
 import chat from './chat';
@@ -43,6 +44,7 @@ export default {
   ...authWeb,
   home,
   landing,
+  appPrompt,
   ...difficulty,
   ...gameSettings,
   ...eventsMode,

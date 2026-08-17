@@ -35,10 +35,14 @@ const BADGE_HEIGHT = 40;
 export function AppStoreBadge({
   source,
   className,
+  onNavigate,
 }: {
   /** Which placement the click came from, for the acquisition funnel. */
-  source: 'landing_hero' | 'landing_footer';
+  source: 'landing_hero' | 'landing_footer' | 'mobile_prompt';
   className?: string;
+  /** Ran after the click is tracked, for a placement that has to react to the visitor leaving —
+   *  the mobile prompt closes itself, so the sheet isn't waiting when they come back to the tab. */
+  onNavigate?: () => void;
 }) {
   const { t } = useTranslation();
   const locale = useUi((s) => s.locale);
@@ -51,7 +55,10 @@ export function AppStoreBadge({
       href={APP_STORE_URL}
       target="_blank"
       rel="noopener noreferrer"
-      onClick={() => track('app_store_click', { source })}
+      onClick={() => {
+        track('app_store_click', { source });
+        onNavigate?.();
+      }}
     >
       <img
         src={dark ? badge.white : badge.black}

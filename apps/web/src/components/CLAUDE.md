@@ -37,7 +37,17 @@ four SVGs in `../assets/app-store/` are **Apple's own artwork, unmodified** — 
 exception to the no-copied-artwork rule above. The only choices it makes are the language and the
 black/white lockup (dark theme takes the white one); never recolour, filter, or scale it
 non-uniformly. Its target is `APP_STORE_URL` (`@trm/client-core/links`) — the `/ios` vanity redirect
-in `apps/web/nginx.conf`, so the storefront and app id rotate there, not in client code.
+in `apps/web/nginx.conf`, so the storefront and app id rotate there, not in client code. It also
+carries the badge in `MobileAppPrompt.tsx` below, which is why its `.app-store-badge` rules live in
+`../styles/app.css` rather than the landing stylesheet.
+
+`MobileAppPrompt.tsx` is the one-shot "get the app" bottom sheet mobile browsers see (issue #106),
+mounted app-wide from `App.tsx`. It is an **offer, never a gate**: the web app stays fully playable,
+one tap (or Escape, or the backdrop) declines, and the decision is remembered per device. It decides
+for itself whether to render — `../lib/mobileApp.ts` answers "is there a public store listing for
+this device?" (iOS only; Android is commented there), and the view allowlist keeps it off the
+immersive, legal, support and account-deletion surfaces. No mobile counterpart exists or should:
+`apps/mobile` **is** the thing being promoted.
 
 `AppErrorBoundary.tsx` wraps `<App/>` in `main.tsx`. Without it an uncaught render throw blanks the
 page. Inline styles + strings read defensively off the i18n singleton, because the crash screen has

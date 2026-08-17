@@ -2,6 +2,7 @@
 // `zaraz.track` (which fans out to the GA4 Managed Component). This module is the ONLY analytics
 // egress; its typed event map is the leak guard — params are safe primitives, never game secrets.
 import type { View } from '../store/ui';
+import type { MobilePlatform } from './mobileApp';
 
 /** Every event name → its exact, safe param shape. Do NOT widen a value to carry game state/PII. */
 export interface AnalyticsEvents {
@@ -62,7 +63,12 @@ export interface AnalyticsEvents {
   landing_shown: Record<string, never>;
   landing_cta_click: { target: 'tutorial' | 'login' };
   /** A click on the App Store lockup — the same funnel, leaving for the iOS app instead. */
-  app_store_click: { source: 'landing_hero' | 'landing_footer' };
+  app_store_click: { source: 'landing_hero' | 'landing_footer' | 'mobile_prompt' };
+  /** The mobile-browser "get the app" sheet (issue #106): its impression, and an explicit
+   *  "keep playing here". A store click from it reports as `app_store_click` above, so the three
+   *  together are the whole funnel for that surface. */
+  app_prompt_shown: { platform: MobilePlatform };
+  app_prompt_dismiss: Record<string, never>;
   encyclopedia_open: Record<string, never>;
   // replay
   replay_open: { source: 'history' | 'link' };
