@@ -21,20 +21,21 @@ Replay recorder off the landing critical path, so re-check the emitted chunks af
 
 Read the one for the area you're touching (Claude Code loads them on demand).
 
-| Area                                                      | Doc                              |
-| --------------------------------------------------------- | -------------------------------- |
-| Snapshot mirror, session/auth, routing, moderation        | `src/store/CLAUDE.md`            |
-| REST client, `GameSocket`, connection bridge, Google GSI  | `src/net/CLAUDE.md`              |
-| `MapScene`/`Board`/geography, seat avatars, report dialog | `src/components/CLAUDE.md`       |
-| Content catalog, view-only helpers, player identity       | `src/game/CLAUDE.md`             |
-| Card + seat colours, tokens parity                        | `src/theme/CLAUDE.md`            |
-| UI strings vs content names                               | `src/i18n/CLAUDE.md`             |
-| Sentry façade, `SECRET_CLASS` replay blocking             | `src/observability/CLAUDE.md`    |
-| Stale-chunk recovery across a redeploy                    | `src/lib/CLAUDE.md`              |
-| Silent auto-reload onto a new deploy                      | `docs/release/server-ota.md`     |
-| Custom map builder (lazy route)                           | `src/features/builder/CLAUDE.md` |
-| Client-side replay                                        | `src/features/replay/CLAUDE.md`  |
-| Shared headless core (net, stores, view logic, tutorial)  | `packages/client-core/CLAUDE.md` |
+| Area                                                      | Doc                                 |
+| --------------------------------------------------------- | ----------------------------------- |
+| Snapshot mirror, session/auth, routing, moderation        | `src/store/CLAUDE.md`               |
+| REST client, `GameSocket`, connection bridge, Google GSI  | `src/net/CLAUDE.md`                 |
+| `MapScene`/`Board`/geography, seat avatars, report dialog | `src/components/CLAUDE.md`          |
+| Content catalog, view-only helpers, player identity       | `src/game/CLAUDE.md`                |
+| Card + seat colours, tokens parity                        | `src/theme/CLAUDE.md`               |
+| UI strings vs content names                               | `src/i18n/CLAUDE.md`                |
+| Sentry façade, `SECRET_CLASS` replay blocking             | `src/observability/CLAUDE.md`       |
+| Stale-chunk recovery across a redeploy                    | `src/lib/CLAUDE.md`                 |
+| Silent auto-reload onto a new deploy                      | `docs/release/server-ota.md`        |
+| Custom map builder (lazy route)                           | `src/features/builder/CLAUDE.md`    |
+| Client-side replay                                        | `src/features/replay/CLAUDE.md`     |
+| AdMob `app-ads.txt` served off this origin                | `docs/release/admob-app-ads-txt.md` |
+| Shared headless core (net, stores, view logic, tutorial)  | `packages/client-core/CLAUDE.md`    |
 
 ## The two rules that hold everywhere here
 

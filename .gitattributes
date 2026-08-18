@@ -3,3 +3,10 @@
 # them to CRLF, and the Docker build would bake `#!/bin/sh\r` into the image. That fails at exec with
 # a "not found" that names the interpreter, not the line endings, which is a bad afternoon.
 *.sh text eol=lf
+
+# app-ads.txt is a machine-parsed IAB record file that AdMob crawls off the deployed web root
+# (apps/web/public/app-ads.txt → /app-ads.txt). Pin it to LF so a Windows checkout with
+# `core.autocrlf=true` cannot bake CRLF into the published bytes: the spec allows CRLF, but the
+# published file should be byte-identical to the record AdMob hands you, and the parity test in
+# apps/web asserts exactly that.
+apps/web/public/app-ads.txt text eol=lf

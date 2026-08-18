@@ -40,6 +40,11 @@ picks by `Platform.OS`. A blank id for one platform just means that placement re
 `adUnitId()` returns Google's `TestIds` under `__DEV__` **regardless** of what is checked in:
 clicking a live ad on your own inventory is invalid traffic that can suspend the account.
 
+The publisher id inside those literals is also what `apps/web/public/app-ads.txt` authorises — AdMob
+will not serve this app's inventory until it has crawled that file off the store listing's developer
+website. Changing AdMob accounts means changing both; `docs/release/admob-app-ads-txt.md` is the
+runbook and `apps/web/src/config/appAdsTxt.test.ts` fails the build if the two drift.
+
 ## The version pin, and what shipping ads declared
 
 `react-native-google-mobile-ads` is **pinned exact to 16.3.4** and the pin is load-bearing: 16.4.0
