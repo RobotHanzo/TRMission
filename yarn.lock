@@ -5035,7 +5035,7 @@ __metadata:
     expo-splash-screen: "npm:~57.0.5"
     expo-sqlite: "npm:~57.0.1"
     expo-status-bar: "npm:~57.0.1"
-    expo-store-review: "npm:~57.0.1"
+    expo-store-review: "npm:57.0.1"
     expo-tracking-transparency: "npm:~57.0.1"
     expo-updates: "npm:~57.0.12"
     expo-web-browser: "npm:~57.0.2"
@@ -5052,7 +5052,7 @@ __metadata:
     react-native-bottom-tabs: "npm:^1.4.0"
     react-native-confetti-cannon: "npm:^1.5.2"
     react-native-gesture-handler: "npm:~2.32.0"
-    react-native-google-mobile-ads: "npm:16.4.0"
+    react-native-google-mobile-ads: "npm:16.3.4"
     react-native-reanimated: "npm:4.5.3"
     react-native-safe-area-context: "npm:~5.8.1"
     react-native-screens: "npm:~4.26.0"
@@ -8703,13 +8703,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-store-review@npm:~57.0.1":
-  version: 57.0.2
-  resolution: "expo-store-review@npm:57.0.2"
+"expo-store-review@npm:57.0.1":
+  version: 57.0.1
+  resolution: "expo-store-review@npm:57.0.1"
   peerDependencies:
     expo: "*"
     react-native: "*"
-  checksum: 10/db593c89b0093a9b6c548d3ebd74ef12fd7f41236db9b767c95038ea068565628ae2e3072b1aa0ac0105736c9cba9845f3c8ec92911fad1d9acb958ce7a1aac1
+  checksum: 10/b8943d22fb0ae6540d8af09e7e40b40af297bc88cc9725365bfd94f13922f2db395361a679fb737ecc3e16d0da6bbec7d7fcc118917ddf4ee99de1d9efdcbc60
   languageName: node
   linkType: hard
 
@@ -12880,9 +12880,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-google-mobile-ads@npm:16.4.0":
-  version: 16.4.0
-  resolution: "react-native-google-mobile-ads@npm:16.4.0"
+"react-native-google-mobile-ads@npm:16.3.4":
+  version: 16.3.4
+  resolution: "react-native-google-mobile-ads@npm:16.3.4"
   dependencies:
     "@iabtcf/core": "npm:^1.5.6"
     use-deep-compare-effect: "npm:^1.8.1"
@@ -12891,7 +12891,7 @@ __metadata:
   peerDependenciesMeta:
     expo:
       optional: true
-  checksum: 10/d545345b17a94f12d40ec8e4ef95c1fbd82acd374264c5aab71066b5ef1d98fe6f44da36e9dc7a1c1ecf286e77d90feea423dda09f93809353e7d3a622fe4193
+  checksum: 10/1854a5e11076e1375730c2e75079ab9997fa0464d800d938a802ac2e9e0c94b9cb1505354a49003050d13411b0bfacc6e233cad919902b5206c5642a85874eaa
   languageName: node
   linkType: hard
 

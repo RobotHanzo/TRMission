@@ -52,6 +52,15 @@ updates:
       - dependency-name: typescript
       - dependency-name: '@typescript/native'
 
+      # Pinned EXACTLY, and not by preference: 16.4.0 raises the native SDK to play-services-ads
+      # 25.4.0, whose Kotlin metadata is 2.3.0 and cannot be read by the Kotlin the Expo SDK's
+      # Android toolchain runs — `:react-native-google-mobile-ads:compileReleaseKotlin` fails
+      # outright (apps/mobile/src/ads/CLAUDE.md). It was grouped into a prod-minor-and-patch batch
+      # anyway despite matching the `react-native-*` pattern of expo-sdk below, and that batch took
+      # the Android release lane down for two days — so the pin is enforced here rather than
+      # trusted to group ordering. Lift it only together with the Expo SDK's Kotlin version.
+      - dependency-name: react-native-google-mobile-ads
+
     groups:
       # Must move as one — see the ignore note above.
       react:

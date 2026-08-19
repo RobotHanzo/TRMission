@@ -43,8 +43,16 @@ Read the one for the area you're touching (Claude Code loads them on demand):
   unified `~57.0.x` versioning — reconcile any dep via `npx expo install --check`, not by hand.
   The SDK's `bundledNativeModules.json` is the native compatibility contract and **outranks npm
   `latest`**: it deliberately holds several packages below their newest release (async-storage
-  2.2.0, gesture-handler ~2.32, webview 13.16.1, worklets 0.10.1, skia 2.6.2). Don't "upgrade"
-  those past the SDK.
+  2.2.0, gesture-handler ~2.32, webview 13.16.1, worklets 0.10.1). Don't "upgrade" those past
+  the SDK. A `~57.0.x` range is NOT protection either — an `expo-*` patch may need a newer
+  `expo-modules-core` than this tree has, and it fails at the native compile, not at install.
+  `expo-store-review` is pinned **exact to 57.0.1** for that reason: 57.0.2's Swift calls
+  `SceneGeometry.foregroundScene()`, absent from expo-modules-core 57.0.10, and the iOS archive
+  fails with `cannot find 'SceneGeometry' in scope`. Move it with the SDK, not ahead of it.
+  `@shopify/react-native-skia` is the counter-example — 2.11.0 sits above the SDK's 2.6.2 and
+  builds on both platforms; from 2.7 its prebuilt binaries are ordinary npm dependencies
+  (`react-native-skia-apple-ios` / `react-native-skia-android`) resolved by the podspec and
+  `build.gradle`, so the `install-skia` bin the release lanes used to call no longer exists.
 - **React Navigation 7** native-stack (not Expo Router — few screens, heavily custom UI).
 - **jest 29** (NOT 30): `jest-expo@57` is still a jest-29 preset (its deps pin `babel-jest`,
   `@jest/globals` and `jest-environment-jsdom` to ^29); a jest-30 runtime collides with its
@@ -53,7 +61,8 @@ Read the one for the area you're touching (Claude Code loads them on demand):
   the jest-expo preset does not wire up.
 - **`react-native-google-mobile-ads` pinned exact to 16.3.4** (issue #50) — a Kotlin-toolchain
   collision, not a preference; `src/ads/CLAUDE.md` has the reason and the policy boundary on
-  placements.
+  placements. A Dependabot batch moved it to 16.4.0 anyway and took the Android release lane down,
+  so the pin is now also enforced in `.github/dependabot.yml`'s `ignore` list.
 - **No EAS, no Expo push service, no _paid_ SaaS.** Builds run in GitHub Actions + fastlane; OTA (P5)
   is self-hosted; push (P0 server) is direct FCM/APNs — the app only registers native device tokens.
   Free / open-source hosted services are allowed where they neither bill nor lock us in (e.g. RNRepo's

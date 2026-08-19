@@ -49,9 +49,15 @@ runbook and `apps/web/src/config/appAdsTxt.test.ts` fails the build if the two d
 
 `react-native-google-mobile-ads` is **pinned exact to 16.3.4** and the pin is load-bearing: 16.4.0
 bumps the native SDK to play-services-ads 25.4.0, whose Kotlin metadata is 2.3.0 and cannot be read
-by Expo SDK 56 / RN 0.85's Kotlin 2.1.20 toolchain (`:react-native-google-mobile-ads:`
+by the Kotlin the Expo SDK's Android toolchain runs (`:react-native-google-mobile-ads:`
 `compileReleaseKotlin` fails). Bumping `kotlinVersion` instead breaks other autolinked modules
 (upstream invertase#863), so keep the caret off until Expo's own Kotlin catches up.
+
+**Still true on Expo SDK 57 / RN 0.86.** A Dependabot batch (`5a26925`, merged in `06841cd`) moved
+the pin to 16.4.0 and the Android release lane failed with exactly this error — the expected Kotlin
+metadata version was 2.1.0, unchanged from the SDK 56 finding above. The pin is now enforced a
+second time, in `.github/dependabot.yml`'s `ignore` list, so a grouped batch cannot quietly lift it
+again; re-test it only when the SDK's own Kotlin moves.
 
 **Adding the plugin changed the OTA fingerprint** — the first OTA after it landed needed a fresh
 native build on both stores.
