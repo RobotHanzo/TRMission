@@ -22,3 +22,10 @@ App-wide context: `apps/mobile/CLAUDE.md`. Stage/layout contract: `../../screens
 - **Card rows on the web harness** (`CardRowScroll.web.tsx`): browsers don't scroll an
   overflowing row with a plain wheel or mouse drag — the web variant adds both (drag swallows
   the resulting click past a slop) while native keeps the plain horizontal ScrollView.
+- **`ScoreBoard.tsx`** ends the game with two rating asks, and their ORDER is the point: the web's
+  in-app rate-this-game block (star + optional text → `POST /ratings`, per-gameId dedupe, online
+  games only) comes first, and only once it has an answer — or was never going to appear, as
+  offline — does the iOS App Store review sheet get its turn (`../../game/appReview.ts`). A player
+  who just rated the game at or below `POOR_RATING_STARS` is never handed to the App Store at all.
+  The `played` prop is GameStage's "the viewer actually played this" test; a replay or an
+  encyclopedia clip reaches game over too and earns neither the count nor the prompt.

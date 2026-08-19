@@ -686,6 +686,9 @@ export function GameStage({
           members={rematchMembers}
           onVote={onVoteRematch}
           onPlayAgain={onPlayAgain}
+          // Same "a game the viewer actually played" test as the haptics driver above: a replay or
+          // an encyclopedia clip reaches game over too, and neither earns a review prompt.
+          played={!!commands && !demo}
         />
       )}
       {overlay}

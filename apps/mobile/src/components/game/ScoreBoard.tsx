@@ -4,6 +4,7 @@
 // <table> becomes per-player stat rows — same data, same view/map affordances, phone-sized.
 // Celebration: continuous confetti behind the sheet, plus the web's rate-this-game block
 // (per-gameId dedupe, only for online games — the room context is unset offline) + Discord CTA.
+// Mobile-only on top of the web's: the iOS App Store review sheet, sequenced behind that block.
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Bot, Crown, Eye, Map as MapIcon, MessagesSquare, X } from 'lucide-react-native';
@@ -20,6 +21,7 @@ import { usePlayerName } from '../../game/playerName';
 import { ticketById } from '../../game/content';
 import { getActiveRoomContext } from '../../game/activeRoom';
 import { hasRatedGame, markGameRated } from '../../game/ratedGames';
+import { useAppReviewPrompt } from '../../game/appReview';
 import { openDiscord } from '../../discord';
 import { useAnimationsStore } from '../../store/animations';
 import { useSession } from '../../store/session';
@@ -33,6 +35,9 @@ const ticketValue = (id: string): number => ticketById.get(id)?.value ?? 0;
 /** Winner's-crown gold — celebration ink, deliberately the same in both themes. */
 const CROWN_GOLD = '#b8860b';
 const FEEDBACK_MAX_LEN = 500;
+/** In-app star ratings at or below this are a complaint, not a compliment: the App Store review
+ *  sheet stays away for that game (`../../game/appReview.ts`). */
+const POOR_RATING_STARS = 3;
 
 /** Completed (gains) vs failed (losses) kept tickets, with their point sums. */
 function ticketSplit(pf: PlayerFinal): {
@@ -120,6 +125,7 @@ export function ScoreBoard({
   members,
   onVote,
   onPlayAgain,
+  played,
 }: {
   snapshot: GameSnapshot;
   onLeave(): void;
@@ -127,6 +133,9 @@ export function ScoreBoard({
   members?: RoomMember[] | undefined;
   onVote?: ((wantsRematch: boolean) => void) | undefined;
   onPlayAgain?: (() => void) | undefined;
+  /** The viewer played this game to its end (live, offline or tutorial) rather than watching a
+   *  replay or an encyclopedia clip — the only case that earns an App Store review prompt. */
+  played?: boolean | undefined;
 }) {
   const { t } = useTranslation();
   const { tokens } = useTheme();
@@ -147,6 +156,7 @@ export function ScoreBoard({
   const [feedback, setFeedback] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [ratingError, setRatingError] = useState(false);
+  const [ratedPoorly, setRatedPoorly] = useState(false);
   // null while the dedupe check is in flight — the block renders nothing until it resolves, so
   // an already-rated game never flashes the picker (and vice versa).
   const [alreadyRated, setAlreadyRated] = useState<boolean | null>(null);
@@ -170,6 +180,7 @@ export function ScoreBoard({
     try {
       await api.submitRating({ gameId, roomId: roomCode, stars, ...(text ? { text } : {}) });
       await markGameRated(gameId);
+      setRatedPoorly(stars <= POOR_RATING_STARS);
       setAlreadyRated(true);
     } catch {
       setRatingError(true);
@@ -180,6 +191,13 @@ export function ScoreBoard({
 
   // Always drop any lingering map highlight when the scoreboard unmounts (e.g. leaving the game).
   useEffect(() => () => clearRouteReveal(), [clearRouteReveal]);
+
+  // The iOS App Store review sheet (gates in ../../game/appReview.ts). It yields to the in-app
+  // rating block: while that block is still waiting on an answer the sheet stays back, and a
+  // player who has just rated this game poorly is never handed to the App Store at all. Offline
+  // and already-rated games have nothing to wait for, so there the sheet follows the scoreboard.
+  const awaitingInAppRating = !!gameId && !!roomCode && alreadyRated !== true;
+  useAppReviewPrompt(played === true, played === true && !awaitingInAppRating && !ratedPoorly);
 
   const fs = snapshot.finalScores;
   if (!fs) return null;

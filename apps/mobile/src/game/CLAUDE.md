@@ -20,3 +20,14 @@ mobile-owned.
 - **`activeRoom.ts`** carries the current `gameId`/`roomCode` for push suppression and moderation
   report context (display-only, never authorization) — see `../push/CLAUDE.md`,
   `../store/CLAUDE.md`.
+- **App Store review prompt** (`appReview.ts` + its `useAppReviewPrompt` driver, mounted from
+  **ScoreBoard**): the iOS StoreKit review sheet after a finished game, via `expo-store-review`.
+  iOS only — Android's Play In-App Review is a separate policy surface we have not taken on, and
+  falling through to `requestReview()`'s store-link fallback would leave the app instead of
+  prompting inside it. The OS is the real rate limiter (a few sheets per year, once per app
+  version, silent otherwise), so the gates here exist to spend those slots well, not to cap:
+  a two-game grace window (same "a newcomer's first game stays clean" rule as `../ads/interstitial.ts`,
+  which also keeps this clear of `../push/PushPrompt.tsx`'s one-shot ask after game 1), one request
+  per app version, a 90-day floor between requests, and never straight after a poor in-app rating.
+  **Adding the dependency changed the OTA fingerprint** — the first OTA after it lands needs a
+  fresh native build on both stores (`docs/mobile/ota.md`).
