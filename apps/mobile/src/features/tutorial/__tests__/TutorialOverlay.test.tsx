@@ -1,7 +1,14 @@
 import { fireEvent, render } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
 import '../../../i18n'; // side-effect i18next init (zh-Hant default)
 import { TutorialOverlay, type TutorialOverlayProps } from '../TutorialOverlay';
 import type { Beat } from '../types';
+
+// A notched phone: the coach floats over a full-bleed stage, so it must reserve these itself.
+const INSETS = { top: 59, bottom: 34, left: 21, right: 21 };
+jest.mock('react-native-safe-area-context', () => ({
+  useSafeAreaInsets: () => INSETS,
+}));
 
 const infoBeat: Beat = { id: 'goal', text: 'tutorial.welcome.goal', mode: 'info' };
 const awaitBeat: Beat = {
@@ -55,6 +62,18 @@ describe('TutorialOverlay', () => {
     );
     fireEvent.press(r.getByTestId('tut-finale-cta'));
     expect(onCreateGame).toHaveBeenCalledTimes(1);
+  });
+
+  it('reserves the safe area so the notch / clock never sits on the coach', () => {
+    // A target in the BOTTOM half sends the coach to the top edge — the case where the Dynamic
+    // Island and the status clock used to land on its header row.
+    const r = render(<TutorialOverlay {...base} spotRects={[{ x: 40, y: 900, w: 200, h: 80 }]} />);
+    const pad = StyleSheet.flatten(r.getByTestId('tut-coach-wrap').props.style);
+    expect(pad.justifyContent).toBe('flex-start'); // docked to the top
+    expect(pad.paddingTop).toBe(12 + INSETS.top);
+    expect(pad.paddingBottom).toBe(12 + INSETS.bottom);
+    expect(pad.paddingLeft).toBe(12 + INSETS.left);
+    expect(pad.paddingRight).toBe(12 + INSETS.right);
   });
 
   it('exit is always reachable', () => {

@@ -31,13 +31,19 @@
   margin: -0.25rem 0 0.5rem;
 }
 
+/* The gutters carry env(safe-area-inset-*) because the document is viewport-fit=cover: on a
+   notched phone (and in the installed PWA) the raw viewport runs under the Dynamic Island / status
+   clock and the home indicator, which would otherwise sit on the coach's header row. */
 .tut-coach {
   position: fixed;
   left: 50%;
-  bottom: clamp(0.75rem, 3vh, 1.5rem);
+  bottom: calc(clamp(0.75rem, 3vh, 1.5rem) + env(safe-area-inset-bottom, 0px));
   transform: translateX(-50%);
   z-index: 55;
-  width: min(36rem, calc(100vw - 1.5rem));
+  width: min(
+    36rem,
+    calc(100vw - 1.5rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px))
+  );
   background: var(--surface, #fff);
   color: var(--text, #111);
   border: 1px solid var(--border, rgba(0, 0, 0, 0.12));
@@ -48,7 +54,7 @@
 }
 .tut-coach[data-pos='top'] {
   bottom: auto;
-  top: clamp(0.75rem, 3vh, 1.5rem);
+  top: calc(clamp(0.75rem, 3vh, 1.5rem) + env(safe-area-inset-top, 0px));
 }
 /* Side-docked: when the target fills the viewport height (the whole map, the ticket chooser) the
    coach can't be dodged vertically, so it docks to the roomier side, vertically centred, and points
@@ -57,16 +63,19 @@
 .tut-coach[data-pos='right'] {
   top: 50%;
   bottom: auto;
-  width: min(22rem, calc(100vw - 1.5rem));
+  width: min(
+    22rem,
+    calc(100vw - 1.5rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px))
+  );
   transform: translateY(-50%);
   animation: tut-coach-in-side 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .tut-coach[data-pos='left'] {
-  left: clamp(0.75rem, 2vw, 1.5rem);
+  left: calc(clamp(0.75rem, 2vw, 1.5rem) + env(safe-area-inset-left, 0px));
   right: auto;
 }
 .tut-coach[data-pos='right'] {
-  right: clamp(0.75rem, 2vw, 1.5rem);
+  right: calc(clamp(0.75rem, 2vw, 1.5rem) + env(safe-area-inset-right, 0px));
   left: auto;
 }
 @keyframes tut-coach-in {

@@ -859,8 +859,11 @@ export function GameStage({
 
   if (tier === 'three-pane') {
     return (
-      <View style={[styles.fill, { backgroundColor: tokens.paper, paddingTop: insets.top }]}>
-        <View style={styles.row}>
+      // The top inset is reserved on the CONTENT row, not the root: `overlays` (the tutorial
+      // coachmark, the notification stack, the sheets) are full-bleed floaters that each apply
+      // their own insets, and padding the root would inset them a second time.
+      <View style={[styles.fill, { backgroundColor: tokens.paper }]}>
+        <View style={[styles.row, { paddingTop: insets.top }]}>
           <View style={styles.fill}>
             {board}
             {/* The chooser replaces the players panel that normally carries the countdown, so it
@@ -889,9 +892,10 @@ export function GameStage({
   }
 
   // two-pane: board + rail, with a rail↔log↔comms tab set (ports the web narrow-desktop branch).
+  // As three-pane: the top inset lands on the content row so the overlays stay full-bleed.
   return (
-    <View style={[styles.fill, { backgroundColor: tokens.paper, paddingTop: insets.top }]}>
-      <View style={styles.row}>
+    <View style={[styles.fill, { backgroundColor: tokens.paper }]}>
+      <View style={[styles.row, { paddingTop: insets.top }]}>
         <View style={styles.fill}>
           {board}
           {/* As three-pane: the chooser owns the rail while drafting, so the clock floats. */}

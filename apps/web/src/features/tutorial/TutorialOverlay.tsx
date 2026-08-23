@@ -60,12 +60,20 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
     const gap = 16;
     const coachW = Math.min(22 * 16, vw - 24);
     const maxStart = Math.max(gap, vw - coachW - gap);
+    // The inline offset overrides the stylesheet's safe-area gutter, so it re-applies it: on a
+    // notched phone in landscape the Dynamic Island eats into exactly this edge.
     if (pos === 'right') {
       const left = Math.max(gap, Math.min(bounds.x + bounds.w + gap, maxStart));
-      return { left: `${Math.round(left)}px`, right: 'auto' };
+      return {
+        left: `max(${Math.round(left)}px, calc(${gap}px + env(safe-area-inset-left, 0px)))`,
+        right: 'auto',
+      };
     }
     const right = Math.max(gap, Math.min(vw - bounds.x + gap, maxStart));
-    return { right: `${Math.round(right)}px`, left: 'auto' };
+    return {
+      right: `max(${Math.round(right)}px, calc(${gap}px + env(safe-area-inset-right, 0px)))`,
+      left: 'auto',
+    };
   })();
 
   // The caret rides the edge of the coach that faces the spotlight target and points at it: for a

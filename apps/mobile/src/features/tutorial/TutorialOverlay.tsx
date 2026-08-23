@@ -2,7 +2,9 @@
 // renders the beat's narration, an optional component specimen (the visual glossary), a progress
 // bar, a connector caret toward the spotlighted target, and the right control for the beat mode.
 // coachPosition dodges it to the top / a side dock when a target would sit under the bottom-
-// anchored bubble. Motion mirrors web's tutorial.css: the coach slides+scales in per position
+// anchored bubble; the wrapper's gutter carries the safe-area insets on every edge, so a
+// top-docked coach clears the notch / Dynamic Island + clock instead of sliding under them.
+// Motion mirrors web's tutorial.css: the coach slides+scales in per position
 // change (260ms), the specimen/body fade-slide per beat (320/240ms), the progress bar glides
 // (360ms), "your turn" pulses (1.6s loop), and the finale badge pops with overshoot — all plain
 // RN Animated (the TutorialSpotlight idiom) and all inert under reduced motion.
@@ -16,6 +18,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { ChevronRight, PartyPopper, RotateCcw, X } from 'lucide-react-native';
 import type { Beat, SpecimenSpec } from './types';
@@ -136,6 +139,8 @@ export interface TutorialOverlayProps {
 
 const GAP = 16;
 const CARET = 12;
+/** Gutter between the coach and the screen edge, before the safe-area insets are added. */
+const GUTTER = 12;
 const ACCENT = '#ee6b1f';
 const SURFACE = '#22262c';
 const INK = '#e9ecf1';
@@ -150,7 +155,16 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
   const { beat, done, index, total, lessonNo, lessonCount, isLastLesson, specimen } = props;
   const spotRects = props.spotRects ?? [];
   const { width, height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const reduced = useReducedMotion();
+
+  // The coach floats over a full-bleed stage, so it owns its own safe area: the gutter on every
+  // edge is the base one PLUS that edge's inset. Without this a top-docked coach starts at the
+  // physical top of the screen and the notch / Dynamic Island + status clock sit on its header.
+  const padTop = GUTTER + insets.top;
+  const padBottom = GUTTER + insets.bottom;
+  const padLeft = GUTTER + insets.left;
+  const padRight = GUTTER + insets.right;
 
   // The very end of the tutorial (last lesson complete) gets the celebratory finale card.
   const finished = done && isLastLesson;
@@ -163,21 +177,24 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
   const pos = coachPosition(spotRects, width, height);
   const sideDocked = pos === 'left' || pos === 'right';
   const progress = total > 0 ? Math.round((Math.min(index + 1, total) / total) * 100) : 0;
-  const coachW = Math.min(22 * 16, width - 24);
+  const coachW = Math.min(22 * 16, width - padLeft - padRight);
 
   // A side-docked coach sits ADJACENT to its (tall) target rather than at the far screen edge, so
-  // it reads as attached to what it highlights — clamped on-screen (web dockStyle, arithmetic 1:1).
+  // it reads as attached to what it highlights — clamped inside the safe box (web dockStyle, same
+  // arithmetic). The margins are measured from the wrapper's already-inset content edge, so the
+  // window-space target is converted back through the gutter rather than added on top of it.
   const dock = (() => {
     if (!sideDocked) return null;
     const bounds = spotlightBounds(spotRects);
     if (!bounds) return null;
-    const maxStart = Math.max(GAP, width - coachW - GAP);
+    const safeLeft = padLeft;
+    const safeRight = width - padRight;
     if (pos === 'right') {
-      return {
-        marginLeft: Math.round(Math.max(GAP, Math.min(bounds.x + bounds.w + GAP, maxStart))),
-      };
+      const left = Math.max(safeLeft, Math.min(bounds.x + bounds.w + GAP, safeRight - coachW));
+      return { marginLeft: Math.round(left - safeLeft) };
     }
-    return { marginRight: Math.round(Math.max(GAP, Math.min(width - bounds.x + GAP, maxStart))) };
+    const right = Math.min(safeRight, Math.max(bounds.x - GAP, safeLeft + coachW));
+    return { marginRight: Math.round(safeRight - right) };
   })();
 
   // The caret rides the edge of the coach that faces the spotlight target and points at it. The
@@ -274,7 +291,20 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
         ]);
 
   return (
-    <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, wrapperStyles[pos]]}>
+    <View
+      pointerEvents="box-none"
+      testID="tut-coach-wrap"
+      style={[
+        StyleSheet.absoluteFill,
+        wrapperStyles[pos],
+        {
+          paddingTop: padTop,
+          paddingBottom: padBottom,
+          paddingLeft: padLeft,
+          paddingRight: padRight,
+        },
+      ]}
+    >
       {/* Whole-tutorial finale: screen-wide celebration behind the coach card — the same shared
           confetti as the endgame scoreboard. */}
       <Confetti active={finished} />
@@ -436,12 +466,13 @@ export function TutorialOverlay(props: TutorialOverlayProps) {
   );
 }
 
-// One flex recipe per coach position (the wrapper is the absolute-filled, touch-transparent zone).
+// One flex recipe per coach position (the wrapper is the absolute-filled, touch-transparent zone;
+// its padding is applied inline because it carries the safe-area insets).
 const wrapperStyles = StyleSheet.create({
-  bottom: { justifyContent: 'flex-end', alignItems: 'center', padding: 12 },
-  top: { justifyContent: 'flex-start', alignItems: 'center', padding: 12 },
-  left: { justifyContent: 'center', alignItems: 'flex-end', padding: 12 },
-  right: { justifyContent: 'center', alignItems: 'flex-start', padding: 12 },
+  bottom: { justifyContent: 'flex-end', alignItems: 'center' },
+  top: { justifyContent: 'flex-start', alignItems: 'center' },
+  left: { justifyContent: 'center', alignItems: 'flex-end' },
+  right: { justifyContent: 'center', alignItems: 'flex-start' },
 });
 
 const styles = StyleSheet.create({
