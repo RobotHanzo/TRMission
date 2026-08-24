@@ -1,6 +1,6 @@
 jest.mock('@react-native-async-storage/async-storage', () =>
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
+  require('@react-native-async-storage/async-storage/jest'),
 );
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getTutorialCompletion, markTutorialCompleted } from '../progress';

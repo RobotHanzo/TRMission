@@ -74,17 +74,7 @@ export const useUi = create<UiState>()((set) => ({
   hydrated: false,
   async hydrate() {
     try {
-      const [
-        theme,
-        locale,
-        colorBlind,
-        boardLayout,
-        trainCarSkin,
-        followActing,
-        soundEnabled,
-        soundVolume,
-        hideAds,
-      ] = await AsyncStorage.multiGet([
+      const values = await AsyncStorage.getMany([
         THEME_KEY,
         LOCALE_KEY,
         COLOR_BLIND_KEY,
@@ -95,18 +85,18 @@ export const useUi = create<UiState>()((set) => ({
         SOUND_VOLUME_KEY,
         HIDE_ADS_KEY,
       ]);
-      const nextLocale = oneOf(LOCALES, locale[1], 'zh-Hant');
-      const vol = soundVolume[1] != null ? Number(soundVolume[1]) : NaN;
+      const nextLocale = oneOf(LOCALES, values[LOCALE_KEY], 'zh-Hant');
+      const vol = values[SOUND_VOLUME_KEY] != null ? Number(values[SOUND_VOLUME_KEY]) : NaN;
       set({
-        theme: oneOf(THEMES, theme[1], 'system'),
+        theme: oneOf(THEMES, values[THEME_KEY], 'system'),
         locale: nextLocale,
-        colorBlind: colorBlind[1] === '1',
-        boardLayout: oneOf(BOARD_LAYOUTS, boardLayout[1], 'rail'),
-        trainCarSkin: oneOf(SKINS, trainCarSkin[1], DEFAULT_TRAIN_CAR_SKIN),
-        followActing: followActing[1] == null ? true : followActing[1] === '1',
-        soundEnabled: soundEnabled[1] == null ? true : soundEnabled[1] === '1',
+        colorBlind: values[COLOR_BLIND_KEY] === '1',
+        boardLayout: oneOf(BOARD_LAYOUTS, values[BOARD_LAYOUT_KEY], 'rail'),
+        trainCarSkin: oneOf(SKINS, values[TRAIN_CAR_SKIN_KEY], DEFAULT_TRAIN_CAR_SKIN),
+        followActing: values[FOLLOW_ACTING_KEY] == null ? true : values[FOLLOW_ACTING_KEY] === '1',
+        soundEnabled: values[SOUND_ENABLED_KEY] == null ? true : values[SOUND_ENABLED_KEY] === '1',
         soundVolume: Number.isFinite(vol) ? Math.max(0, Math.min(1, vol)) : 0.6,
-        hideAds: hideAds[1] === '1',
+        hideAds: values[HIDE_ADS_KEY] === '1',
         hydrated: true,
       });
       if (i18n.language !== nextLocale) await i18n.changeLanguage(nextLocale);
@@ -167,12 +157,12 @@ export const useUi = create<UiState>()((set) => ({
       trainCarSkin,
     });
     void i18n.changeLanguage(prefs.locale);
-    void AsyncStorage.multiSet([
-      [THEME_KEY, prefs.theme],
-      [LOCALE_KEY, prefs.locale],
-      [COLOR_BLIND_KEY, prefs.colorBlind ? '1' : '0'],
-      [BOARD_LAYOUT_KEY, prefs.boardLayout],
-      [TRAIN_CAR_SKIN_KEY, trainCarSkin],
-    ]).catch(() => undefined);
+    void AsyncStorage.setMany({
+      [THEME_KEY]: prefs.theme,
+      [LOCALE_KEY]: prefs.locale,
+      [COLOR_BLIND_KEY]: prefs.colorBlind ? '1' : '0',
+      [BOARD_LAYOUT_KEY]: prefs.boardLayout,
+      [TRAIN_CAR_SKIN_KEY]: trainCarSkin,
+    }).catch(() => undefined);
   },
 }));
