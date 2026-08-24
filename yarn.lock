@@ -1195,45 +1195,38 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bufbuild/protobuf@npm:2.14.0":
-  version: 2.14.0
-  resolution: "@bufbuild/protobuf@npm:2.14.0"
-  checksum: 10/ade3c53a9defee6ce4a96068ca3a84e0ecbd5114f67459c15623ce56f904738b002e1dbbcaaa07ea90b9b4820d5f92d220a0e9f4a6cbcd8491166cb92d1b0445
-  languageName: node
-  linkType: hard
-
-"@bufbuild/protobuf@npm:^2.13.0":
+"@bufbuild/protobuf@npm:2.13.0, @bufbuild/protobuf@npm:^2.13.0":
   version: 2.13.0
   resolution: "@bufbuild/protobuf@npm:2.13.0"
   checksum: 10/e9585e15422eb92a1d394408b330647543d256c27152e71cde1de14ccb3ec268a809ddb017e7347a97850e400351c3d37e28ea3887a4148b985a3bba347fbd57
   languageName: node
   linkType: hard
 
-"@bufbuild/protoc-gen-es@npm:^2.14.0":
-  version: 2.14.0
-  resolution: "@bufbuild/protoc-gen-es@npm:2.14.0"
+"@bufbuild/protoc-gen-es@npm:2.13.0":
+  version: 2.13.0
+  resolution: "@bufbuild/protoc-gen-es@npm:2.13.0"
   dependencies:
-    "@bufbuild/protobuf": "npm:2.14.0"
-    "@bufbuild/protoplugin": "npm:2.14.0"
+    "@bufbuild/protobuf": "npm:2.13.0"
+    "@bufbuild/protoplugin": "npm:2.13.0"
   peerDependencies:
-    "@bufbuild/protobuf": 2.14.0
+    "@bufbuild/protobuf": 2.13.0
   peerDependenciesMeta:
     "@bufbuild/protobuf":
       optional: true
   bin:
     protoc-gen-es: bin/protoc-gen-es
-  checksum: 10/27bb06a9e48151e280535e85b57d88484075c395ba22ba9280564d33b0d26b62cdc579aba34d84fba644b50925bfb0a524fcbde1458052fa86a2879f6d795f89
+  checksum: 10/05a126627b575e5e712f7c33dc7be99423f99e3044ed3d6c67066437755a2776cc79b3c68a260c953fafe0272fc33fb9450faa8a2d45bc4de6b137d654f00d03
   languageName: node
   linkType: hard
 
-"@bufbuild/protoplugin@npm:2.14.0":
-  version: 2.14.0
-  resolution: "@bufbuild/protoplugin@npm:2.14.0"
+"@bufbuild/protoplugin@npm:2.13.0":
+  version: 2.13.0
+  resolution: "@bufbuild/protoplugin@npm:2.13.0"
   dependencies:
-    "@bufbuild/protobuf": "npm:2.14.0"
+    "@bufbuild/protobuf": "npm:2.13.0"
     "@typescript/vfs": "npm:^1.6.2"
     typescript: "npm:5.4.5"
-  checksum: 10/9f582c5037710b92547aef7f04be285f9d8fe241a46481c1fc76decfcc9d72f938d9cd8fedce6a66f90e5fbd6e9a6dd26dba55d72625e1adbee83103a7086ebf
+  checksum: 10/f70120b35920bf3ac8395ca9ee94ead25cd78432a978347a58a45d3b28c96cce437dd6a77daa0228bf8e7dde54fdb13709c2b514bc33ba9311bb2378b4250fd7
   languageName: node
   linkType: hard
 
@@ -3613,18 +3606,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native/jest-preset@npm:0.87.0":
-  version: 0.87.0
-  resolution: "@react-native/jest-preset@npm:0.87.0"
+"@react-native/jest-preset@npm:0.86.2":
+  version: 0.86.2
+  resolution: "@react-native/jest-preset@npm:0.86.2"
   dependencies:
     "@jest/create-cache-key-function": "npm:^29.7.0"
-    "@react-native/js-polyfills": "npm:0.87.0"
+    "@react-native/js-polyfills": "npm:0.86.2"
     babel-jest: "npm:^29.7.0"
     jest-environment-node: "npm:^29.7.0"
     regenerator-runtime: "npm:^0.13.2"
   peerDependencies:
     react: ^19.2.3
-  checksum: 10/a030b2a75e99562404decca6066a5c79ed6e3e4a3c1192cba4bc43cea8ca4e1620325d15f94817ef9415dc2b816ae591d4bdac14cb82cb517c485ed683a99129
+  checksum: 10/5b8b434fedee7982ae891145dad6b8a0f34b5d0fa0e6398196ea7df6f98b805a392da13253dde701a751534ecd20ea9a56b9b58d51641acc25d3fcc1ebca7429
   languageName: node
   linkType: hard
 
@@ -3639,13 +3632,6 @@ __metadata:
   version: 0.86.2
   resolution: "@react-native/js-polyfills@npm:0.86.2"
   checksum: 10/3c076d314c4e220e7722ceb6e03020433607e0ff330ed43d22b8013da134926a9a267d4dd82776256e780c3bf4452b5fded9b1c05ac8604669813c4bc70a7889
-  languageName: node
-  linkType: hard
-
-"@react-native/js-polyfills@npm:0.87.0":
-  version: 0.87.0
-  resolution: "@react-native/js-polyfills@npm:0.87.0"
-  checksum: 10/5a01b5eb0c804446255c790352dbbd59f38d4fb66257d8df02af1bd4cc92404e5bb5ba948b91775025005a971460e2a11665074d20ec3c20ab171d0d1db3ee20
   languageName: node
   linkType: hard
 
@@ -5149,7 +5135,7 @@ __metadata:
     "@react-native-async-storage/async-storage": "npm:3.1.1"
     "@react-native-community/netinfo": "npm:12.0.1"
     "@react-native-google-signin/google-signin": "npm:^16.1.4"
-    "@react-native/jest-preset": "npm:0.87.0"
+    "@react-native/jest-preset": "npm:0.86.2"
     "@react-navigation/bottom-tabs": "npm:^7.18.15"
     "@react-navigation/elements": "npm:^2.9.37"
     "@react-navigation/native": "npm:^7.3.15"
@@ -5227,7 +5213,7 @@ __metadata:
   dependencies:
     "@bufbuild/buf": "npm:^1.72.0"
     "@bufbuild/protobuf": "npm:^2.13.0"
-    "@bufbuild/protoc-gen-es": "npm:^2.14.0"
+    "@bufbuild/protoc-gen-es": "npm:2.13.0"
     "@trm/tsc7": "workspace:*"
     typescript: "npm:@typescript/typescript6@^6.0.2"
     vitest: "npm:^4.1.11"
