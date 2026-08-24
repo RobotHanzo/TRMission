@@ -18,7 +18,7 @@
     "@trm/tsc7": "workspace:*",
     "fast-check": "^4.9.0",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.11"
   },
   "scripts": {
     "typecheck": "tsc7 --noEmit",
