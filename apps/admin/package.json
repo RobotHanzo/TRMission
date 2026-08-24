@@ -13,15 +13,15 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@sentry/react": "^10.69.0",
+    "@sentry/react": "^10.70.0",
     "@trm/map-data": "workspace:*",
     "@trm/shared": "workspace:*",
-    "i18next": "^26.3.6",
-    "lucide-react": "^1.29.0",
+    "i18next": "^26.4.0",
+    "lucide-react": "^1.33.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "react-i18next": "^17.0.11",
-    "zustand": "^5.0.14"
+    "react-i18next": "^17.0.12",
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@sentry/vite-plugin": "^5.4.0",
