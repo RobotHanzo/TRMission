@@ -20,6 +20,6 @@
   "devDependencies": {
     "@trm/tsc7": "workspace:*",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.11"
   }
 }
