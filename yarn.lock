@@ -1195,45 +1195,38 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bufbuild/protobuf@npm:2.13.0":
-  version: 2.13.0
-  resolution: "@bufbuild/protobuf@npm:2.13.0"
-  checksum: 10/e9585e15422eb92a1d394408b330647543d256c27152e71cde1de14ccb3ec268a809ddb017e7347a97850e400351c3d37e28ea3887a4148b985a3bba347fbd57
-  languageName: node
-  linkType: hard
-
-"@bufbuild/protobuf@npm:^2.14.0":
+"@bufbuild/protobuf@npm:2.14.0, @bufbuild/protobuf@npm:^2.14.0":
   version: 2.14.0
   resolution: "@bufbuild/protobuf@npm:2.14.0"
   checksum: 10/ade3c53a9defee6ce4a96068ca3a84e0ecbd5114f67459c15623ce56f904738b002e1dbbcaaa07ea90b9b4820d5f92d220a0e9f4a6cbcd8491166cb92d1b0445
   languageName: node
   linkType: hard
 
-"@bufbuild/protoc-gen-es@npm:^2.13.0":
-  version: 2.13.0
-  resolution: "@bufbuild/protoc-gen-es@npm:2.13.0"
+"@bufbuild/protoc-gen-es@npm:^2.14.0":
+  version: 2.14.0
+  resolution: "@bufbuild/protoc-gen-es@npm:2.14.0"
   dependencies:
-    "@bufbuild/protobuf": "npm:2.13.0"
-    "@bufbuild/protoplugin": "npm:2.13.0"
+    "@bufbuild/protobuf": "npm:2.14.0"
+    "@bufbuild/protoplugin": "npm:2.14.0"
   peerDependencies:
-    "@bufbuild/protobuf": 2.13.0
+    "@bufbuild/protobuf": 2.14.0
   peerDependenciesMeta:
     "@bufbuild/protobuf":
       optional: true
   bin:
     protoc-gen-es: bin/protoc-gen-es
-  checksum: 10/05a126627b575e5e712f7c33dc7be99423f99e3044ed3d6c67066437755a2776cc79b3c68a260c953fafe0272fc33fb9450faa8a2d45bc4de6b137d654f00d03
+  checksum: 10/27bb06a9e48151e280535e85b57d88484075c395ba22ba9280564d33b0d26b62cdc579aba34d84fba644b50925bfb0a524fcbde1458052fa86a2879f6d795f89
   languageName: node
   linkType: hard
 
-"@bufbuild/protoplugin@npm:2.13.0":
-  version: 2.13.0
-  resolution: "@bufbuild/protoplugin@npm:2.13.0"
+"@bufbuild/protoplugin@npm:2.14.0":
+  version: 2.14.0
+  resolution: "@bufbuild/protoplugin@npm:2.14.0"
   dependencies:
-    "@bufbuild/protobuf": "npm:2.13.0"
+    "@bufbuild/protobuf": "npm:2.14.0"
     "@typescript/vfs": "npm:^1.6.2"
     typescript: "npm:5.4.5"
-  checksum: 10/f70120b35920bf3ac8395ca9ee94ead25cd78432a978347a58a45d3b28c96cce437dd6a77daa0228bf8e7dde54fdb13709c2b514bc33ba9311bb2378b4250fd7
+  checksum: 10/9f582c5037710b92547aef7f04be285f9d8fe241a46481c1fc76decfcc9d72f938d9cd8fedce6a66f90e5fbd6e9a6dd26dba55d72625e1adbee83103a7086ebf
   languageName: node
   linkType: hard
 
@@ -5130,7 +5123,7 @@ __metadata:
     react-native-svg: "npm:15.15.5"
     react-native-web: "npm:^0.21.2"
     react-native-webview: "npm:14.0.1"
-    react-native-worklets: "npm:0.12.1"
+    react-native-worklets: "npm:0.11.4"
     react-test-renderer: "npm:19.2.8"
     sf-symbols-typescript: "npm:^2.2.0"
     typescript: "npm:@typescript/typescript6@^6.0.2"
@@ -5145,7 +5138,7 @@ __metadata:
   dependencies:
     "@bufbuild/buf": "npm:^1.72.0"
     "@bufbuild/protobuf": "npm:^2.14.0"
-    "@bufbuild/protoc-gen-es": "npm:^2.13.0"
+    "@bufbuild/protoc-gen-es": "npm:^2.14.0"
     "@trm/tsc7": "workspace:*"
     typescript: "npm:@typescript/typescript6@^6.0.2"
     vitest: "npm:^4.1.10"
@@ -13090,9 +13083,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-worklets@npm:0.12.1":
-  version: 0.12.1
-  resolution: "react-native-worklets@npm:0.12.1"
+"react-native-worklets@npm:0.11.4":
+  version: 0.11.4
+  resolution: "react-native-worklets@npm:0.11.4"
   dependencies:
     "@babel/generator": "npm:^7.27.1"
     "@babel/plugin-transform-arrow-functions": "npm:^7.27.1"
@@ -13112,8 +13105,8 @@ __metadata:
     "@babel/core": "*"
     "@react-native/metro-config": "*"
     react: "*"
-    react-native: 0.83 - 0.87
-  checksum: 10/df5368ab370a93355c653befb4fda80307aa68858a05d242f374fe3d453d1fddd64bc1eb217a06fac44d730f1fb629e4b9806f9a611a7ed1253e9eae483dea43
+    react-native: 0.83 - 0.86
+  checksum: 10/3b4d5ccf76f470215dba2ef9609e043cc3d457b6b24e3964e27dc29c09de1183006dd3c9b79fcef5dcbe9aded14f6d5e4723185a453a97b354cbddba1a93e5b8
   languageName: node
   linkType: hard
 
