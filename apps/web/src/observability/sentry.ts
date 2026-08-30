@@ -34,7 +34,7 @@ const DEFAULT_REPLAY_ERROR_SAMPLE_RATE = 1;
 
 /** Browser noise that is never actionable: extension frames, and the handful of benign errors
  *  every React app on the open web collects by the thousand. */
-const IGNORED_ERRORS = [
+export const IGNORED_ERRORS = [
   'ResizeObserver loop limit exceeded',
   'ResizeObserver loop completed with undelivered notifications',
   /^AbortError:/,
@@ -47,8 +47,14 @@ const IGNORED_ERRORS = [
   // our document, so it can't be filtered by URL (TRMISSION-WEB-1). We never touch that API, so any
   // mention of it is somebody else's script.
   /messageHandlers/,
+  // The ANDROID half of the same story: the host app hands its injected script a WebView
+  // `@JavascriptInterface` object, and once the host recycles that object every later call throws
+  // "Error invoking postMessage: Java object is gone" — TRMISSION-WEB-9, from Instagram's
+  // `navigation_performance_logger_android`. `DENY_URLS` covers the framed ones; this covers the
+  // rest, since we ship no Java bridge for the phrase to be about.
+  /Java object is gone/,
 ];
-const DENY_URLS = [
+export const DENY_URLS = [
   /extensions\//i,
   /^chrome:\/\//i,
   /^chrome-extension:\/\//i,
@@ -61,6 +67,10 @@ const DENY_URLS = [
   /beacon\.min\.js/i,
   /static\.cloudflareinsights\.com/i,
   /\/cdn-cgi\//i,
+  // Android in-app browsers serve their injected instrumentation over their own `iabjs://` scheme
+  // ("in-app browser JS"), so every frame of TRMISSION-WEB-9 is theirs even though the document is
+  // ours. Filtering by frame keeps a same-worded error thrown from our own bundle reportable.
+  /^iabjs:\/\//i,
 ];
 
 /**

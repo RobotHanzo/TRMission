@@ -8,7 +8,7 @@
 //
 // Opt-in by DSN, like every other surface: no `sentryDsn` in the app config means `Sentry.init` is
 // never called and the SDK is inert.
-import { Platform } from 'react-native';
+import { AppState, Platform } from 'react-native';
 import * as Sentry from '@sentry/react-native';
 import { scrubTelemetryBreadcrumb, scrubTelemetryEvent, telemetrySampleRate } from '@trm/shared';
 import {
@@ -81,7 +81,55 @@ export function initSentry(): boolean {
     beforeBreadcrumb: (crumb) => scrubTelemetryBreadcrumb(crumb),
   });
   Sentry.setTag('trm.commit', GIT_COMMIT);
+  installMemoryPressureBreadcrumbs();
   return true;
+}
+
+/** How high `trm.memoryWarnings` counts before it saturates — a tag wants few distinct values, and
+ *  past a handful the only question left is "a lot". */
+const MEMORY_WARNING_TAG_CAP = 9;
+
+let memoryWarnings = 0;
+
+/**
+ * Record every OS memory warning as a breadcrumb + a saturating tag. Returns an unsubscribe.
+ *
+ * This exists for **TRMISSION-MOBILE-8**, the iOS `WatchdogTermination`. That event has no stack and
+ * never will: sentry-cocoa cannot observe its own process being killed, so it infers the kill on the
+ * NEXT launch from the app state it persisted, and everything it can say about the run that died has
+ * to already be in that persisted scope. Which means the one thing worth knowing — did the OS
+ * reclaim us under memory pressure, or did the user just swipe the app away? — is only answerable if
+ * the previous run left a trace. Neither layer records memory warnings on its own, so we do: JS
+ * breadcrumbs and tags are mirrored onto the native scope (`NATIVE.addBreadcrumb`) and persisted
+ * with it, so these survive the termination and land on the event.
+ *
+ * A single warning is ordinary iOS housekeeping. A run of them before a termination is the signature
+ * of an actual leak, and the breadcrumb's `appState` says whether it happened while we were on
+ * screen. Cheap enough to leave on always: the listener idles until the OS says something.
+ *
+ * `memoryWarning` is an iOS-first event (`didReceiveMemoryWarning`); where a platform never emits
+ * it, this is an inert subscription.
+ */
+export function installMemoryPressureBreadcrumbs(): () => void {
+  const subscription = AppState.addEventListener('memoryWarning', () => {
+    memoryWarnings += 1;
+    Sentry.addBreadcrumb({
+      category: 'device.memory',
+      type: 'system',
+      level: 'warning',
+      message: 'OS memory warning',
+      data: { count: memoryWarnings, appState: AppState.currentState },
+    });
+    Sentry.setTag(
+      'trm.memoryWarnings',
+      memoryWarnings > MEMORY_WARNING_TAG_CAP
+        ? `${MEMORY_WARNING_TAG_CAP}+`
+        : String(memoryWarnings),
+    );
+  });
+  return () => {
+    subscription.remove();
+  };
 }
 
 /**
