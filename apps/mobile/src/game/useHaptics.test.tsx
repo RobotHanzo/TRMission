@@ -32,10 +32,10 @@ function Harness({ playing }: { playing: boolean }) {
 }
 
 /** Mount, deliver one batch, and report every impact style fired. */
-function fire(playing: boolean, events: GameEvent[]): string[] {
-  render(<Harness playing={playing} />);
-  act(() => useGame.getState().applySnapshot(snap()));
-  act(() => useGame.getState().applyEvents(2, events));
+async function fire(playing: boolean, events: GameEvent[]): Promise<string[]> {
+  await render(<Harness playing={playing} />);
+  await act(() => useGame.getState().applySnapshot(snap()));
+  await act(() => useGame.getState().applyEvents(2, events));
   return (Haptics.impactAsync as jest.Mock).mock.calls.map(([style]) => style as string);
 }
 
@@ -47,7 +47,7 @@ describe('useHaptics', () => {
   });
 
   it('double-pulses when the viewer’s own turn starts', async () => {
-    expect(fire(true, [turnOf('p0')])).toEqual(['rigid']);
+    expect(await fire(true, [turnOf('p0')])).toEqual(['rigid']);
     // The second pulse lands after the gap; awaiting a macrotask is enough with real timers.
     await act(async () => {
       await new Promise((r) => setTimeout(r, 200));
@@ -55,16 +55,16 @@ describe('useHaptics', () => {
     expect((Haptics.impactAsync as jest.Mock).mock.calls).toHaveLength(2);
   });
 
-  it('stays silent for an opponent’s turn', () => {
-    expect(fire(true, [turnOf('p1')])).toEqual([]);
+  it('stays silent for an opponent’s turn', async () => {
+    expect(await fire(true, [turnOf('p1')])).toEqual([]);
   });
 
-  it('stays silent when the viewer is only watching (replay / demo clip)', () => {
-    expect(fire(false, [turnOf('p0')])).toEqual([]);
+  it('stays silent when the viewer is only watching (replay / demo clip)', async () => {
+    expect(await fire(false, [turnOf('p0')])).toEqual([]);
   });
 
-  it('stays silent when the device haptics switch is off', () => {
+  it('stays silent when the device haptics switch is off', async () => {
     useSettings.getState().setHaptics(false);
-    expect(fire(true, [turnOf('p0')])).toEqual([]);
+    expect(await fire(true, [turnOf('p0')])).toEqual([]);
   });
 });

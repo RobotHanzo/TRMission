@@ -51,16 +51,16 @@ describe('useAnimationDriver', () => {
     useAnimations.getState().reset();
   });
 
-  it('does not fire a fanfare for tickets already complete on the first snapshot', () => {
-    render(<Harness />);
-    act(() => useGame.getState().applySnapshot(snap(1, [{ p: 'p0', t: T1 }])));
+  it('does not fire a fanfare for tickets already complete on the first snapshot', async () => {
+    await render(<Harness />);
+    await act(() => useGame.getState().applySnapshot(snap(1, [{ p: 'p0', t: T1 }])));
     expect(useAnimations.getState().fanfare).toBeNull();
   });
 
-  it('fires a fanfare + score float when a new ticket completes for me', () => {
-    render(<Harness />);
-    act(() => useGame.getState().applySnapshot(snap(1, [{ p: 'p0', t: T1 }])));
-    act(() =>
+  it('fires a fanfare + score float when a new ticket completes for me', async () => {
+    await render(<Harness />);
+    await act(() => useGame.getState().applySnapshot(snap(1, [{ p: 'p0', t: T1 }])));
+    await act(() =>
       useGame.getState().applySnapshot(
         snap(2, [
           { p: 'p0', t: T1 },
@@ -72,72 +72,72 @@ describe('useAnimationDriver', () => {
     expect(useAnimations.getState().floats.length).toBeGreaterThan(0);
   });
 
-  it('reveals covered market slots when a draw finishes (phase leaves DRAWING_CARDS)', () => {
-    render(<Harness />);
-    act(() => useGame.getState().applySnapshot(snap(1, [], Phase.DRAWING_CARDS)));
-    act(() => useAnimations.getState().pushIntent({ kind: 'marketCover', slot: 3 }));
+  it('reveals covered market slots when a draw finishes (phase leaves DRAWING_CARDS)', async () => {
+    await render(<Harness />);
+    await act(() => useGame.getState().applySnapshot(snap(1, [], Phase.DRAWING_CARDS)));
+    await act(() => useAnimations.getState().pushIntent({ kind: 'marketCover', slot: 3 }));
     expect(useAnimations.getState().coveredMarketSlots.has(3)).toBe(true);
-    act(() => useGame.getState().applySnapshot(snap(2, [], Phase.AWAIT_ACTION)));
+    await act(() => useGame.getState().applySnapshot(snap(2, [], Phase.AWAIT_ACTION)));
     const s = useAnimations.getState();
     expect(s.coveredMarketSlots.size).toBe(0);
     expect(s.marketFlips.has(3)).toBe(true);
   });
 
-  it('does not warn when the first snapshot is already in the final round (reconnect)', () => {
-    render(<Harness />);
-    act(() => useGame.getState().applySnapshot(endgameSnap(1, true)));
+  it('does not warn when the first snapshot is already in the final round (reconnect)', async () => {
+    await render(<Harness />);
+    await act(() => useGame.getState().applySnapshot(endgameSnap(1, true)));
     expect(useAnimations.getState().endgameCue).toBeNull();
   });
 
-  it('pops the final-round warning when the endgame triggers, flagging who caused it', () => {
-    render(<Harness />);
-    act(() => useGame.getState().applySnapshot(endgameSnap(1, false)));
+  it('pops the final-round warning when the endgame triggers, flagging who caused it', async () => {
+    await render(<Harness />);
+    await act(() => useGame.getState().applySnapshot(endgameSnap(1, false)));
     expect(useAnimations.getState().endgameCue).toBeNull();
     // p1 (not me) runs their trains down → warning fires, not attributed to me.
-    act(() => useGame.getState().applySnapshot(endgameSnap(2, true, 1)));
+    await act(() => useGame.getState().applySnapshot(endgameSnap(2, true, 1)));
     expect(useAnimations.getState().endgameCue?.triggeredByYou).toBe(false);
   });
 
-  it('attributes the final-round trigger to me when I cause it', () => {
-    render(<Harness />);
-    act(() => useGame.getState().applySnapshot(endgameSnap(1, false)));
-    act(() => useGame.getState().applySnapshot(endgameSnap(2, true, 0)));
+  it('attributes the final-round trigger to me when I cause it', async () => {
+    await render(<Harness />);
+    await act(() => useGame.getState().applySnapshot(endgameSnap(1, false)));
+    await act(() => useGame.getState().applySnapshot(endgameSnap(2, true, 0)));
     expect(useAnimations.getState().endgameCue?.triggeredByYou).toBe(true);
   });
 
-  it('turns an event batch into intents (RouteClaimed → glow)', () => {
-    render(<Harness />);
-    act(() => useGame.getState().applySnapshot(snap(1, [])));
+  it('turns an event batch into intents (RouteClaimed → glow)', async () => {
+    await render(<Harness />);
+    await act(() => useGame.getState().applySnapshot(snap(1, [])));
     const ev: GameEvent = {
       event: { case: 'routeClaimed', value: { playerId: 'p0', routeId: 'R1', pointsAwarded: 2 } },
     } as GameEvent;
-    act(() => useGame.getState().applyEvents(2, [ev]));
+    await act(() => useGame.getState().applyEvents(2, [ev]));
     expect(useAnimations.getState().glowingRoutes.get('R1')).toBe(0);
   });
 
-  it('notifies me when my turn opens straight into a forced ticket re-draw', () => {
-    render(<Harness />);
-    act(() => useGame.getState().applySnapshot(snap(1, [])));
+  it('notifies me when my turn opens straight into a forced ticket re-draw', async () => {
+    await render(<Harness />);
+    await act(() => useGame.getState().applySnapshot(snap(1, [])));
     const turnStarted: GameEvent = {
       event: { case: 'turnStarted', value: { playerId: 'p0', orderIndex: 0 } },
     } as GameEvent;
     const ticketsOffered: GameEvent = {
       event: { case: 'ticketsOffered', value: { playerId: 'p0', ticketIds: [T1] } },
     } as GameEvent;
-    act(() => useGame.getState().applyEvents(2, [turnStarted, ticketsOffered]));
+    await act(() => useGame.getState().applyEvents(2, [turnStarted, ticketsOffered]));
     const notifications = useAnimations.getState().notifications;
     expect(
       notifications.some((n) => n.variant === 'success' && n.text === i18n.t('forcedTicketRedraw')),
     ).toBe(true);
   });
 
-  it('does not notify for a voluntary mid-turn ticket draw (no accompanying turnStarted)', () => {
-    render(<Harness />);
-    act(() => useGame.getState().applySnapshot(snap(1, [])));
+  it('does not notify for a voluntary mid-turn ticket draw (no accompanying turnStarted)', async () => {
+    await render(<Harness />);
+    await act(() => useGame.getState().applySnapshot(snap(1, [])));
     const ticketsOffered: GameEvent = {
       event: { case: 'ticketsOffered', value: { playerId: 'p0', ticketIds: [T1] } },
     } as GameEvent;
-    act(() => useGame.getState().applyEvents(2, [ticketsOffered]));
+    await act(() => useGame.getState().applyEvents(2, [ticketsOffered]));
     const notifications = useAnimations.getState().notifications;
     expect(notifications.some((n) => n.variant === 'success')).toBe(false);
   });

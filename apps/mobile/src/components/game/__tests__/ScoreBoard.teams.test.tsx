@@ -69,14 +69,14 @@ const teamSnap = (): GameSnapshot =>
   });
 
 describe('ScoreBoard team mode', () => {
-  it('shows the longest-route bonus on the team row, where it is actually awarded', () => {
-    render(<ScoreBoard snapshot={teamSnap()} onLeave={jest.fn()} />);
+  it('shows the longest-route bonus on the team row, where it is actually awarded', async () => {
+    await render(<ScoreBoard snapshot={teamSnap()} onLeave={jest.fn()} />);
     expect(screen.getByText(/合併最長路線 · 18 節車廂（\+10 分）/)).toBeTruthy();
     expect(screen.getByText(/合併最長路線 · 9 節車廂（\+0 分）/)).toBeTruthy();
   });
 
-  it('never shows a member a bare +0 for a bonus their side scored', () => {
-    render(<ScoreBoard snapshot={teamSnap()} onLeave={jest.fn()} />);
+  it('never shows a member a bare +0 for a bonus their side scored', async () => {
+    await render(<ScoreBoard snapshot={teamSnap()} onLeave={jest.fn()} />);
     expect(screen.getByText(/📏 18 節車廂$/)).toBeTruthy();
     expect(screen.queryByText(/📏 18 節車廂（\+0 分）/)).toBeNull();
   });

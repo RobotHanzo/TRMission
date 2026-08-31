@@ -1,4 +1,4 @@
-import { render, waitFor } from '@testing-library/react-native';
+import { act, render, waitFor } from '@testing-library/react-native';
 import { StyleSheet } from 'react-native';
 import { LIGHT_TOKENS, DARK_TOKENS } from '@trm/client-core/theme/tokens';
 import { TAIWAN_CONTENT, type GameContent } from '@trm/map-data';
@@ -13,15 +13,21 @@ const brokenRailContent: GameContent = {
 };
 
 const cardBg = async (theme: 'light' | 'dark'): Promise<string | undefined> => {
-  useUi.setState({ theme });
-  const r = render(<FeatureIntroOverlay content={brokenRailContent} />);
+  await act(() => {
+    useUi.setState({ theme });
+  });
+  const r = await render(<FeatureIntroOverlay content={brokenRailContent} />);
   // The overlay stays hidden until the on-device seen-mirror resolves.
   const card = await waitFor(() => r.getByTestId('feature-intro-card'));
   return StyleSheet.flatten(card.props.style).backgroundColor;
 };
 
 describe('FeatureIntroOverlay', () => {
-  afterEach(() => useUi.setState({ theme: 'system' }));
+  afterEach(async () => {
+    await act(() => {
+      useUi.setState({ theme: 'system' });
+    });
+  });
 
   // Issue #67: the card was a hardcoded white sheet, so on a dark board it read as a light-mode
   // leftover. It is app chrome — it follows the theme like every other modal.

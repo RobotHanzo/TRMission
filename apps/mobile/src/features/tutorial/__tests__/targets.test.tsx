@@ -17,7 +17,7 @@ function Probe({ onTargets }: { onTargets: (t: TutorialTargets) => void }) {
 describe('useTutorialAnchor', () => {
   it('registers into the provider and sets collapsable={false}', async () => {
     let targets: TutorialTargets | null = null;
-    const r = render(
+    const r = await render(
       <TutorialTargetsProvider>
         <Probe onTargets={(t) => (targets = t)} />
       </TutorialTargetsProvider>,
@@ -26,11 +26,11 @@ describe('useTutorialAnchor', () => {
     // jsdom-less RN test env: measureInWindow yields nothing → 0-sized → dropped, but the
     // registration path itself must not throw and must resolve to an array.
     await expect(targets!.measure(TUTORIAL_ANCHORS.market)).resolves.toBeInstanceOf(Array);
-    r.unmount(); // unmount must unregister without throwing
+    await r.unmount(); // unmount must unregister without throwing
   });
 
-  it('is a safe no-op outside the provider (live game)', () => {
-    const r = render(<Probe onTargets={() => {}} />);
+  it('is a safe no-op outside the provider (live game)', async () => {
+    const r = await render(<Probe onTargets={() => {}} />);
     expect(r.getByTestId('probe')).toBeTruthy();
   });
 });

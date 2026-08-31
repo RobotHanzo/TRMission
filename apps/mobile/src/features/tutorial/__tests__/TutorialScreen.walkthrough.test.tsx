@@ -112,8 +112,8 @@ describe('scripted end-to-end Quickstart walkthrough', () => {
     'travels every core lesson to the finale and persists completion',
     async () => {
       jest.useFakeTimers();
-      const r = render(<TutorialScreen />);
-      fireEvent.press(r.getByTestId('tut-scope-core'));
+      const r = await render(<TutorialScreen />);
+      await fireEvent.press(r.getByTestId('tut-scope-core'));
 
       const lessons = lessonsForScope('core');
       for (let li = 0; li < lessons.length; li++) {
@@ -128,20 +128,20 @@ describe('scripted end-to-end Quickstart walkthrough', () => {
               isLastBeat && !isLastLesson
                 ? r.getByTestId('tut-next-lesson')
                 : r.getByTestId('tut-next');
-            fireEvent.press(btn);
+            await fireEvent.press(btn);
           } else if (beat.mode === 'await') {
             const sandbox = mockStageProps!.commands as SandboxSocket;
-            act(() => performAwait(sandbox, beat));
+            await act(() => performAwait(sandbox, beat));
           } else {
             // auto beat: the player fires its scripted action on a timer.
-            act(() => {
+            await act(() => {
               jest.advanceTimersByTime((beat.delayMs ?? 900) + 50);
             });
           }
           await act(async () => {}); // flush projections/re-renders
           // A done lesson (last beat consumed) rolls into the next one via the done-state button.
           if (isLastBeat && beat.mode !== 'info' && !isLastLesson) {
-            fireEvent.press(r.getByTestId('tut-next-lesson'));
+            await fireEvent.press(r.getByTestId('tut-next-lesson'));
             await act(async () => {});
           }
         }

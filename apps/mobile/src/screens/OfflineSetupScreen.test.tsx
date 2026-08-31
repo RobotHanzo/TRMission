@@ -32,26 +32,26 @@ const baseUser = {
   tutorialCompleted: true,
 } as const;
 
-function renderScreen(replace: jest.Mock) {
+async function renderScreen(replace: jest.Mock) {
   const navigation = { replace } as unknown as Props['navigation'];
   const route = { key: 'OfflineSetup', name: 'OfflineSetup' } as unknown as Props['route'];
-  render(<OfflineSetupScreen navigation={navigation} route={route} />);
+  await render(<OfflineSetupScreen navigation={navigation} route={route} />);
 }
 
 describe('OfflineSetupScreen', () => {
-  afterEach(() => {
-    act(() => {
+  afterEach(async () => {
+    await act(() => {
       useSession.setState({ user: null });
     });
   });
 
-  it('hides the events picker and starts eventsMode off without the randomEvents feature', () => {
+  it('hides the events picker and starts eventsMode off without the randomEvents feature', async () => {
     useSession.setState({ user: { ...baseUser, features: [] }, booting: false });
     const replace = jest.fn();
-    renderScreen(replace);
+    await renderScreen(replace);
 
     expect(screen.queryByText('隨機事件')).toBeNull();
-    fireEvent.press(screen.getByText('開始對局'));
+    await fireEvent.press(screen.getByText('開始對局'));
     expect(replace).toHaveBeenCalledWith(
       'OfflineGame',
       expect.objectContaining({ eventsMode: 'off' }),
@@ -61,44 +61,44 @@ describe('OfflineSetupScreen', () => {
   // Regression (#41): the picker used to offer only the layouts the CURRENT bot count could form,
   // so the default 2-bot table showed a lone "free-for-all" chip and read as "offline games can't
   // do teams". Every mode is offered; picking one moves the bot count to a table that fits.
-  it('offers every team mode and snaps the bot count to a table that can form it', () => {
+  it('offers every team mode and snaps the bot count to a table that can form it', async () => {
     useSession.setState({ user: { ...baseUser, features: [] }, booting: false });
     const replace = jest.fn();
-    renderScreen(replace);
+    await renderScreen(replace);
 
     expect(screen.getByText('兩隊')).toBeTruthy();
     expect(screen.getByText('三隊')).toBeTruthy();
 
-    fireEvent.press(screen.getByText('三隊'));
+    await fireEvent.press(screen.getByText('三隊'));
     expect(screen.getByText('6 人・2 人一隊')).toBeTruthy(); // three pairs
-    fireEvent.press(screen.getByText('開始對局'));
+    await fireEvent.press(screen.getByText('開始對局'));
     expect(replace).toHaveBeenCalledWith(
       'OfflineGame',
       expect.objectContaining({ teamCount: 3, botCount: 5 }),
     );
   });
 
-  it('drops back to free-for-all when the bot count can no longer form the chosen layout', () => {
+  it('drops back to free-for-all when the bot count can no longer form the chosen layout', async () => {
     useSession.setState({ user: { ...baseUser, features: [] }, booting: false });
     const replace = jest.fn();
-    renderScreen(replace);
+    await renderScreen(replace);
 
-    fireEvent.press(screen.getByText('兩隊'));
-    fireEvent.press(screen.getByText('4')); // 5 players — no layout divides it
-    fireEvent.press(screen.getByText('開始對局'));
+    await fireEvent.press(screen.getByText('兩隊'));
+    await fireEvent.press(screen.getByText('4')); // 5 players — no layout divides it
+    await fireEvent.press(screen.getByText('開始對局'));
     const params = replace.mock.calls[0]![1] as Record<string, unknown>;
     expect(params).toMatchObject({ botCount: 4 });
     expect(params.teamCount).toBeUndefined();
   });
 
-  it('lets a randomEvents holder pick an intensity and threads it into the new game', () => {
+  it('lets a randomEvents holder pick an intensity and threads it into the new game', async () => {
     useSession.setState({ user: { ...baseUser, features: ['randomEvents'] }, booting: false });
     const replace = jest.fn();
-    renderScreen(replace);
+    await renderScreen(replace);
 
     expect(screen.getByText('隨機事件')).toBeTruthy();
-    fireEvent.press(screen.getByText('強烈'));
-    fireEvent.press(screen.getByText('開始對局'));
+    await fireEvent.press(screen.getByText('強烈'));
+    await fireEvent.press(screen.getByText('開始對局'));
     expect(replace).toHaveBeenCalledWith(
       'OfflineGame',
       expect.objectContaining({ eventsMode: 'intense' }),

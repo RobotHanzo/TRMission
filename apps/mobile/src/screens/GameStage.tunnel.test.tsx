@@ -50,24 +50,24 @@ const tunnelSnap = (): GameSnapshot =>
 beforeEach(() => resolveTunnel.mockClear());
 
 describe('GameStage tunnel reveal in playback', () => {
-  it('a replay reveal is read-only and closes on demand, without resolving anything', () => {
-    render(<GameStage snapshot={tunnelSnap()} commands={null} onLeave={() => {}} sandbox />);
+  it('a replay reveal is read-only and closes on demand, without resolving anything', async () => {
+    await render(<GameStage snapshot={tunnelSnap()} commands={null} onLeave={() => {}} sandbox />);
     expect(screen.getByText(i18n.t('tunnel'))).toBeTruthy();
     // Read-only even though the viewed perspective is the claimant.
     expect(screen.queryByText(i18n.t('abort'))).toBeNull();
 
-    fireEvent.press(screen.getByText(i18n.t('close')));
+    await fireEvent.press(screen.getByText(i18n.t('close')));
     expect(screen.queryByText(i18n.t('tunnel'))).toBeNull();
     expect(resolveTunnel).not.toHaveBeenCalled();
   });
 
-  it('a live claimant still gets the interactive dialog, and no Close', () => {
-    render(
+  it('a live claimant still gets the interactive dialog, and no Close', async () => {
+    await render(
       <GameStage snapshot={tunnelSnap()} commands={commandSpies()} onLeave={() => {}} sandbox />,
     );
     expect(screen.queryByText(i18n.t('close'))).toBeNull();
     // The claimant's own way out stays the real action — it resolves the tunnel on the server.
-    fireEvent.press(screen.getByText(i18n.t('abort')));
+    await fireEvent.press(screen.getByText(i18n.t('abort')));
     expect(resolveTunnel).toHaveBeenCalledWith(false);
   });
 });

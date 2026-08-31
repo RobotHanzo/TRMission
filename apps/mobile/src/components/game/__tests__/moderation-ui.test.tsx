@@ -38,9 +38,9 @@ const snapshot = create(GameSnapshotSchema, {
   you: { playerId: 'me' },
 });
 
-beforeEach(() => {
+beforeEach(async () => {
   jest.clearAllMocks();
-  act(() => {
+  await act(() => {
     useModeration.getState().reset();
     useChat.getState().reset();
     useGame.setState({ snapshot });
@@ -58,8 +58,8 @@ describe('canModerate', () => {
 });
 
 describe('ChatPanel blocked filtering', () => {
-  it('hides messages (text and preset) from blocked authors', () => {
-    act(() => {
+  it('hides messages (text and preset) from blocked authors', async () => {
+    await act(() => {
       useChat.getState().ingest({ playerId: 'me', content: { case: 'text', value: 'hello' } });
       useChat
         .getState()
@@ -69,7 +69,7 @@ describe('ChatPanel blocked filtering', () => {
         .ingest({ playerId: 'u-loud', content: { case: 'presetId', value: 'GREETING' } });
       useModeration.setState({ blocked: new Set(['u-loud']) });
     });
-    const { queryByText, getByText, getAllByText } = render(<ChatPanel />);
+    const { queryByText, getByText, getAllByText } = await render(<ChatPanel />);
     expect(getByText('hello')).toBeTruthy();
     expect(queryByText('rude words')).toBeNull();
     // The blocked author's GREETING preset must not render as a message — the single
@@ -79,8 +79,8 @@ describe('ChatPanel blocked filtering', () => {
 });
 
 describe('PlayerTrackers name masking', () => {
-  it('masks a blocked player back to the neutral seat label', () => {
-    act(() => {
+  it('masks a blocked player back to the neutral seat label', async () => {
+    await act(() => {
       useRoster
         .getState()
         .setMembers([
@@ -88,7 +88,7 @@ describe('PlayerTrackers name masking', () => {
         ]);
       useModeration.setState({ blocked: new Set(['u-loud']) });
     });
-    const { getByText, queryByText } = render(<PlayerTrackers snapshot={snapshot} />);
+    const { getByText, queryByText } = await render(<PlayerTrackers snapshot={snapshot} />);
     expect(queryByText('RudeName')).toBeNull();
     expect(getByText('P2')).toBeTruthy();
   });
@@ -98,13 +98,13 @@ describe('PlayerActionSheet', () => {
   it('submits a report with the selected category, message, and active room context', async () => {
     mocked.reportPlayer.mockResolvedValue({ id: 'r1' });
     setActiveRoomContext({ gameId: 'g1', roomCode: 'ABCD' });
-    const { getByTestId, findByText, getByText } = render(
+    const { getByTestId, findByText, getByText } = await render(
       <PlayerActionSheet target={{ id: 'u-loud', name: 'Loud' }} onClose={jest.fn()} />,
     );
-    fireEvent.press(getByTestId('sheet-report'));
-    fireEvent.press(getByTestId('report-category-SPAM'));
-    fireEvent.changeText(getByTestId('report-message'), 'spamming presets');
-    fireEvent.press(getByText('送出檢舉'));
+    await fireEvent.press(getByTestId('sheet-report'));
+    await fireEvent.press(getByTestId('report-category-SPAM'));
+    await fireEvent.changeText(getByTestId('report-message'), 'spamming presets');
+    await fireEvent.press(getByText('送出檢舉'));
     expect(await findByText('已收到你的檢舉，我們會盡快處理。')).toBeTruthy();
     expect(mocked.reportPlayer).toHaveBeenCalledWith({
       userId: 'u-loud',
@@ -115,13 +115,13 @@ describe('PlayerActionSheet', () => {
     });
   });
 
-  it('block action calls the moderation store optimistically and closes', () => {
+  it('block action calls the moderation store optimistically and closes', async () => {
     mocked.blockUser.mockResolvedValue(undefined);
     const onClose = jest.fn();
-    const { getByTestId } = render(
+    const { getByTestId } = await render(
       <PlayerActionSheet target={{ id: 'u-loud', name: 'Loud' }} onClose={onClose} />,
     );
-    fireEvent.press(getByTestId('sheet-block'));
+    await fireEvent.press(getByTestId('sheet-block'));
     expect(useModeration.getState().blocked.has('u-loud')).toBe(true);
     expect(onClose).toHaveBeenCalled();
   });

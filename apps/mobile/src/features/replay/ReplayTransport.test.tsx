@@ -58,8 +58,8 @@ const controls = (over: Partial<ReplayControls> = {}): ReplayControls => ({
   ...over,
 });
 
-function mount(player: ReplayControls) {
-  render(
+async function mount(player: ReplayControls) {
+  await render(
     <ReplayTransport
       actions={actions(player.total)}
       players={[
@@ -76,17 +76,17 @@ function mount(player: ReplayControls) {
 }
 
 describe('ReplayTransport strip', () => {
-  it('seeks to the pressed position', () => {
+  it('seeks to the pressed position', async () => {
     const player = controls();
-    const strip = mount(player);
+    const strip = await mount(player);
     strip.props.onStartShouldSetResponder(touchEvent(0, 0));
     strip.props.onResponderGrant(touchEvent(50, 0)); // a quarter along 200dp of 100 steps
     expect(player.seek).toHaveBeenLastCalledWith(25);
   });
 
-  it('tracks the finger while dragging, not just the initial press', () => {
+  it('tracks the finger while dragging, not just the initial press', async () => {
     const player = controls();
-    const strip = mount(player);
+    const strip = await mount(player);
     strip.props.onStartShouldSetResponder(touchEvent(0, 0));
     strip.props.onResponderGrant(touchEvent(20, 0));
     expect(player.seek).toHaveBeenLastCalledWith(10);
@@ -96,9 +96,9 @@ describe('ReplayTransport strip', () => {
     expect(player.seek).toHaveBeenLastCalledWith(3);
   });
 
-  it('clamps a drag that runs off either end of the strip', () => {
+  it('clamps a drag that runs off either end of the strip', async () => {
     const player = controls();
-    const strip = mount(player);
+    const strip = await mount(player);
     strip.props.onStartShouldSetResponder(touchEvent(0, 0));
     strip.props.onResponderGrant(touchEvent(100, 0));
     strip.props.onResponderMove(touchEvent(-400, 1, 100));
@@ -107,26 +107,26 @@ describe('ReplayTransport strip', () => {
     expect(player.seek).toHaveBeenLastCalledWith(100);
   });
 
-  it('refuses to hand the gesture back mid-drag', () => {
+  it('refuses to hand the gesture back mid-drag', async () => {
     // The replay screen is a native-stack route; on iOS the back-swipe would otherwise claim a
     // drag that starts near the left edge.
-    const strip = mount(controls());
+    const strip = await mount(controls());
     expect(strip.props.onResponderTerminationRequest(touchEvent(10, 1))).toBe(false);
   });
 
-  it('keeps the painted layers out of the touch path', () => {
+  it('keeps the painted layers out of the touch path', async () => {
     // `locationX` is measured from the view the touch landed ON. If a turn section could take the
     // touch, a press would be measured from that section's left edge and seek somewhere else.
-    const strip = mount(controls());
+    const strip = await mount(controls());
     expect(strip.children).toHaveLength(1);
     expect((strip.children[0] as { props: { pointerEvents?: string } }).props.pointerEvents).toBe(
       'none',
     );
   });
 
-  it('exposes the playhead to assistive tech, and steps it', () => {
+  it('exposes the playhead to assistive tech, and steps it', async () => {
     const player = controls({ step: 40 });
-    const strip = mount(player);
+    const strip = await mount(player);
     expect(strip.props.accessibilityValue).toEqual({ min: 0, max: 100, now: 40 });
     strip.props.onAccessibilityAction({ nativeEvent: { actionName: 'increment' } });
     expect(player.seek).toHaveBeenLastCalledWith(41);
@@ -134,9 +134,9 @@ describe('ReplayTransport strip', () => {
     expect(player.seek).toHaveBeenLastCalledWith(39);
   });
 
-  it('ignores a press on an empty log rather than seeking into nothing', () => {
+  it('ignores a press on an empty log rather than seeking into nothing', async () => {
     const player = controls({ total: 0, atEnd: true });
-    const strip = mount(player);
+    const strip = await mount(player);
     strip.props.onResponderGrant(touchEvent(50, 0));
     expect(player.seek).not.toHaveBeenCalled();
   });

@@ -22,16 +22,16 @@ describe('NotificationsRow', () => {
 
   it('toggling ON requests permission then registers', async () => {
     mockRequestPermissions.mockResolvedValue({ granted: true });
-    render(<NotificationsRow />);
-    fireEvent(screen.getByTestId('notifications-switch'), 'valueChange', true);
+    await render(<NotificationsRow />);
+    await fireEvent(screen.getByTestId('notifications-switch'), 'valueChange', true);
     await waitFor(() => expect(mockEnsure).toHaveBeenCalled());
     expect(useSettings.getState().notifications).toBe(true);
   });
 
   it('permission denied leaves the toggle OFF', async () => {
     mockRequestPermissions.mockResolvedValue({ granted: false, canAskAgain: true });
-    render(<NotificationsRow />);
-    fireEvent(screen.getByTestId('notifications-switch'), 'valueChange', true);
+    await render(<NotificationsRow />);
+    await fireEvent(screen.getByTestId('notifications-switch'), 'valueChange', true);
     await waitFor(() => expect(mockRequestPermissions).toHaveBeenCalled());
     expect(useSettings.getState().notifications).toBe(false);
     expect(mockEnsure).not.toHaveBeenCalled();
@@ -39,8 +39,8 @@ describe('NotificationsRow', () => {
 
   it('toggling OFF deregisters the device token', async () => {
     useSettings.setState({ notifications: true });
-    render(<NotificationsRow />);
-    fireEvent(screen.getByTestId('notifications-switch'), 'valueChange', false);
+    await render(<NotificationsRow />);
+    await fireEvent(screen.getByTestId('notifications-switch'), 'valueChange', false);
     await waitFor(() => expect(mockUnregister).toHaveBeenCalled());
     expect(useSettings.getState().notifications).toBe(false);
   });

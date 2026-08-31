@@ -4,7 +4,7 @@
 // deals. The tutorial follows the same map: a beat awaiting a deck action opens the tab that deck
 // now lives in. Same recipe as GameStage.gate.test.tsx — the Skia board is a stub; here the window
 // is also narrowed to the compact tier, since the dock only exists below 700dp.
-import { render, screen, fireEvent, act, within } from '@testing-library/react-native';
+import { render, screen, fireEvent, within } from '@testing-library/react-native';
 import { Dimensions } from 'react-native';
 import { create } from '@bufbuild/protobuf';
 import { CardColor as PbCardColor, GameSnapshotSchema, Phase, type GameSnapshot } from '@trm/proto';
@@ -64,8 +64,8 @@ const renderStage = (gate?: ActionGate) =>
 const drawMissions = () => screen.queryByText('抽任務卡 (5)');
 
 describe('phone dock tabs (issue #79)', () => {
-  it('has no Draw tab — one tab per deck, beside what it deals', () => {
-    renderStage();
+  it('has no Draw tab — one tab per deck, beside what it deals', async () => {
+    await renderStage();
     // The first Text in each tab is its label (a count pill may follow). Sandbox drops chat.
     const labels = screen
       .getAllByRole('tab')
@@ -73,8 +73,8 @@ describe('phone dock tabs (issue #79)', () => {
     expect(labels).toEqual(['手牌', '任務卡', '玩家', '紀錄']);
   });
 
-  it('opens on the Cards tab, holding the train-card deck and the hand together', () => {
-    renderStage();
+  it('opens on the Cards tab, holding the train-card deck and the hand together', async () => {
+    await renderStage();
     expect(screen.getByTestId('market-deck')).toBeTruthy();
     expect(screen.getByTestId('market-slot-0')).toBeTruthy();
     expect(screen.getByTestId('hand-brief-toggle')).toBeTruthy();
@@ -82,52 +82,50 @@ describe('phone dock tabs (issue #79)', () => {
     expect(drawMissions()).toBeNull();
   });
 
-  it('carries the mission-deck button in the Missions tab', () => {
-    renderStage();
-    fireEvent.press(screen.getByText('任務卡'));
+  it('carries the mission-deck button in the Missions tab', async () => {
+    await renderStage();
+    await fireEvent.press(screen.getByText('任務卡'));
     expect(drawMissions()).toBeTruthy();
     expect(screen.queryByTestId('market-deck')).toBeNull();
   });
 
-  it('collapses the hand to its brief reading and back', () => {
-    renderStage();
+  it('collapses the hand to its brief reading and back', async () => {
+    await renderStage();
     const toggle = screen.getByTestId('hand-brief-toggle');
     const widths = () => screen.getAllByLabelText(/×\d/).map((n) => n.props.style.width);
     expect(widths()).toEqual([92, 92]);
-    fireEvent.press(toggle);
+    await fireEvent.press(toggle);
     expect(widths()).toEqual([56, 56]);
     // The market above it is untouched — collapsing the hand is what keeps it on screen.
     expect(screen.getByTestId('market-deck')).toBeTruthy();
-    fireEvent.press(screen.getByTestId('hand-brief-toggle'));
+    await fireEvent.press(screen.getByTestId('hand-brief-toggle'));
     expect(widths()).toEqual([92, 92]);
   });
 });
 
 describe('the tutorial dock follows each deck to its new tab', () => {
-  it('a market-draw beat surfaces the Cards tab', () => {
-    renderStage({ t: 'DRAW_ANY' });
+  it('a market-draw beat surfaces the Cards tab', async () => {
+    await renderStage({ t: 'DRAW_ANY' });
     expect(screen.getByTestId('market-deck')).toBeTruthy();
   });
 
-  it('a mission-draw beat surfaces the Missions tab', () => {
-    renderStage({ t: 'DRAW_TICKETS' });
+  it('a mission-draw beat surfaces the Missions tab', async () => {
+    await renderStage({ t: 'DRAW_TICKETS' });
     expect(drawMissions()).toBeTruthy();
   });
 
-  it('a board beat tucks the dock away instead of picking a tab', () => {
-    const { rerender } = renderStage({ t: 'DRAW_TICKETS' });
+  it('a board beat tucks the dock away instead of picking a tab', async () => {
+    const { rerender } = await renderStage({ t: 'DRAW_TICKETS' });
     expect(drawMissions()).toBeTruthy();
-    act(() => {
-      rerender(
-        <GameStage
-          snapshot={snap()}
-          commands={null}
-          onLeave={() => {}}
-          sandbox
-          actionGate={{ t: 'CLAIM_ROUTE' }}
-        />,
-      );
-    });
+    await rerender(
+      <GameStage
+        snapshot={snap()}
+        commands={null}
+        onLeave={() => {}}
+        sandbox
+        actionGate={{ t: 'CLAIM_ROUTE' }}
+      />,
+    );
     // Still mounted (the dock clips it while collapsed) — the tab choice simply stops changing.
     expect(drawMissions()).toBeTruthy();
   });

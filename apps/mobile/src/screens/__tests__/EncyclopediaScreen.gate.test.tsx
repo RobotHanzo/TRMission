@@ -28,8 +28,8 @@ describe('EncyclopediaScreen action gate', () => {
   afterEach(() => jest.useRealTimers());
 
   it('locks narration beats and exposes the awaited target on the claim beat', async () => {
-    const r = render(<EncyclopediaScreen />);
-    fireEvent.press(r.getByTestId('enc-topic-claim'));
+    const r = await render(<EncyclopediaScreen />);
+    await fireEvent.press(r.getByTestId('enc-topic-claim'));
     await act(async () => {}); // let the sandbox build + project its first snapshot
 
     // Beat 0 is narration: nothing on the board or in the market accepts a tap.
@@ -37,21 +37,21 @@ describe('EncyclopediaScreen action gate', () => {
 
     // Stepping forward pauses the clip on the `await` beat whose caption reads "click the
     // highlighted Pingdong–Chaozhou route on the map to claim it" — so that route must be live.
-    fireEvent.press(r.getByTestId('enc-next-step'));
+    await fireEvent.press(r.getByTestId('enc-next-step'));
     await act(async () => {});
     expect(stageProps?.actionGate).toEqual({ t: 'CLAIM_ROUTE', routeId: 'R42' });
     expect(typeof stageProps?.onPendingClaim).toBe('function');
   });
 
   it('exposes the awaited city on the station beat', async () => {
-    const r = render(<EncyclopediaScreen />);
-    fireEvent.press(r.getByTestId('enc-topic-stations'));
+    const r = await render(<EncyclopediaScreen />);
+    await fireEvent.press(r.getByTestId('enc-topic-stations'));
     await act(async () => {});
 
     // 'stations' opens with two narration beats before its BUILD_STATION practice.
-    fireEvent.press(r.getByTestId('enc-next-step'));
+    await fireEvent.press(r.getByTestId('enc-next-step'));
     await act(async () => {});
-    fireEvent.press(r.getByTestId('enc-next-step'));
+    await fireEvent.press(r.getByTestId('enc-next-step'));
     await act(async () => {});
     expect(stageProps?.actionGate).toEqual({ t: 'BUILD_STATION', cityId: 'taipei' });
   });

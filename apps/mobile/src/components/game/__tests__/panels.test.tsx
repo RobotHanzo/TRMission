@@ -21,8 +21,8 @@ const marketSnapshot = (overrides: Record<string, unknown> = {}) =>
     ...overrides,
   });
 
-afterEach(() => {
-  act(() => {
+afterEach(async () => {
+  await act(() => {
     useUi.setState({ colorBlind: false });
   });
 });
@@ -30,43 +30,43 @@ afterEach(() => {
 describe('PlayerHand', () => {
   const hand = create(CardCountsSchema, { red: 3, locomotive: 1 });
 
-  it('renders one card per held colour with its count', () => {
-    const { getByText, queryByText } = render(<PlayerHand hand={hand} />);
+  it('renders one card per held colour with its count', async () => {
+    const { getByText, queryByText } = await render(<PlayerHand hand={hand} />);
     expect(getByText('×3')).toBeTruthy();
     expect(getByText('×1')).toBeTruthy();
     // No glyph chips while colour-blind mode is off.
     expect(queryByText('▲')).toBeNull();
   });
 
-  it('shows the colour-blind glyphs only when the setting is on', () => {
-    act(() => {
+  it('shows the colour-blind glyphs only when the setting is on', async () => {
+    await act(() => {
       useUi.setState({ colorBlind: true });
     });
-    const { getByText } = render(<PlayerHand hand={hand} />);
+    const { getByText } = await render(<PlayerHand hand={hand} />);
     expect(getByText('▲')).toBeTruthy(); // RED
     expect(getByText('★')).toBeTruthy(); // LOCOMOTIVE
   });
 
-  it('renders the empty-hand hint when nothing is held', () => {
-    const { getByText } = render(<PlayerHand hand={undefined} />);
+  it('renders the empty-hand hint when nothing is held', async () => {
+    const { getByText } = await render(<PlayerHand hand={undefined} />);
     expect(getByText('沒有手牌')).toBeTruthy(); // zh-Hant is the primary locale
   });
 
   // Issue #79: the Cards tab carries the draw market above the hand, so the hand has a brief
   // reading — the same cards at the tutorial glossary's size, still one per held colour.
-  const cardWidths = (el: ReturnType<typeof render>) =>
+  const cardWidths = (el: Awaited<ReturnType<typeof render>>) =>
     el.getAllByLabelText(/×\d/).map((n) => (n.props.style as { width: number }).width);
 
-  it('collapses to the glossary card size in brief mode, keeping every held colour', () => {
-    expect(cardWidths(render(<PlayerHand hand={hand} />))).toEqual([92, 92]);
-    expect(cardWidths(render(<PlayerHand hand={hand} brief />))).toEqual([56, 56]);
+  it('collapses to the glossary card size in brief mode, keeping every held colour', async () => {
+    expect(cardWidths(await render(<PlayerHand hand={hand} />))).toEqual([92, 92]);
+    expect(cardWidths(await render(<PlayerHand hand={hand} brief />))).toEqual([56, 56]);
   });
 });
 
 describe('CardMarket', () => {
-  it('pressing a face-up slot draws it', () => {
+  it('pressing a face-up slot draws it', async () => {
     const onDrawFaceUp = jest.fn();
-    const { getByTestId } = render(
+    const { getByTestId } = await render(
       <CardMarket
         snapshot={marketSnapshot()}
         canDraw
@@ -74,14 +74,14 @@ describe('CardMarket', () => {
         onDrawBlind={jest.fn()}
       />,
     );
-    fireEvent.press(getByTestId('market-slot-2'));
+    await fireEvent.press(getByTestId('market-slot-2'));
     expect(onDrawFaceUp).toHaveBeenCalledWith(2);
   });
 
-  it('ignores presses when the viewer cannot draw', () => {
+  it('ignores presses when the viewer cannot draw', async () => {
     const onDrawFaceUp = jest.fn();
     const onDrawBlind = jest.fn();
-    const { getByTestId } = render(
+    const { getByTestId } = await render(
       <CardMarket
         snapshot={marketSnapshot()}
         canDraw={false}
@@ -89,15 +89,15 @@ describe('CardMarket', () => {
         onDrawBlind={onDrawBlind}
       />,
     );
-    fireEvent.press(getByTestId('market-slot-2'));
-    fireEvent.press(getByTestId('market-deck'));
+    await fireEvent.press(getByTestId('market-slot-2'));
+    await fireEvent.press(getByTestId('market-deck'));
     expect(onDrawFaceUp).not.toHaveBeenCalled();
     expect(onDrawBlind).not.toHaveBeenCalled();
   });
 
-  it('blocks a face-up locomotive as the second draw (engine rule)', () => {
+  it('blocks a face-up locomotive as the second draw (engine rule)', async () => {
     const onDrawFaceUp = jest.fn();
-    const { getByTestId } = render(
+    const { getByTestId } = await render(
       <CardMarket
         snapshot={marketSnapshot({ phase: Phase.DRAWING_CARDS })}
         canDraw
@@ -105,15 +105,15 @@ describe('CardMarket', () => {
         onDrawBlind={jest.fn()}
       />,
     );
-    fireEvent.press(getByTestId('market-slot-3')); // the LOCOMOTIVE slot
+    await fireEvent.press(getByTestId('market-slot-3')); // the LOCOMOTIVE slot
     expect(onDrawFaceUp).not.toHaveBeenCalled();
-    fireEvent.press(getByTestId('market-slot-0'));
+    await fireEvent.press(getByTestId('market-slot-0'));
     expect(onDrawFaceUp).toHaveBeenCalledWith(0);
   });
 
-  it('draws blind from the deck', () => {
+  it('draws blind from the deck', async () => {
     const onDrawBlind = jest.fn();
-    const { getByTestId } = render(
+    const { getByTestId } = await render(
       <CardMarket
         snapshot={marketSnapshot()}
         canDraw
@@ -121,7 +121,7 @@ describe('CardMarket', () => {
         onDrawBlind={onDrawBlind}
       />,
     );
-    fireEvent.press(getByTestId('market-deck'));
+    await fireEvent.press(getByTestId('market-deck'));
     expect(onDrawBlind).toHaveBeenCalled();
   });
 });
@@ -135,8 +135,8 @@ describe('PlayerTrackers', () => {
     ],
   });
 
-  it('marks the bot row with a badge and the current player with the turn ring', () => {
-    const { getByTestId, queryByTestId } = render(<PlayerTrackers snapshot={snapshot} />);
+  it('marks the bot row with a badge and the current player with the turn ring', async () => {
+    const { getByTestId, queryByTestId } = await render(<PlayerTrackers snapshot={snapshot} />);
     expect(getByTestId('bot-badge-bot:1')).toBeTruthy();
     expect(queryByTestId('bot-badge-p1')).toBeNull();
     expect(getByTestId('tracker-bot:1').props.accessibilityState).toMatchObject({

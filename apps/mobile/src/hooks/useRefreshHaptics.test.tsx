@@ -24,28 +24,29 @@ describe('useRefreshHaptics', () => {
     useSettings.getState().setHaptics(true);
   });
 
-  it('buzzes and still refreshes', () => {
+  it('buzzes and still refreshes', async () => {
     const onRefresh = jest.fn();
-    const { getByTestId } = render(<Harness onRefresh={onRefresh} />);
-    fireEvent.press(getByTestId('refresh'));
+    const { getByTestId } = await render(<Harness onRefresh={onRefresh} />);
+    await fireEvent.press(getByTestId('refresh'));
     expect(Haptics.impactAsync).toHaveBeenCalledWith('light');
     expect(onRefresh).toHaveBeenCalledTimes(1);
   });
 
-  it('refreshes without buzzing when the setting is off', () => {
+  it('refreshes without buzzing when the setting is off', async () => {
     useSettings.getState().setHaptics(false);
     const onRefresh = jest.fn();
-    const { getByTestId } = render(<Harness onRefresh={onRefresh} />);
-    fireEvent.press(getByTestId('refresh'));
+    const { getByTestId } = await render(<Harness onRefresh={onRefresh} />);
+    await fireEvent.press(getByTestId('refresh'));
     expect(Haptics.impactAsync).not.toHaveBeenCalled();
     expect(onRefresh).toHaveBeenCalledTimes(1);
   });
 
-  it('swallows a rejected native call', () => {
+  it('swallows a rejected native call', async () => {
     (Haptics.impactAsync as jest.Mock).mockRejectedValueOnce(new Error('no motor'));
     const onRefresh = jest.fn();
-    const { getByTestId } = render(<Harness onRefresh={onRefresh} />);
-    expect(() => fireEvent.press(getByTestId('refresh'))).not.toThrow();
+    const { getByTestId } = await render(<Harness onRefresh={onRefresh} />);
+    // Must not reject/throw even though the native call underneath does.
+    await fireEvent.press(getByTestId('refresh'));
     expect(onRefresh).toHaveBeenCalledTimes(1);
   });
 });

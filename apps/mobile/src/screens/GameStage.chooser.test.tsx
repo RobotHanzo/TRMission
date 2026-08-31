@@ -50,17 +50,17 @@ const arm = (s: GameSnapshot): void => {
 afterEach(() => useGame.getState().reset());
 
 describe('GameStage countdown while drafting missions', () => {
-  it('keeps exactly one countdown on screen while the chooser owns the rail', () => {
+  it('keeps exactly one countdown on screen while the chooser owns the rail', async () => {
     const s = snap(true);
     arm(s);
-    render(<GameStage snapshot={s} commands={null} onLeave={() => {}} />);
+    await render(<GameStage snapshot={s} commands={null} onLeave={() => {}} />);
     expect(screen.getAllByTestId('turn-countdown')).toHaveLength(1);
   });
 
-  it('still mounts exactly one when the rail carries its usual panels', () => {
+  it('still mounts exactly one when the rail carries its usual panels', async () => {
     const s = snap(false);
     arm(s);
-    render(<GameStage snapshot={s} commands={null} onLeave={() => {}} />);
+    await render(<GameStage snapshot={s} commands={null} onLeave={() => {}} />);
     expect(screen.getAllByTestId('turn-countdown')).toHaveLength(1);
   });
 });

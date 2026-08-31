@@ -35,39 +35,43 @@ const base: TutorialOverlayProps = {
 };
 
 describe('TutorialOverlay', () => {
-  it('info beat: Next advances', () => {
+  it('info beat: Next advances', async () => {
     const onAdvance = jest.fn();
-    const r = render(<TutorialOverlay {...base} onAdvance={onAdvance} />);
-    fireEvent.press(r.getByTestId('tut-next'));
+    const r = await render(<TutorialOverlay {...base} onAdvance={onAdvance} />);
+    await fireEvent.press(r.getByTestId('tut-next'));
     expect(onAdvance).toHaveBeenCalledTimes(1);
   });
 
-  it('await beat: shows the your-turn cue, no Next button', () => {
-    const r = render(<TutorialOverlay {...base} beat={awaitBeat} />);
+  it('await beat: shows the your-turn cue, no Next button', async () => {
+    const r = await render(<TutorialOverlay {...base} beat={awaitBeat} />);
     expect(r.getByTestId('tut-yourturn')).toBeTruthy();
     expect(r.queryByTestId('tut-next')).toBeNull();
   });
 
-  it('last beat of a non-final lesson hands off to the next lesson', () => {
+  it('last beat of a non-final lesson hands off to the next lesson', async () => {
     const onNextLesson = jest.fn();
-    const r = render(<TutorialOverlay {...base} index={4} total={5} onNextLesson={onNextLesson} />);
-    fireEvent.press(r.getByTestId('tut-next-lesson'));
+    const r = await render(
+      <TutorialOverlay {...base} index={4} total={5} onNextLesson={onNextLesson} />,
+    );
+    await fireEvent.press(r.getByTestId('tut-next-lesson'));
     expect(onNextLesson).toHaveBeenCalledTimes(1);
   });
 
-  it('whole-tutorial finale: celebratory CTA fires onCreateGame', () => {
+  it('whole-tutorial finale: celebratory CTA fires onCreateGame', async () => {
     const onCreateGame = jest.fn();
-    const r = render(
+    const r = await render(
       <TutorialOverlay {...base} beat={null} done isLastLesson onCreateGame={onCreateGame} />,
     );
-    fireEvent.press(r.getByTestId('tut-finale-cta'));
+    await fireEvent.press(r.getByTestId('tut-finale-cta'));
     expect(onCreateGame).toHaveBeenCalledTimes(1);
   });
 
-  it('reserves the safe area so the notch / clock never sits on the coach', () => {
+  it('reserves the safe area so the notch / clock never sits on the coach', async () => {
     // A target in the BOTTOM half sends the coach to the top edge — the case where the Dynamic
     // Island and the status clock used to land on its header row.
-    const r = render(<TutorialOverlay {...base} spotRects={[{ x: 40, y: 900, w: 200, h: 80 }]} />);
+    const r = await render(
+      <TutorialOverlay {...base} spotRects={[{ x: 40, y: 900, w: 200, h: 80 }]} />,
+    );
     const pad = StyleSheet.flatten(r.getByTestId('tut-coach-wrap').props.style);
     expect(pad.justifyContent).toBe('flex-start'); // docked to the top
     expect(pad.paddingTop).toBe(12 + INSETS.top);
@@ -76,10 +80,10 @@ describe('TutorialOverlay', () => {
     expect(pad.paddingRight).toBe(12 + INSETS.right);
   });
 
-  it('exit is always reachable', () => {
+  it('exit is always reachable', async () => {
     const onExit = jest.fn();
-    const r = render(<TutorialOverlay {...base} onExit={onExit} />);
-    fireEvent.press(r.getByTestId('tut-exit'));
+    const r = await render(<TutorialOverlay {...base} onExit={onExit} />);
+    await fireEvent.press(r.getByTestId('tut-exit'));
     expect(onExit).toHaveBeenCalledTimes(1);
   });
 });

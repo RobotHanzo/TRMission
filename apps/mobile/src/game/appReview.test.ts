@@ -138,7 +138,7 @@ describe('useAppReviewPrompt', () => {
 
   it('counts the finished game and offers the sheet a beat later', async () => {
     await finishGames(2);
-    renderHook(() => useAppReviewPrompt(true, true));
+    await renderHook(() => useAppReviewPrompt(true, true));
     await settle();
     // The third finished game is this one — counted by the hook, not by the caller.
     expect(mRequest).toHaveBeenCalledTimes(1);
@@ -146,7 +146,7 @@ describe('useAppReviewPrompt', () => {
 
   it('counts the game but stays silent while the caller is not ready', async () => {
     await finishGames(2);
-    renderHook(() => useAppReviewPrompt(true, false));
+    await renderHook(() => useAppReviewPrompt(true, false));
     await settle();
     expect(mRequest).not.toHaveBeenCalled();
 
@@ -156,16 +156,16 @@ describe('useAppReviewPrompt', () => {
 
   it('drops the pending ask when the player leaves the scoreboard first', async () => {
     await finishGames(2);
-    const { unmount } = renderHook(() => useAppReviewPrompt(true, true));
+    const { unmount } = await renderHook(() => useAppReviewPrompt(true, true));
     await act(async () => {});
-    unmount();
+    await unmount();
     await settle();
     expect(mRequest).not.toHaveBeenCalled();
   });
 
   it('ignores a game the viewer only watched', async () => {
     await finishGames(2);
-    renderHook(() => useAppReviewPrompt(false, false));
+    await renderHook(() => useAppReviewPrompt(false, false));
     await settle();
     expect(mRequest).not.toHaveBeenCalled();
     // A replay never counts toward the grace window either.

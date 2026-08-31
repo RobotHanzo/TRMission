@@ -31,8 +31,8 @@ const snap = (): GameSnapshot =>
   });
 
 describe('GameStage players panel head', () => {
-  it('heads the panel with its title and the tap-for-details hint', () => {
-    render(<GameStage snapshot={snap()} commands={null} onLeave={() => {}} sandbox />);
+  it('heads the panel with its title and the tap-for-details hint', async () => {
+    await render(<GameStage snapshot={snap()} commands={null} onLeave={() => {}} sandbox />);
     expect(screen.getByText('玩家')).toBeTruthy();
     expect(screen.getByText('點一下查看詳情')).toBeTruthy();
   });

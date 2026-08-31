@@ -19,21 +19,21 @@ const teamGame = (routePoints: [number, number, number, number]) =>
   });
 
 describe('TeamTally', () => {
-  it('renders one segment per side with its live total and the lead line', () => {
-    const { getByTestId } = render(<TeamTally snapshot={teamGame([30, 18, 25, 14])} />);
+  it('renders one segment per side with its live total and the lead line', async () => {
+    const { getByTestId } = await render(<TeamTally snapshot={teamGame([30, 18, 25, 14])} />);
     expect(getByTestId('team-tally-seg-0')).toHaveTextContent(/1 隊48/);
     expect(getByTestId('team-tally-seg-1')).toHaveTextContent(/2 隊39/);
     expect(getByTestId('team-tally-lead')).toHaveTextContent('1 隊領先 9 分');
   });
 
-  it('reads level before anyone has scored, and while the top is tied', () => {
-    const { getByTestId, rerender } = render(<TeamTally snapshot={teamGame([0, 0, 0, 0])} />);
+  it('reads level before anyone has scored, and while the top is tied', async () => {
+    const { getByTestId, rerender } = await render(<TeamTally snapshot={teamGame([0, 0, 0, 0])} />);
     expect(getByTestId('team-tally-lead')).toHaveTextContent('勢均力敵');
-    rerender(<TeamTally snapshot={teamGame([10, 10, 12, 8])} />);
+    await rerender(<TeamTally snapshot={teamGame([10, 10, 12, 8])} />);
     expect(getByTestId('team-tally-lead')).toHaveTextContent('勢均力敵');
   });
 
-  it('draws nothing in a free-for-all', () => {
+  it('draws nothing in a free-for-all', async () => {
     const ffa = create(GameSnapshotSchema, {
       players: [
         { id: 'me', seat: 0, team: -1, routePoints: 20 },
@@ -41,7 +41,7 @@ describe('TeamTally', () => {
       ],
       you: { playerId: 'me' },
     });
-    const { queryByTestId } = render(<TeamTally snapshot={ffa} />);
+    const { queryByTestId } = await render(<TeamTally snapshot={ffa} />);
     expect(queryByTestId('team-tally')).toBeNull();
   });
 });

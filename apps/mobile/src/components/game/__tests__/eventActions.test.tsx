@@ -40,34 +40,34 @@ function snap(
 }
 
 describe('EventPhaseBar', () => {
-  it('lantern relocation: a candidate city button relocates the host', () => {
+  it('lantern relocation: a candidate city button relocates the host', async () => {
     const commands = commandSpies();
     const s = snap(Phase.LANTERN_RELOCATION, {
       mode: 'intense',
       lanternHost: { eventId: 'lantern', cityId: 'taipei', points: 6 },
       lanternPendingRelocation: { playerId: 'p0', candidateCityIds: ['kaohsiung'] },
     });
-    const { getByText } = render(
+    const { getByText } = await render(
       <EventPhaseBar snapshot={s} commands={commands} locale="zh-Hant" />,
     );
-    fireEvent.press(getByText('高雄'));
+    await fireEvent.press(getByText('高雄'));
     expect(commands.relocateLanternHost).toHaveBeenCalledWith('kaohsiung');
   });
 
-  it('rolling-stock draft: a perk button chooses that perk', () => {
+  it('rolling-stock draft: a perk button chooses that perk', async () => {
     const commands = commandSpies();
     const s = snap(Phase.EVENT_DRAFT, {
       mode: 'intense',
       eventDraft: { order: ['p0', 'p1'], pickIndex: 0, currentPlayerId: 'p0' },
     });
-    const { getByText } = render(
+    const { getByText } = await render(
       <EventPhaseBar snapshot={s} commands={commands} locale="zh-Hant" />,
     );
-    fireEvent.press(getByText('立即抽 2 張'));
+    await fireEvent.press(getByText('立即抽 2 張'));
     expect(commands.chooseEventPerk).toHaveBeenCalledWith('DRAW_TWO');
   });
 
-  it('hive draw: shows the reveal progress and stops on demand', () => {
+  it('hive draw: shows the reveal progress and stops on demand', async () => {
     const commands = commandSpies();
     const s = snap(Phase.HIVE_DRAW, {
       mode: 'intense',
@@ -77,24 +77,24 @@ describe('EventPhaseBar', () => {
         maxDraws: 4,
       },
     });
-    const { getByText } = render(
+    const { getByText } = await render(
       <EventPhaseBar snapshot={s} commands={commands} locale="zh-Hant" />,
     );
     expect(getByText(/2\/4/)).toBeTruthy();
-    fireEvent.press(getByText('收手並保留'));
+    await fireEvent.press(getByText('收手並保留'));
     expect(commands.stopHiveDraw).toHaveBeenCalledTimes(1);
   });
 
-  it("another player's pending phase renders read-only", () => {
+  it("another player's pending phase renders read-only", async () => {
     const commands = commandSpies();
     const s = snap(Phase.HIVE_DRAW, {
       mode: 'intense',
       pendingHiveDraw: { playerId: 'p1', revealed: [], maxDraws: 4 },
     });
-    const { getByText } = render(
+    const { getByText } = await render(
       <EventPhaseBar snapshot={s} commands={commands} locale="zh-Hant" />,
     );
-    fireEvent.press(getByText('收手並保留'));
+    await fireEvent.press(getByText('收手並保留'));
     expect(commands.stopHiveDraw).not.toHaveBeenCalled();
   });
 });
@@ -113,13 +113,13 @@ describe('EventTurnActions', () => {
     nightMarketSwapAvailable: true,
   } as MessageInitShape<typeof GameSnapshotSchema>['randomEvents'];
 
-  it('offers hive start, the night-market swap (skipping the reserved locomotive slot), and named repairs', () => {
+  it('offers hive start, the night-market swap (skipping the reserved locomotive slot), and named repairs', async () => {
     const commands = commandSpies();
     const onRepair = jest.fn();
     const s = snap(Phase.AWAIT_ACTION, activeEvents, {
       market: [PbCardColor.LOCOMOTIVE, PbCardColor.BLUE, PbCardColor.GREEN, PbCardColor.YELLOW],
     });
-    const { getByText, getByTestId } = render(
+    const { getByText, getByTestId } = await render(
       <EventTurnActions
         snapshot={s}
         commands={commands}
@@ -129,22 +129,22 @@ describe('EventTurnActions', () => {
       />,
     );
 
-    fireEvent.press(getByText('開始試膽'));
+    await fireEvent.press(getByText('開始試膽'));
     expect(commands.startHiveDraw).toHaveBeenCalledTimes(1);
 
     // Defaults: first held colour (RED) and the first swappable slot — slot 0 is a face-up
     // locomotive, reserved while ALL_SEATS_RESERVED is active, so slot 1 is offered instead.
-    fireEvent.press(getByTestId('night-swap-submit'));
+    await fireEvent.press(getByTestId('night-swap-submit'));
     expect(commands.nightMarketSwap).toHaveBeenCalledWith('RED', 1);
 
     // The repair affordance names its route by endpoints (R1 = 臺北–板橋).
-    fireEvent.press(getByText('搶修 臺北–板橋'));
+    await fireEvent.press(getByText('搶修 臺北–板橋'));
     expect(onRepair).toHaveBeenCalledWith('R1');
   });
 
-  it('renders nothing while the viewer cannot act', () => {
+  it('renders nothing while the viewer cannot act', async () => {
     const s = snap(Phase.AWAIT_ACTION, activeEvents);
-    const { queryByTestId } = render(
+    const { queryByTestId } = await render(
       <EventTurnActions
         snapshot={s}
         commands={commandSpies()}

@@ -27,8 +27,8 @@ describe('orientationLockFor (pure: smallest side < 600dp ⇒ phone ⇒ portrait
 describe('useOrientationPolicy', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('applies the policy for the current window on mount', () => {
-    renderHook(() => useOrientationPolicy());
+  it('applies the policy for the current window on mount', async () => {
+    await renderHook(() => useOrientationPolicy());
     const { width, height } = Dimensions.get('window');
     if (orientationLockFor(width, height) === 'portrait') {
       expect(mockLockAsync).toHaveBeenCalledWith(1);
