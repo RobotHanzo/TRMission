@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@bufbuild/protobuf": "^2.14.0",
-    "@sentry/react": "^10.70.0",
+    "@sentry/react": "^10.71.0",
     "@trm/client-core": "workspace:*",
     "@trm/codec": "workspace:*",
     "@trm/engine": "workspace:*",
@@ -24,7 +24,7 @@
     "canvas-confetti": "^1.9.4",
     "i18next": "^26.4.0",
     "immer": "^11.1.18",
-    "lucide-react": "^1.33.0",
+    "lucide-react": "^1.34.0",
     "polygon-clipping": "^0.15.7",
     "react": "19.2.8",
     "react-dom": "19.2.8",
