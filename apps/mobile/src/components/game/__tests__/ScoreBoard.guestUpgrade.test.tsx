@@ -54,14 +54,14 @@ afterEach(() => {
 describe('ScoreBoard guest upgrade', () => {
   it('offers a guest player the leaderboard-framed upgrade nudge', async () => {
     mockUser = guestUser;
-    render(<ScoreBoard snapshot={snap()} onLeave={jest.fn()} />);
+    await render(<ScoreBoard snapshot={snap()} onLeave={jest.fn()} />);
     await screen.findByTestId('scoreboard-guest-upgrade');
     expect(screen.getByText(/排行榜/)).toBeTruthy();
   });
 
   it('hides for a registered player', async () => {
     mockUser = { ...guestUser, isGuest: false };
-    render(<ScoreBoard snapshot={snap()} onLeave={jest.fn()} />);
+    await render(<ScoreBoard snapshot={snap()} onLeave={jest.fn()} />);
     await screen.findByTestId('scoreboard-discord');
     expect(screen.queryByTestId('scoreboard-guest-upgrade')).toBeNull();
   });
@@ -69,20 +69,20 @@ describe('ScoreBoard guest upgrade', () => {
   it('hides outside an online room context (offline/sandbox)', async () => {
     setActiveRoomContext({});
     mockUser = guestUser;
-    render(<ScoreBoard snapshot={snap()} onLeave={jest.fn()} />);
+    await render(<ScoreBoard snapshot={snap()} onLeave={jest.fn()} />);
     await screen.findByTestId('scoreboard-discord');
     expect(screen.queryByTestId('scoreboard-guest-upgrade')).toBeNull();
   });
 
   it('expands into an email/password form and submits the upgrade', async () => {
     mockUser = guestUser;
-    render(<ScoreBoard snapshot={snap()} onLeave={jest.fn()} />);
+    await render(<ScoreBoard snapshot={snap()} onLeave={jest.fn()} />);
     await screen.findByTestId('scoreboard-guest-upgrade');
 
-    fireEvent.press(screen.getByText('建立帳號'));
-    fireEvent.changeText(screen.getByPlaceholderText('電子郵件'), 'a@b.com');
-    fireEvent.changeText(screen.getByPlaceholderText('密碼'), 'password1');
-    fireEvent.press(screen.getByText('建立帳號'));
+    await fireEvent.press(screen.getByText('建立帳號'));
+    await fireEvent.changeText(screen.getByPlaceholderText('電子郵件'), 'a@b.com');
+    await fireEvent.changeText(screen.getByPlaceholderText('密碼'), 'password1');
+    await fireEvent.press(screen.getByText('建立帳號'));
 
     expect(mockUpgrade).toHaveBeenCalledWith('a@b.com', 'password1');
   });

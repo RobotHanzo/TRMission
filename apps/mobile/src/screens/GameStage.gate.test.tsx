@@ -53,9 +53,9 @@ const payableSnap = (): GameSnapshot =>
     you: { playerId: 'p0', hand: { locomotive: 9 }, keptTicketIds: [], pendingOfferTicketIds: [] },
   });
 
-const renderStage = (gate?: ActionGate) => {
+const renderStage = async (gate?: ActionGate) => {
   const onPendingClaim = jest.fn();
-  render(
+  await render(
     <GameStage
       snapshot={payableSnap()}
       commands={null}
@@ -73,62 +73,62 @@ beforeEach(() => {
 });
 
 describe('GameStage tutorial action gate wiring', () => {
-  it('with no gate (live game) both board affordances stay live', () => {
-    renderStage();
+  it('with no gate (live game) both board affordances stay live', async () => {
+    await renderStage();
     expect(mockBoardProps?.canClaim).toBe(true);
     expect(mockBoardProps?.canBuildStation).toBe(true);
   });
 
-  it('a locked gate (narration / info beat) disables both board affordances', () => {
-    renderStage('locked');
+  it('a locked gate (narration / info beat) disables both board affordances', async () => {
+    await renderStage('locked');
     expect(mockBoardProps?.canClaim).toBe(false);
     expect(mockBoardProps?.canBuildStation).toBe(false);
   });
 
-  it('a CLAIM_ROUTE gate keeps claiming live but stations dead — and vice versa', () => {
-    renderStage({ t: 'CLAIM_ROUTE' });
+  it('a CLAIM_ROUTE gate keeps claiming live but stations dead — and vice versa', async () => {
+    await renderStage({ t: 'CLAIM_ROUTE' });
     expect(mockBoardProps?.canClaim).toBe(true);
     expect(mockBoardProps?.canBuildStation).toBe(false);
 
-    renderStage({ t: 'BUILD_STATION' });
+    await renderStage({ t: 'BUILD_STATION' });
     expect(mockBoardProps?.canClaim).toBe(false);
     expect(mockBoardProps?.canBuildStation).toBe(true);
   });
 
-  it('a CLAIM_ROUTE gate naming one route ignores a tap on a different route', () => {
-    const onPendingClaim = renderStage({ t: 'CLAIM_ROUTE', routeId: routeA.id as string });
-    act(() => mockBoardProps!.onPickRoute(routeB.id as string));
+  it('a CLAIM_ROUTE gate naming one route ignores a tap on a different route', async () => {
+    const onPendingClaim = await renderStage({ t: 'CLAIM_ROUTE', routeId: routeA.id as string });
+    await act(() => mockBoardProps!.onPickRoute(routeB.id as string));
     expect(onPendingClaim).toHaveBeenLastCalledWith(null);
-    act(() => mockBoardProps!.onPickRoute(routeA.id as string));
+    await act(() => mockBoardProps!.onPickRoute(routeA.id as string));
     expect(onPendingClaim).toHaveBeenLastCalledWith('route');
   });
 
-  it('a BUILD_STATION gate naming one city ignores a tap on a different city', () => {
-    const onPendingClaim = renderStage({ t: 'BUILD_STATION', cityId: cityA });
-    act(() => mockBoardProps!.onPickCity(cityB));
+  it('a BUILD_STATION gate naming one city ignores a tap on a different city', async () => {
+    const onPendingClaim = await renderStage({ t: 'BUILD_STATION', cityId: cityA });
+    await act(() => mockBoardProps!.onPickCity(cityB));
     expect(onPendingClaim).toHaveBeenLastCalledWith(null);
-    act(() => mockBoardProps!.onPickCity(cityA));
+    await act(() => mockBoardProps!.onPickCity(cityA));
     expect(onPendingClaim).toHaveBeenLastCalledWith('station');
   });
 
-  it('a CLAIM_ROUTE gate leaves every city un-tappable (not just the wrong-station case)', () => {
-    const onPendingClaim = renderStage({ t: 'CLAIM_ROUTE', routeId: routeA.id as string });
-    act(() => mockBoardProps!.onPickCity(cityA));
+  it('a CLAIM_ROUTE gate leaves every city un-tappable (not just the wrong-station case)', async () => {
+    const onPendingClaim = await renderStage({ t: 'CLAIM_ROUTE', routeId: routeA.id as string });
+    await act(() => mockBoardProps!.onPickCity(cityA));
     expect(onPendingClaim).toHaveBeenLastCalledWith(null);
   });
 
-  it('a BUILD_STATION gate leaves every route un-tappable (not just the wrong-route case)', () => {
-    const onPendingClaim = renderStage({ t: 'BUILD_STATION', cityId: cityA });
-    act(() => mockBoardProps!.onPickRoute(routeA.id as string));
+  it('a BUILD_STATION gate leaves every route un-tappable (not just the wrong-route case)', async () => {
+    const onPendingClaim = await renderStage({ t: 'BUILD_STATION', cityId: cityA });
+    await act(() => mockBoardProps!.onPickRoute(routeA.id as string));
     expect(onPendingClaim).toHaveBeenLastCalledWith(null);
   });
 
-  it('reports the payment dialog opening and closing through onPendingClaim', () => {
-    const onPendingClaim = renderStage({ t: 'CLAIM_ROUTE', routeId: routeA.id as string });
+  it('reports the payment dialog opening and closing through onPendingClaim', async () => {
+    const onPendingClaim = await renderStage({ t: 'CLAIM_ROUTE', routeId: routeA.id as string });
     expect(onPendingClaim).toHaveBeenLastCalledWith(null);
-    act(() => mockBoardProps!.onPickRoute(routeA.id as string));
+    await act(() => mockBoardProps!.onPickRoute(routeA.id as string));
     expect(onPendingClaim).toHaveBeenLastCalledWith('route');
-    fireEvent.press(screen.getByTestId('payment-backdrop')); // cancel
+    await fireEvent.press(screen.getByTestId('payment-backdrop')); // cancel
     expect(onPendingClaim).toHaveBeenLastCalledWith(null);
   });
 });

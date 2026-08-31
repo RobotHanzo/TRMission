@@ -57,11 +57,11 @@ beforeEach(() => {
 });
 
 describe('useClaimFlow', () => {
-  it('pickRoute with an affording hand opens the payment claim', () => {
+  it('pickRoute with an affording hand opens the payment claim', async () => {
     const commands = commandsMock();
     const s = snap(handOf(colorRoute.color, colorRoute.length + 1));
-    const { result } = renderHook(() => useClaimFlow(s, commands));
-    act(() => result.current.pickRoute(colorRoute.id as string));
+    const { result } = await renderHook(() => useClaimFlow(s, commands));
+    await act(() => result.current.pickRoute(colorRoute.id as string));
     expect(result.current.claim).not.toBeNull();
     expect(result.current.claim?.kind).toBe('route');
     expect(
@@ -71,10 +71,10 @@ describe('useClaimFlow', () => {
     ).toBeGreaterThan(0);
   });
 
-  it('pickRoute with an empty hand pushes the shortfall notice and opens nothing', () => {
+  it('pickRoute with an empty hand pushes the shortfall notice and opens nothing', async () => {
     const commands = commandsMock();
-    const { result } = renderHook(() => useClaimFlow(snap({}), commands));
-    act(() => result.current.pickRoute(colorRoute.id as string));
+    const { result } = await renderHook(() => useClaimFlow(snap({}), commands));
+    await act(() => result.current.pickRoute(colorRoute.id as string));
     expect(result.current.claim).toBeNull();
     const notes = useAnimations.getState().notifications;
     expect(notes).toHaveLength(1);
@@ -83,7 +83,7 @@ describe('useClaimFlow', () => {
 
   // The board lets the tap through (no hover means no tooltip to explain the 🔧 chip), so the flow
   // has to answer with WHO holds first claim rather than silently doing nothing.
-  it('a repaired rail inside the repairer’s window pushes the exclusivity notice, not a claim', () => {
+  it('a repaired rail inside the repairer’s window pushes the exclusivity notice, not a claim', async () => {
     const commands = commandsMock();
     const s = snap(handOf(colorRoute.color, colorRoute.length + 1), {
       players: [
@@ -92,8 +92,8 @@ describe('useClaimFlow', () => {
       ],
       brokenRails: [{ routeId: colorRoute.id, repairedByPlayerId: 'rival', exclusiveTurnEnds: 2 }],
     });
-    const { result } = renderHook(() => useClaimFlow(s, commands));
-    act(() => result.current.pickRoute(colorRoute.id as string));
+    const { result } = await renderHook(() => useClaimFlow(s, commands));
+    await act(() => result.current.pickRoute(colorRoute.id as string));
     expect(result.current.claim).toBeNull();
     const notes = useAnimations.getState().notifications;
     expect(notes).toHaveLength(1);
@@ -101,7 +101,7 @@ describe('useClaimFlow', () => {
     expect(notes[0]).toMatchObject({ variant: 'notice', text: expect.stringContaining('P2') });
   });
 
-  it('the same rail claims normally once the exclusivity window has closed', () => {
+  it('the same rail claims normally once the exclusivity window has closed', async () => {
     const commands = commandsMock();
     const s = snap(handOf(colorRoute.color, colorRoute.length + 1), {
       players: [
@@ -110,40 +110,40 @@ describe('useClaimFlow', () => {
       ],
       brokenRails: [{ routeId: colorRoute.id, repairedByPlayerId: 'rival', exclusiveTurnEnds: 0 }],
     });
-    const { result } = renderHook(() => useClaimFlow(s, commands));
-    act(() => result.current.pickRoute(colorRoute.id as string));
+    const { result } = await renderHook(() => useClaimFlow(s, commands));
+    await act(() => result.current.pickRoute(colorRoute.id as string));
     expect(result.current.claim?.kind).toBe('route');
     expect(useAnimations.getState().notifications).toHaveLength(0);
   });
 
-  it('the repairer themself may claim inside their own window', () => {
+  it('the repairer themself may claim inside their own window', async () => {
     const commands = commandsMock();
     const s = snap(handOf(colorRoute.color, colorRoute.length + 1), {
       brokenRails: [{ routeId: colorRoute.id, repairedByPlayerId: 'me', exclusiveTurnEnds: 2 }],
     });
-    const { result } = renderHook(() => useClaimFlow(s, commands));
-    act(() => result.current.pickRoute(colorRoute.id as string));
+    const { result } = await renderHook(() => useClaimFlow(s, commands));
+    await act(() => result.current.pickRoute(colorRoute.id as string));
     expect(result.current.claim?.kind).toBe('route');
   });
 
-  it('cancelClaim drops the pending claim without sending anything', () => {
+  it('cancelClaim drops the pending claim without sending anything', async () => {
     const commands = commandsMock();
     const s = snap(handOf(colorRoute.color, colorRoute.length + 1));
-    const { result } = renderHook(() => useClaimFlow(s, commands));
-    act(() => result.current.pickRoute(colorRoute.id as string));
-    act(() => result.current.cancelClaim());
+    const { result } = await renderHook(() => useClaimFlow(s, commands));
+    await act(() => result.current.pickRoute(colorRoute.id as string));
+    await act(() => result.current.cancelClaim());
     expect(result.current.claim).toBeNull();
     expect(commands.claimRoute).not.toHaveBeenCalled();
   });
 
-  it('confirmPayment claims the route with the proto payment and clears the claim', () => {
+  it('confirmPayment claims the route with the proto payment and clears the claim', async () => {
     const commands = commandsMock();
     const s = snap(handOf(colorRoute.color, colorRoute.length + 1));
-    const { result } = renderHook(() => useClaimFlow(s, commands));
-    act(() => result.current.pickRoute(colorRoute.id as string));
+    const { result } = await renderHook(() => useClaimFlow(s, commands));
+    await act(() => result.current.pickRoute(colorRoute.id as string));
     const payment =
       result.current.claim?.kind === 'route' ? result.current.claim.payments[0]! : null;
-    act(() => result.current.confirmPayment(payment!));
+    await act(() => result.current.confirmPayment(payment!));
     expect(commands.claimRoute).toHaveBeenCalledWith(
       colorRoute.id,
       expect.objectContaining({ colorCount: payment!.colorCount }),
@@ -153,19 +153,19 @@ describe('useClaimFlow', () => {
 
   (tunnelRoute ? it : it.skip)(
     'a tunnel claim stashes the base payment: the surcharge enumerates against the REMAINING hand',
-    () => {
+    async () => {
       const commands = commandsMock();
       const tr = tunnelRoute!;
       // Exactly length+1 of the colour: after paying `length` for the base, 1 card remains.
       const s1 = snap(handOf(tr.color, tr.length + 1));
-      const { result, rerender } = renderHook(
+      const { result, rerender } = await renderHook(
         ({ s }: { s: GameSnapshot }) => useClaimFlow(s, commands),
         { initialProps: { s: s1 } },
       );
-      act(() => result.current.pickRoute(tr.id as string));
+      await act(() => result.current.pickRoute(tr.id as string));
       const base =
         result.current.claim?.kind === 'route' ? result.current.claim.payments[0]! : null;
-      act(() => result.current.confirmPayment(base!));
+      await act(() => result.current.confirmPayment(base!));
       expect(commands.claimRoute).toHaveBeenCalled();
 
       // Server answers with a pending tunnel needing 2 extra — but only 1 card remains after the
@@ -179,7 +179,7 @@ describe('useClaimFlow', () => {
           playedColor: paymentToProto(base!).color,
         },
       });
-      rerender({ s: s2 });
+      await rerender({ s: s2 });
       expect(result.current.tunnelMine).toBe(true);
       expect(result.current.tunnelExtras).toHaveLength(0);
 
@@ -193,47 +193,47 @@ describe('useClaimFlow', () => {
           playedColor: paymentToProto(base!).color,
         },
       });
-      rerender({ s: s3 });
+      await rerender({ s: s3 });
       expect(result.current.tunnelExtras.length).toBeGreaterThan(0);
 
-      act(() => result.current.onTunnelCommit(result.current.tunnelExtras[0]!));
+      await act(() => result.current.onTunnelCommit(result.current.tunnelExtras[0]!));
       expect(commands.resolveTunnel).toHaveBeenCalledWith(true, expect.anything());
     },
   );
 
-  it('onTunnelAbort resolves the tunnel negatively', () => {
+  it('onTunnelAbort resolves the tunnel negatively', async () => {
     const commands = commandsMock();
-    const { result } = renderHook(() => useClaimFlow(snap({}), commands));
-    act(() => result.current.onTunnelAbort());
+    const { result } = await renderHook(() => useClaimFlow(snap({}), commands));
+    await act(() => result.current.onTunnelAbort());
     expect(commands.resolveTunnel).toHaveBeenCalledWith(false);
   });
 
-  it('pickCity with no stations left pushes the noStationsLeft notice', () => {
+  it('pickCity with no stations left pushes the noStationsLeft notice', async () => {
     const commands = commandsMock();
     const s = snap(handOf('RED', 5), {
       players: [{ id: 'me', seat: 0, trainCars: 45, stationsRemaining: 0 }],
     });
-    const { result } = renderHook(() => useClaimFlow(s, commands));
-    act(() => result.current.pickCity('anywhere'));
+    const { result } = await renderHook(() => useClaimFlow(s, commands));
+    await act(() => result.current.pickCity('anywhere'));
     expect(result.current.claim).toBeNull();
     const notes = useAnimations.getState().notifications;
     expect(notes).toHaveLength(1);
     expect(notes[0]).toMatchObject({ variant: 'notice' });
   });
 
-  it('pickCity with stations + cards opens a station claim priced by stations used', () => {
+  it('pickCity with stations + cards opens a station claim priced by stations used', async () => {
     const commands = commandsMock();
     const s = snap(handOf('RED', 5), {
       players: [{ id: 'me', seat: 0, trainCars: 45, stationsRemaining: 2 }],
     });
-    const { result } = renderHook(() => useClaimFlow(s, commands));
-    act(() => result.current.pickCity('taipei'));
+    const { result } = await renderHook(() => useClaimFlow(s, commands));
+    await act(() => result.current.pickCity('taipei'));
     expect(result.current.claim?.kind).toBe('station');
     const payment =
       result.current.claim?.kind === 'station' ? result.current.claim.payments[0]! : null;
     // Second station costs 2 cards.
     expect(payment!.colorCount + payment!.locomotives).toBe(2);
-    act(() => result.current.confirmPayment(payment!));
+    await act(() => result.current.confirmPayment(payment!));
     expect(commands.buildStation).toHaveBeenCalledWith('taipei', expect.anything());
   });
 });

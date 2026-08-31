@@ -25,13 +25,13 @@ describe('OfflineHomeSection', () => {
 
     const onNewGame = jest.fn();
     const onResume = jest.fn();
-    render(<OfflineHomeSection onNewGame={onNewGame} onResume={onResume} store={store} />);
+    await render(<OfflineHomeSection onNewGame={onNewGame} onResume={onResume} store={store} />);
 
-    fireEvent.press(screen.getByTestId('offline-play-bots'));
+    await fireEvent.press(screen.getByTestId('offline-play-bots'));
     expect(onNewGame).toHaveBeenCalled();
 
     const entry = await waitFor(() => screen.getByTestId('offline-resume-local:home-1'));
-    fireEvent.press(entry);
+    await fireEvent.press(entry);
     expect(onResume).toHaveBeenCalledWith('local:home-1');
   });
 
@@ -52,16 +52,16 @@ describe('OfflineHomeSection', () => {
 
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     try {
-      render(<OfflineHomeSection onNewGame={jest.fn()} onResume={jest.fn()} store={store} />);
+      await render(<OfflineHomeSection onNewGame={jest.fn()} onResume={jest.fn()} store={store} />);
 
       await waitFor(() => screen.getByTestId('offline-resume-local:home-2'));
-      fireEvent.press(screen.getByTestId('offline-delete-local:home-2'));
+      await fireEvent.press(screen.getByTestId('offline-delete-local:home-2'));
 
       expect(alertSpy).toHaveBeenCalledTimes(1);
       expect(await store.loadGame('local:home-2')).not.toBeNull();
 
       // The confirm button fires an async delete → reload → setState chain. Drive it inside
-      // act() so the re-render is FLUSHED rather than polled for — waitFor's 1s budget is a
+      // await act() so the re-render is FLUSHED rather than polled for — waitFor's 1s budget is a
       // coin flip on a loaded CI runner.
       const buttons = alertSpy.mock.calls[0][2] as AlertButton[];
       await act(async () => {

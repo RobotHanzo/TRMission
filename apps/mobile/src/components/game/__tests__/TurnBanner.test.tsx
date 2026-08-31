@@ -21,29 +21,29 @@ beforeEach(() => {
 });
 
 describe('TurnBanner', () => {
-  it('announces my turn', () => {
-    render(<TurnBanner snapshot={snap()} />);
+  it('announces my turn', async () => {
+    await render(<TurnBanner snapshot={snap()} />);
     expect(screen.getByText('輪到你了')).toBeTruthy();
   });
 
-  it("announces the acting opponent's turn by seat label", () => {
-    render(<TurnBanner snapshot={snap({ mine: false })} />);
+  it("announces the acting opponent's turn by seat label", async () => {
+    await render(<TurnBanner snapshot={snap({ mine: false })} />);
     expect(screen.getByText('輪到 P2')).toBeTruthy();
   });
 
-  it('announces game over', () => {
-    render(<TurnBanner snapshot={snap({ over: true })} />);
+  it('announces game over', async () => {
+    await render(<TurnBanner snapshot={snap({ over: true })} />);
     expect(screen.getByText('遊戲結束')).toBeTruthy();
   });
 
-  it('shows the connection chip while reconnecting — but never in a sandbox game', () => {
+  it('shows the connection chip while reconnecting — but never in a sandbox game', async () => {
     useGame.setState({ status: 'reconnecting' });
-    render(<TurnBanner snapshot={snap()} />);
+    await render(<TurnBanner snapshot={snap()} />);
     expect(screen.getByTestId('turn-banner-conn')).toBeTruthy();
     expect(screen.getByText('重新連線中…')).toBeTruthy();
 
-    screen.unmount();
-    render(<TurnBanner snapshot={snap()} sandbox />);
+    await screen.unmount();
+    await render(<TurnBanner snapshot={snap()} sandbox />);
     expect(screen.queryByTestId('turn-banner-conn')).toBeNull();
   });
 });

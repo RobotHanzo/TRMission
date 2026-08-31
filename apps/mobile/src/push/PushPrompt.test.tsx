@@ -20,24 +20,24 @@ describe('PushPrompt (contextual, one-shot)', () => {
 
   it('accept: requests OS permission, registers, flips the toggle, never shows again', async () => {
     mockRequestPermissions.mockResolvedValue({ granted: true });
-    render(<PushPrompt />);
-    fireEvent.press(screen.getByTestId('push-prompt-accept'));
+    await render(<PushPrompt />);
+    await fireEvent.press(screen.getByTestId('push-prompt-accept'));
     await Promise.resolve();
     expect(mockRequestPermissions).toHaveBeenCalled();
     expect(useSettings.getState().pushPromptSeen).toBe(true);
     expect(useSettings.getState().notifications).toBe(true);
   });
 
-  it('dismiss: marks seen without requesting anything', () => {
-    render(<PushPrompt />);
-    fireEvent.press(screen.getByTestId('push-prompt-dismiss'));
+  it('dismiss: marks seen without requesting anything', async () => {
+    await render(<PushPrompt />);
+    await fireEvent.press(screen.getByTestId('push-prompt-dismiss'));
     expect(mockRequestPermissions).not.toHaveBeenCalled();
     expect(useSettings.getState().pushPromptSeen).toBe(true);
   });
 
-  it('renders nothing once seen', () => {
+  it('renders nothing once seen', async () => {
     useSettings.setState({ pushPromptSeen: true });
-    render(<PushPrompt />);
+    await render(<PushPrompt />);
     expect(screen.queryByTestId('push-prompt-accept')).toBeNull();
   });
 });

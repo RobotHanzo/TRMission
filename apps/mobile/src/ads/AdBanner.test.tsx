@@ -35,41 +35,41 @@ describe('AdBanner', () => {
     useUi.setState({ hideAds: false });
   });
 
-  it('renders once the SDK is up and consent allows ads', () => {
-    render(<AdBanner />);
+  it('renders once the SDK is up and consent allows ads', async () => {
+    await render(<AdBanner />);
     expect(screen.queryByTestId('ad-banner')).not.toBeNull();
   });
 
-  it('renders nothing before the SDK is up — no request may precede consent', () => {
+  it('renders nothing before the SDK is up — no request may precede consent', async () => {
     useAds.setState({ ready: false });
-    render(<AdBanner />);
+    await render(<AdBanner />);
     expect(screen.queryByTestId('ad-banner')).toBeNull();
   });
 
-  it('renders nothing on an unfocused tab', () => {
+  it('renders nothing on an unfocused tab', async () => {
     // Native bottom tabs keep every tab mounted; without this the app would hold four live banner
     // requests and burn impressions on screens nobody is looking at.
     mockFocused = false;
-    render(<AdBanner />);
+    await render(<AdBanner />);
     expect(screen.queryByTestId('ad-banner')).toBeNull();
   });
 
-  it('is suppressed for an adFree account that has toggled ads off', () => {
+  it('is suppressed for an adFree account that has toggled ads off', async () => {
     useSession.setState({ user: user(['adFree']) as never });
     useUi.setState({ hideAds: true });
-    render(<AdBanner />);
+    await render(<AdBanner />);
     expect(screen.queryByTestId('ad-banner')).toBeNull();
   });
 
-  it('still shows for an adFree account that has NOT toggled ads off', () => {
+  it('still shows for an adFree account that has NOT toggled ads off', async () => {
     useSession.setState({ user: user(['adFree']) as never });
-    render(<AdBanner />);
+    await render(<AdBanner />);
     expect(screen.queryByTestId('ad-banner')).not.toBeNull();
   });
 
-  it('ignores a stored hideAds flag without the adFree feature (no opt-out bypass)', () => {
+  it('ignores a stored hideAds flag without the adFree feature (no opt-out bypass)', async () => {
     useUi.setState({ hideAds: true });
-    render(<AdBanner />);
+    await render(<AdBanner />);
     expect(screen.queryByTestId('ad-banner')).not.toBeNull();
   });
 });

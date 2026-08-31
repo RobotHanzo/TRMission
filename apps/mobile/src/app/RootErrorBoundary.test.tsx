@@ -26,7 +26,7 @@ describe('RootErrorBoundary', () => {
     // React logs caught boundary errors; keep the test output clean.
     const quiet = jest.spyOn(console, 'error').mockImplementation(() => undefined);
     try {
-      const screen = render(
+      const screen = await render(
         <RootErrorBoundary>
           <Bomb />
         </RootErrorBoundary>,
@@ -35,7 +35,7 @@ describe('RootErrorBoundary', () => {
       expect(screen.queryByTestId('alive')).toBeNull();
 
       armed = false;
-      fireEvent.press(screen.getByTestId('crash-retry'));
+      await fireEvent.press(screen.getByTestId('crash-retry'));
       expect(screen.getByTestId('alive')).toBeTruthy();
 
       const rec = await getLastCrash();

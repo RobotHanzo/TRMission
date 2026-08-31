@@ -33,7 +33,7 @@ const identityCam: ReadBoardCamera = () => ({
 
 describe('useSpotlightRects (native)', () => {
   it('resolves a hud anchor through the registry', async () => {
-    const r = render(
+    const r = await render(
       <TutorialTargetsProvider>
         <FakeAnchor anchorId={TUTORIAL_ANCHORS.market} rect={{ x: 5, y: 600, w: 400, h: 90 }} />
         <Probe spotlight={{ kind: 'hud', selector: '.market' }} readCamera={identityCam} />
@@ -47,7 +47,7 @@ describe('useSpotlightRects (native)', () => {
   });
 
   it('projects a cities spotlight through the camera + board viewport anchor', async () => {
-    const r = render(
+    const r = await render(
       <TutorialTargetsProvider>
         <FakeAnchor anchorId={TUTORIAL_ANCHORS.board} rect={{ x: 0, y: 100, w: 800, h: 500 }} />
         <Probe spotlight={{ kind: 'cities', ids: ['hsinchu'] }} readCamera={identityCam} />
@@ -61,7 +61,7 @@ describe('useSpotlightRects (native)', () => {
   });
 
   it('a named target that cannot resolve yields NO rects (never a bogus dim)', async () => {
-    const r = render(
+    const r = await render(
       <TutorialTargetsProvider>
         <Probe spotlight={{ kind: 'hud', selector: '.ticket-chooser' }} readCamera={identityCam} />
       </TutorialTargetsProvider>,

@@ -45,8 +45,8 @@ const snap = create(GameSnapshotSchema, {
   ],
 });
 
-beforeEach(() => {
-  act(() => {
+beforeEach(async () => {
+  await act(() => {
     useAnimations.getState().reset();
     useRoster.getState().clear();
     useModeration.setState({ blocked: new Set() });
@@ -54,71 +54,77 @@ beforeEach(() => {
 });
 
 describe('PlayerCard (issue #14)', () => {
-  it('splits the live score into route points and completed-mission value', () => {
-    const { getByText } = render(<PlayerCard snapshot={snap} playerId="p0" onClose={jest.fn()} />);
+  it('splits the live score into route points and completed-mission value', async () => {
+    const { getByText } = await render(
+      <PlayerCard snapshot={snap} playerId="p0" onClose={jest.fn()} />,
+    );
     expect(getByText(String(30 + gain))).toBeTruthy();
     expect(getByText('30')).toBeTruthy();
   });
 
-  it('warns that the endgame is close when the train supply runs low', () => {
-    const { getByText } = render(<PlayerCard snapshot={snap} playerId="p0" onClose={jest.fn()} />);
+  it('warns that the endgame is close when the train supply runs low', async () => {
+    const { getByText } = await render(
+      <PlayerCard snapshot={snap} playerId="p0" onClose={jest.fn()} />,
+    );
     expect(getByText('即將觸發終局')).toBeTruthy();
   });
 
-  it('lights only that player’s own routes on the board, and clears them again', () => {
-    const { getByTestId } = render(
+  it('lights only that player’s own routes on the board, and clears them again', async () => {
+    const { getByTestId } = await render(
       <PlayerCard snapshot={snap} playerId="p0" onClose={jest.fn()} />,
     );
-    fireEvent.press(getByTestId('player-card-reveal'));
+    await fireEvent.press(getByTestId('player-card-reveal'));
     expect(useAnimations.getState().routeReveal).toEqual({ seat: 0, path: mine });
     // The body folds away while the network is lit — the point of the reveal is the board.
-    fireEvent.press(getByTestId('player-card-reveal'));
+    await fireEvent.press(getByTestId('player-card-reveal'));
     expect(useAnimations.getState().routeReveal).toBeNull();
   });
 
-  it('drops the highlight when the card closes, so the board cannot keep glowing', () => {
-    const { getByTestId, unmount } = render(
+  it('drops the highlight when the card closes, so the board cannot keep glowing', async () => {
+    const { getByTestId, unmount } = await render(
       <PlayerCard snapshot={snap} playerId="p0" onClose={jest.fn()} />,
     );
-    fireEvent.press(getByTestId('player-card-reveal'));
+    await fireEvent.press(getByTestId('player-card-reveal'));
     expect(useAnimations.getState().routeReveal).not.toBeNull();
-    unmount();
+    await unmount();
     expect(useAnimations.getState().routeReveal).toBeNull();
   });
 
-  it('renders nothing for an id that is not seated', () => {
-    const { toJSON } = render(<PlayerCard snapshot={snap} playerId="ghost" onClose={jest.fn()} />);
+  it('renders nothing for an id that is not seated', async () => {
+    const { toJSON } = await render(
+      <PlayerCard snapshot={snap} playerId="ghost" onClose={jest.fn()} />,
+    );
     expect(toJSON()).toBeNull();
   });
 
   // Issue #65: the sheet sits on the bottom edge, where a phone's home indicator and rounded
   // corners eat whatever the last row does not step back from.
-  it('keeps its content clear of the home indicator and a landscape notch', () => {
-    const { getByTestId } = render(
+  it('keeps its content clear of the home indicator and a landscape notch', async () => {
+    const { getByTestId } = await render(
       <PlayerCard snapshot={snap} playerId="p0" onClose={jest.fn()} />,
     );
     const body = getByTestId('player-card-body');
     expect(StyleSheet.flatten(body.props.contentContainerStyle).paddingBottom).toBe(16 + 34);
     // …and the same for the bar that replaces the body while the network is lit.
-    fireEvent.press(getByTestId('player-card-reveal'));
+    await fireEvent.press(getByTestId('player-card-reveal'));
     const barStyle = StyleSheet.flatten(getByTestId('player-card-reveal-bar').props.style);
     expect(barStyle.paddingBottom).toBe(12 + 34);
     expect(barStyle.paddingLeft).toBe(16 + 21);
   });
 
-  it('shows a grab handle, so the sheet reads as something you can pull away', () => {
-    const { getByTestId } = render(
+  it('shows a grab handle, so the sheet reads as something you can pull away', async () => {
+    const { getByTestId } = await render(
       <PlayerCard snapshot={snap} playerId="p0" onClose={jest.fn()} />,
     );
     expect(getByTestId('player-card-grab')).toBeTruthy();
   });
 
-  it('offers no report action for a bot', () => {
+  it('offers no report action for a bot', async () => {
     const bots = create(GameSnapshotSchema, {
       players: [{ id: 'bot:1', seat: 0, team: -1, trainCars: 45 }],
       you: { playerId: 'p1' },
     });
-    const { queryByTestId } = render(
+    const { queryByTestId } = await render(
       <PlayerCard snapshot={bots} playerId="bot:1" onClose={jest.fn()} />,
     );
     expect(queryByTestId('player-card-report')).toBeNull();
@@ -126,15 +132,15 @@ describe('PlayerCard (issue #14)', () => {
 });
 
 describe('PlayerTrackers rows (issue #14)', () => {
-  it('opens the card for the row that was tapped', () => {
+  it('opens the card for the row that was tapped', async () => {
     const onInspect = jest.fn();
-    const { getByTestId } = render(<PlayerTrackers snapshot={snap} onInspect={onInspect} />);
-    fireEvent.press(getByTestId('tracker-p0'));
+    const { getByTestId } = await render(<PlayerTrackers snapshot={snap} onInspect={onInspect} />);
+    await fireEvent.press(getByTestId('tracker-p0'));
     expect(onInspect).toHaveBeenCalledWith('p0');
   });
 
-  it('keeps the score and train cars on the row and drops the rest to the card', () => {
-    const { getByText, queryByText } = render(<PlayerTrackers snapshot={snap} />);
+  it('keeps the score and train cars on the row and drops the rest to the card', async () => {
+    const { getByText, queryByText } = await render(<PlayerTrackers snapshot={snap} />);
     expect(getByText(String(30 + gain))).toBeTruthy(); // live score
     expect(getByText('4')).toBeTruthy(); // train cars
     expect(queryByText('6')).toBeNull(); // hand count no longer in the row

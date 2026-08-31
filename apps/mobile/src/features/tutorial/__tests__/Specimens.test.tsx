@@ -20,8 +20,8 @@ const ALL: SpecimenSpec[] = [
 
 describe('Specimen', () => {
   for (const spec of ALL) {
-    it(`renders ${JSON.stringify(spec)}`, () => {
-      const r = render(<Specimen spec={spec} />);
+    it(`renders ${JSON.stringify(spec)}`, async () => {
+      const r = await render(<Specimen spec={spec} />);
       expect(r.getByTestId('tut-specimen')).toBeTruthy();
     });
   }

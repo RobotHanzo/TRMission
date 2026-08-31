@@ -64,8 +64,8 @@ describe('useLiveActivity', () => {
   });
 
   it('starts one activity with localized per-seat turn labels, then only updates', async () => {
-    act(() => useGame.getState().applySnapshot(snapshot({ current: 'them' })));
-    const { rerender } = renderHook(() => useLiveActivity('G1', 'ABC123'));
+    await act(() => useGame.getState().applySnapshot(snapshot({ current: 'them' })));
+    const { rerender } = await renderHook(() => useLiveActivity('G1', 'ABC123'));
 
     await waitFor(() => expect(startLiveActivity).toHaveBeenCalledTimes(1));
     const [attributes, content] = (startLiveActivity as jest.Mock).mock.calls[0];
@@ -75,8 +75,8 @@ describe('useLiveActivity', () => {
     expect(attributes.turnLabels[0]).not.toBe(attributes.turnLabels[1]);
     expect(content).toMatchObject({ currentSeat: 1, myTrains: 40, over: false });
 
-    act(() => useGame.getState().applySnapshot(snapshot({ current: 'me', trains: 37 })));
-    rerender(undefined);
+    await act(() => useGame.getState().applySnapshot(snapshot({ current: 'me', trains: 37 })));
+    await rerender(undefined);
     await waitFor(() => expect(updateLiveActivity).toHaveBeenCalledTimes(1));
     expect(startLiveActivity).toHaveBeenCalledTimes(1);
     expect((updateLiveActivity as jest.Mock).mock.calls[0]?.[0]).toMatchObject({
@@ -86,25 +86,27 @@ describe('useLiveActivity', () => {
   });
 
   it('registers the ActivityKit push token against the game', async () => {
-    act(() => useGame.getState().applySnapshot(snapshot({ current: 'them' })));
-    renderHook(() => useLiveActivity('G1', 'ABC123'));
+    await act(() => useGame.getState().applySnapshot(snapshot({ current: 'them' })));
+    await renderHook(() => useLiveActivity('G1', 'ABC123'));
     await waitFor(() => expect(addPushTokenListener).toHaveBeenCalled());
 
-    act(() => pushTokenListener?.('deadbeef'));
+    await act(() => pushTokenListener?.('deadbeef'));
     await waitFor(() => expect(api.registerLiveActivity).toHaveBeenCalledWith('G1', 'deadbeef'));
 
     // The same token again is not news — one row per device per game.
-    act(() => pushTokenListener?.('deadbeef'));
+    await act(() => pushTokenListener?.('deadbeef'));
     expect(api.registerLiveActivity).toHaveBeenCalledTimes(1);
   });
 
   it('ends the activity (leaving it up briefly) at game over, and never restarts it', async () => {
-    act(() => useGame.getState().applySnapshot(snapshot({ current: 'them' })));
-    const { rerender } = renderHook(() => useLiveActivity('G1', 'ABC123'));
+    await act(() => useGame.getState().applySnapshot(snapshot({ current: 'them' })));
+    const { rerender } = await renderHook(() => useLiveActivity('G1', 'ABC123'));
     await waitFor(() => expect(startLiveActivity).toHaveBeenCalledTimes(1));
 
-    act(() => useGame.getState().applySnapshot(snapshot({ current: '', over: true, trains: 9 })));
-    rerender(undefined);
+    await act(() =>
+      useGame.getState().applySnapshot(snapshot({ current: '', over: true, trains: 9 })),
+    );
+    await rerender(undefined);
     await waitFor(() => expect(endLiveActivity).toHaveBeenCalledTimes(1));
     const [finalContent, linger] = (endLiveActivity as jest.Mock).mock.calls[0];
     expect(finalContent).toMatchObject({ over: true, currentSeat: -1 });
@@ -113,23 +115,23 @@ describe('useLiveActivity', () => {
   });
 
   it('starts nothing with the in-app setting off', async () => {
-    // NOT wrapped in act(): the persisted settings store's setState returns the AsyncStorage write
-    // promise, which act() would treat as an async act and then complain was never awaited.
+    // NOT wrapped in await act(): the persisted settings store's setState returns the AsyncStorage write
+    // promise, which await act() would treat as an async act and then complain was never awaited.
     useSettings.setState({ liveActivities: false });
-    act(() => useGame.getState().applySnapshot(snapshot({ current: 'them' })));
-    renderHook(() => useLiveActivity('G1', 'ABC123'));
+    await act(() => useGame.getState().applySnapshot(snapshot({ current: 'them' })));
+    await renderHook(() => useLiveActivity('G1', 'ABC123'));
     expect(startLiveActivity).not.toHaveBeenCalled();
     expect(addPushTokenListener).not.toHaveBeenCalled();
   });
 
   it('starts nothing before the room view has resolved the game id', async () => {
-    act(() => useGame.getState().applySnapshot(snapshot({ current: 'them' })));
-    renderHook(() => useLiveActivity(null, 'ABC123'));
+    await act(() => useGame.getState().applySnapshot(snapshot({ current: 'them' })));
+    await renderHook(() => useLiveActivity(null, 'ABC123'));
     expect(startLiveActivity).not.toHaveBeenCalled();
   });
 
   it('starts nothing for a spectator (no SelfView ⇒ no seat, trains or score)', async () => {
-    act(() =>
+    await act(() =>
       useGame.getState().applySnapshot(
         create(GameSnapshotSchema, {
           stateVersion: 5,
@@ -139,17 +141,17 @@ describe('useLiveActivity', () => {
         }),
       ),
     );
-    renderHook(() => useLiveActivity('G1', 'ABC123'));
+    await renderHook(() => useLiveActivity('G1', 'ABC123'));
     expect(startLiveActivity).not.toHaveBeenCalled();
   });
   it('takes the card down and drops the token when the screen unmounts', async () => {
-    act(() => useGame.getState().applySnapshot(snapshot({ current: 'them' })));
-    const { unmount } = renderHook(() => useLiveActivity('G1', 'ABC123'));
+    await act(() => useGame.getState().applySnapshot(snapshot({ current: 'them' })));
+    const { unmount } = await renderHook(() => useLiveActivity('G1', 'ABC123'));
     await waitFor(() => expect(startLiveActivity).toHaveBeenCalledTimes(1));
-    act(() => pushTokenListener?.('deadbeef'));
+    await act(() => pushTokenListener?.('deadbeef'));
     await waitFor(() => expect(api.registerLiveActivity).toHaveBeenCalled());
 
-    unmount();
+    await unmount();
     expect(endLiveActivity).toHaveBeenCalledWith(null, 0);
     await waitFor(() => expect(api.removeLiveActivity).toHaveBeenCalledWith('deadbeef'));
   });

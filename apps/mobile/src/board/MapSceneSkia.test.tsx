@@ -18,69 +18,65 @@ const { geometry } = buildRouteGeometryFor(TAIWAN_CONTENT.cities, TAIWAN_CONTENT
 const hubs = computeHubsFor(TAIWAN_CONTENT.cities, TAIWAN_CONTENT.routes);
 
 describe('MapSceneSkia', () => {
-  it('renders the full Taiwan scene without crashing (base network)', () => {
-    expect(() =>
-      render(
-        <MapSceneSkia
-          cities={TAIWAN_CONTENT.cities}
-          routes={TAIWAN_CONTENT.routes}
-          geometry={geometry}
-          hubs={hubs}
-          geography={null}
-          view={TAIWAN_BASE_VIEW}
-          bucket="district"
-          inv={0.53}
-          marker={0.72}
-        />,
-      ),
-    ).not.toThrow();
+  it('renders the full Taiwan scene without crashing (base network)', async () => {
+    await render(
+      <MapSceneSkia
+        cities={TAIWAN_CONTENT.cities}
+        routes={TAIWAN_CONTENT.routes}
+        geometry={geometry}
+        hubs={hubs}
+        geography={null}
+        view={TAIWAN_BASE_VIEW}
+        bucket="district"
+        inv={0.53}
+        marker={0.72}
+      />,
+    );
   });
 
-  it('renders with game state — ownership, stations, glow, targets, colour-blind', () => {
+  it('renders with game state — ownership, stations, glow, targets, colour-blind', async () => {
     const firstRoute = TAIWAN_CONTENT.routes[0]!;
     const secondRoute = TAIWAN_CONTENT.routes[1]!;
     const thirdRoute = TAIWAN_CONTENT.routes[2]!;
     const firstCity = TAIWAN_CONTENT.cities[0]!;
-    expect(() =>
-      render(
-        <MapSceneSkia
-          cities={TAIWAN_CONTENT.cities}
-          routes={TAIWAN_CONTENT.routes}
-          geometry={geometry}
-          hubs={hubs}
-          geography={null}
-          view={TAIWAN_BASE_VIEW}
-          owned={
-            new Map([
-              [firstRoute.id, { ownerSeat: 0 }],
-              [thirdRoute.id, { ownerSeat: 2 }],
-              [secondRoute.id, { locked: true }],
-            ])
-          }
-          stations={new Map([[firstCity.id, 1]])}
-          // Team game: seats 0 and 1 are partners, so their rails AND stations paint one colour.
-          teamBySeat={
-            new Map([
-              [0, 0],
-              [1, 0],
-              [2, 1],
-            ])
-          }
-          glowingRoutes={new Map([[firstRoute.id, 0]])}
-          glowingStations={new Map([[firstCity.id, 1]])}
-          highlightCities={new Set([firstCity.id])}
-          colorBlind
-          cityLabel={(c) => c.id}
-          cityTier={() => 'major'}
-          bucket="local"
-          inv={0.3}
-          marker={1.1}
-        />,
-      ),
-    ).not.toThrow();
+    await render(
+      <MapSceneSkia
+        cities={TAIWAN_CONTENT.cities}
+        routes={TAIWAN_CONTENT.routes}
+        geometry={geometry}
+        hubs={hubs}
+        geography={null}
+        view={TAIWAN_BASE_VIEW}
+        owned={
+          new Map([
+            [firstRoute.id, { ownerSeat: 0 }],
+            [thirdRoute.id, { ownerSeat: 2 }],
+            [secondRoute.id, { locked: true }],
+          ])
+        }
+        stations={new Map([[firstCity.id, 1]])}
+        // Team game: seats 0 and 1 are partners, so their rails AND stations paint one colour.
+        teamBySeat={
+          new Map([
+            [0, 0],
+            [1, 0],
+            [2, 1],
+          ])
+        }
+        glowingRoutes={new Map([[firstRoute.id, 0]])}
+        glowingStations={new Map([[firstCity.id, 1]])}
+        highlightCities={new Set([firstCity.id])}
+        colorBlind
+        cityLabel={(c) => c.id}
+        cityTier={() => 'major'}
+        bucket="local"
+        inv={0.3}
+        marker={1.1}
+      />,
+    );
   });
 
-  it('renders with the UI-thread motion guard shared value wired', () => {
+  it('renders with the UI-thread motion guard shared value wired', async () => {
     function Scene({ moving }: { moving: boolean }) {
       const motionSV = useSharedValue(moving);
       return (
@@ -98,13 +94,13 @@ describe('MapSceneSkia', () => {
         />
       );
     }
-    expect(() => render(<Scene moving={false} />)).not.toThrow();
-    expect(() => render(<Scene moving />)).not.toThrow();
+    await render(<Scene moving={false} />);
+    await render(<Scene moving />);
   });
 
   // The repairer's 🔧 first-claim chip renders from the scene itself, NOT the events layer — a
   // broken rail is authored content, so it must still appear with random events off.
-  it('renders the repaired broken-rail exclusivity chip with no events slice', () => {
+  it('renders the repaired broken-rail exclusivity chip with no events slice', async () => {
     const broken = TAIWAN_CONTENT.routes[0]!;
     const scene = (bucket: 'far' | 'local') => (
       <MapSceneSkia
@@ -121,11 +117,11 @@ describe('MapSceneSkia', () => {
         marker={1.1}
       />
     );
-    expect(() => render(scene('local'))).not.toThrow();
-    expect(() => render(scene('far'))).not.toThrow(); // dropped at the far tier, still safe
+    await render(scene('local'));
+    await render(scene('far')); // dropped at the far tier, still safe
   });
 
-  it('renders the full random-events overlay set without crashing', () => {
+  it('renders the full random-events overlay set without crashing', async () => {
     const [r1, r2, r3, r4] = TAIWAN_CONTENT.routes;
     const [c1, c2, c3, c4, c5, c6] = TAIWAN_CONTENT.cities;
     const events = boardEventOverlays(
@@ -149,21 +145,19 @@ describe('MapSceneSkia', () => {
         ],
       }),
     );
-    expect(() =>
-      render(
-        <MapSceneSkia
-          cities={TAIWAN_CONTENT.cities}
-          routes={TAIWAN_CONTENT.routes}
-          geometry={geometry}
-          hubs={hubs}
-          geography={null}
-          view={TAIWAN_BASE_VIEW}
-          events={events}
-          bucket="local"
-          inv={0.3}
-          marker={1.1}
-        />,
-      ),
-    ).not.toThrow();
+    await render(
+      <MapSceneSkia
+        cities={TAIWAN_CONTENT.cities}
+        routes={TAIWAN_CONTENT.routes}
+        geometry={geometry}
+        hubs={hubs}
+        geography={null}
+        view={TAIWAN_BASE_VIEW}
+        events={events}
+        bucket="local"
+        inv={0.3}
+        marker={1.1}
+      />,
+    );
   });
 });

@@ -65,17 +65,17 @@ beforeEach(() => {
 });
 
 describe('TeamSelector host-assign', () => {
-  it('swaps the two players the host named, in that pair', () => {
-    renderSelector();
-    fireEvent.press(screen.getByText('Guest1'));
-    fireEvent.press(screen.getByLabelText('與 Guest2 互換'));
+  it('swaps the two players the host named, in that pair', async () => {
+    await renderSelector();
+    await fireEvent.press(screen.getByText('Guest1'));
+    await fireEvent.press(screen.getByLabelText('與 Guest2 互換'));
     expect(onSwap).toHaveBeenCalledWith('g1', 'g2');
     expect(onAssign).not.toHaveBeenCalled();
   });
 
-  it('offers a swap only against the other teams', () => {
-    renderSelector();
-    fireEvent.press(screen.getByText('Guest1'));
+  it('offers a swap only against the other teams', async () => {
+    await renderSelector();
+    await fireEvent.press(screen.getByText('Guest1'));
     // g3 is g1's own teammate, and g1 is the pick itself — neither is a counterpart.
     expect(screen.queryByLabelText('與 Guest3 互換')).toBeNull();
     expect(screen.queryByLabelText('與 Guest1 互換')).toBeNull();
@@ -83,27 +83,27 @@ describe('TeamSelector host-assign', () => {
     expect(screen.getByLabelText('與 Me 互換')).toBeTruthy();
   });
 
-  it('moves the pick when the tapped player is on the picked player’s team', () => {
-    renderSelector();
-    fireEvent.press(screen.getByText('Guest1'));
-    fireEvent.press(screen.getByText('Guest3'));
+  it('moves the pick when the tapped player is on the picked player’s team', async () => {
+    await renderSelector();
+    await fireEvent.press(screen.getByText('Guest1'));
+    await fireEvent.press(screen.getByText('Guest3'));
     expect(onSwap).not.toHaveBeenCalled();
     // The pick is now g3, so Guest2 offers the swap against g3 instead.
-    fireEvent.press(screen.getByLabelText('與 Guest2 互換'));
+    await fireEvent.press(screen.getByLabelText('與 Guest2 互換'));
     expect(onSwap).toHaveBeenCalledWith('g3', 'g2');
   });
 
-  it('still lets the host tap a team header and let it pick the counterpart', () => {
-    renderSelector();
-    fireEvent.press(screen.getByText('Guest1'));
-    fireEvent.press(screen.getByText('1 隊'));
+  it('still lets the host tap a team header and let it pick the counterpart', async () => {
+    await renderSelector();
+    await fireEvent.press(screen.getByText('Guest1'));
+    await fireEvent.press(screen.getByText('1 隊'));
     expect(onAssign).toHaveBeenCalledWith('g1', 0);
     expect(onSwap).not.toHaveBeenCalled();
   });
 
-  it('does nothing on a chip tap when the viewer is not the assigning host', () => {
-    renderSelector({ isHost: false });
-    fireEvent.press(screen.getByText('Guest1'));
+  it('does nothing on a chip tap when the viewer is not the assigning host', async () => {
+    await renderSelector({ isHost: false });
+    await fireEvent.press(screen.getByText('Guest1'));
     expect(screen.queryByLabelText('與 Guest2 互換')).toBeNull();
     expect(onSwap).not.toHaveBeenCalled();
   });

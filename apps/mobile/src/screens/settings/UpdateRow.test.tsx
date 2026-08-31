@@ -27,9 +27,9 @@ describe('UpdateRow', () => {
 
   it('reports "up to date" without downloading anything', async () => {
     mockCheck.mockResolvedValue(NO_UPDATE);
-    render(<UpdateRow first />);
+    await render(<UpdateRow first />);
 
-    fireEvent.press(screen.getByTestId('settings-check-updates'));
+    await fireEvent.press(screen.getByTestId('settings-check-updates'));
 
     await waitFor(() => screen.getByText(i18n.t('settings.updateUpToDate')));
     expect(mockFetch).not.toHaveBeenCalled();
@@ -40,8 +40,8 @@ describe('UpdateRow', () => {
     mockFetch.mockResolvedValue({ isNew: true, manifest: {}, isRollBackToEmbedded: false });
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     try {
-      render(<UpdateRow first />);
-      fireEvent.press(screen.getByTestId('settings-check-updates'));
+      await render(<UpdateRow first />);
+      await fireEvent.press(screen.getByTestId('settings-check-updates'));
 
       await waitFor(() => expect(alertSpy).toHaveBeenCalledTimes(1));
       expect(mockFetch).toHaveBeenCalledTimes(1);
@@ -62,11 +62,11 @@ describe('UpdateRow', () => {
     mockFetch.mockResolvedValue({ isNew: true, manifest: {}, isRollBackToEmbedded: false });
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     try {
-      render(<UpdateRow first />);
-      fireEvent.press(screen.getByTestId('settings-check-updates'));
+      await render(<UpdateRow first />);
+      await fireEvent.press(screen.getByTestId('settings-check-updates'));
 
       await waitFor(() => screen.getByText(i18n.t('settings.updateRestart')));
-      fireEvent.press(screen.getByTestId('settings-check-updates'));
+      await fireEvent.press(screen.getByTestId('settings-check-updates'));
       expect(mockReload).toHaveBeenCalledTimes(1);
       expect(mockCheck).toHaveBeenCalledTimes(1); // the second press applies, it does not re-check
     } finally {
@@ -83,8 +83,8 @@ describe('UpdateRow', () => {
     mockFetch.mockResolvedValue({ isNew: false, manifest: undefined, isRollBackToEmbedded: true });
     const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     try {
-      render(<UpdateRow first />);
-      fireEvent.press(screen.getByTestId('settings-check-updates'));
+      await render(<UpdateRow first />);
+      await fireEvent.press(screen.getByTestId('settings-check-updates'));
 
       await waitFor(() => screen.getByText(i18n.t('settings.updateRestart')));
       expect(mockFetch).toHaveBeenCalledTimes(1);
@@ -99,23 +99,23 @@ describe('UpdateRow', () => {
         code: 'ERR_UPDATES_DISABLED',
       }),
     );
-    render(<UpdateRow first />);
+    await render(<UpdateRow first />);
 
-    fireEvent.press(screen.getByTestId('settings-check-updates'));
+    await fireEvent.press(screen.getByTestId('settings-check-updates'));
 
     await waitFor(() => screen.getByText(i18n.t('settings.updateUnavailable')));
   });
 
   it('a network failure is reported as one and stays retryable', async () => {
     mockCheck.mockRejectedValue(new Error('offline'));
-    render(<UpdateRow first />);
+    await render(<UpdateRow first />);
 
-    fireEvent.press(screen.getByTestId('settings-check-updates'));
+    await fireEvent.press(screen.getByTestId('settings-check-updates'));
 
     await waitFor(() => screen.getByText(i18n.t('settings.updateFailed')));
 
     mockCheck.mockResolvedValue(NO_UPDATE);
-    fireEvent.press(screen.getByTestId('settings-check-updates'));
+    await fireEvent.press(screen.getByTestId('settings-check-updates'));
     await waitFor(() => screen.getByText(i18n.t('settings.updateUpToDate')));
   });
 });

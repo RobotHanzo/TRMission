@@ -53,43 +53,43 @@ afterEach(() => {
 
 describe('ScoreBoard app review prompt', () => {
   it('waits for the in-app rating block, then asks once the game is rated well', async () => {
-    render(<ScoreBoard snapshot={snap()} onLeave={jest.fn()} played />);
+    await render(<ScoreBoard snapshot={snap()} onLeave={jest.fn()} played />);
     await screen.findByTestId('scoreboard-rating');
     // The picker is still on screen and unanswered — the App Store sheet stays back.
     expect(lastCall()).toEqual([true, false]);
 
-    fireEvent.press(screen.getByTestId('star-5'));
-    fireEvent.press(screen.getByText('送出評分'));
+    await fireEvent.press(screen.getByTestId('star-5'));
+    await fireEvent.press(screen.getByText('送出評分'));
     await waitFor(() => expect(lastCall()).toEqual([true, true]));
   });
 
   it('never hands a player who just complained to the App Store', async () => {
-    render(<ScoreBoard snapshot={snap()} onLeave={jest.fn()} played />);
+    await render(<ScoreBoard snapshot={snap()} onLeave={jest.fn()} played />);
     await screen.findByTestId('scoreboard-rating');
 
-    fireEvent.press(screen.getByTestId('star-2'));
-    fireEvent.press(screen.getByText('送出評分'));
+    await fireEvent.press(screen.getByTestId('star-2'));
+    await fireEvent.press(screen.getByText('送出評分'));
     await screen.findByText('感謝你的評分！');
     expect(lastCall()).toEqual([true, false]);
   });
 
   it('asks straight away for a game with no rating block (offline vs bots)', async () => {
     setActiveRoomContext({});
-    render(<ScoreBoard snapshot={snap()} onLeave={jest.fn()} played />);
+    await render(<ScoreBoard snapshot={snap()} onLeave={jest.fn()} played />);
     await screen.findByTestId('scoreboard-discord');
     expect(lastCall()).toEqual([true, true]);
   });
 
   it('asks straight away for an already-rated game', async () => {
     await markGameRated('g1');
-    render(<ScoreBoard snapshot={snap()} onLeave={jest.fn()} played />);
+    await render(<ScoreBoard snapshot={snap()} onLeave={jest.fn()} played />);
     await screen.findByText('感謝你的評分！');
     expect(lastCall()).toEqual([true, true]);
   });
 
   it('counts nothing and asks nothing for a replay or an encyclopedia clip', async () => {
     setActiveRoomContext({});
-    render(<ScoreBoard snapshot={snap()} onLeave={jest.fn()} />);
+    await render(<ScoreBoard snapshot={snap()} onLeave={jest.fn()} />);
     await screen.findByTestId('scoreboard-discord');
     expect(lastCall()).toEqual([false, false]);
   });

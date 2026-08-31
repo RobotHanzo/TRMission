@@ -42,7 +42,7 @@ describe('BuilderScreen', () => {
 
   it('mints a fresh carry code and points the WebView at the handoff URL', async () => {
     mockMobileCarry.mockResolvedValue({ code: 'abc123' });
-    render(<BuilderScreen />);
+    await render(<BuilderScreen />);
     await waitFor(() => expect(mockWebView).toHaveBeenCalled());
     const props = mockWebView.mock.calls.at(-1)![0] as { source: { uri: string } };
     expect(props.source.uri).toBe(
@@ -51,16 +51,16 @@ describe('BuilderScreen', () => {
     expect(mockMobileCarry).toHaveBeenCalledTimes(1);
   });
 
-  it('offline: renders the branded banner, never mounts the WebView', () => {
+  it('offline: renders the branded banner, never mounts the WebView', async () => {
     mockNetState = { isConnected: false };
-    render(<BuilderScreen />);
+    await render(<BuilderScreen />);
     expect(screen.getByTestId('builder-offline')).toBeTruthy();
     expect(mockWebView).not.toHaveBeenCalled();
   });
 
   it('carry mint failure renders the error state (no WebView with a broken URL)', async () => {
     mockMobileCarry.mockRejectedValue(new Error('401'));
-    render(<BuilderScreen />);
+    await render(<BuilderScreen />);
     await waitFor(() => expect(screen.getByTestId('builder-error')).toBeTruthy());
     expect(mockWebView).not.toHaveBeenCalled();
   });

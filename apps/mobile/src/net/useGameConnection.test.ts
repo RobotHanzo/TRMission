@@ -34,13 +34,13 @@ describe('useGameConnection', () => {
   });
 
   it('fetches a ticket and connects on mount', async () => {
-    renderHook(() => useGameConnection('ABCD'));
+    await renderHook(() => useGameConnection('ABCD'));
     await waitFor(() => expect(connectGame).toHaveBeenCalledWith('T1', { roomCode: 'ABCD' }));
     expect(api.getTicket).toHaveBeenCalledWith('ABCD');
   });
 
   it('re-mints the ticket and reconnects when the app foregrounds', async () => {
-    renderHook(() => useGameConnection('ABCD'));
+    await renderHook(() => useGameConnection('ABCD'));
     await waitFor(() => expect(connectGame).toHaveBeenCalledTimes(1));
     await act(async () => {
       for (const h of appStateHandlers) h('background');
@@ -51,9 +51,9 @@ describe('useGameConnection', () => {
   });
 
   it('does NOT reconnect on foreground once the session was replaced', async () => {
-    renderHook(() => useGameConnection('ABCD'));
+    await renderHook(() => useGameConnection('ABCD'));
     await waitFor(() => expect(connectGame).toHaveBeenCalledTimes(1));
-    act(() => useGame.getState().setSessionReplaced(true));
+    await act(() => useGame.getState().setSessionReplaced(true));
     await act(async () => {
       for (const h of appStateHandlers) h('active');
     });
@@ -62,17 +62,17 @@ describe('useGameConnection', () => {
 
   it('keeps the socket down but recoverable when the ticket mint fails', async () => {
     (api.getTicket as jest.Mock).mockRejectedValueOnce(new Error('offline'));
-    const { result } = renderHook(() => useGameConnection('ABCD'));
+    const { result } = await renderHook(() => useGameConnection('ABCD'));
     await waitFor(() => expect(api.getTicket).toHaveBeenCalledTimes(1));
     expect(connectGame).not.toHaveBeenCalled();
-    act(() => result.current.retry());
+    await act(() => result.current.retry());
     await waitFor(() => expect(connectGame).toHaveBeenCalledTimes(1));
   });
 
   it('tears the socket down on unmount', async () => {
-    const { unmount } = renderHook(() => useGameConnection('ABCD'));
+    const { unmount } = await renderHook(() => useGameConnection('ABCD'));
     await waitFor(() => expect(connectGame).toHaveBeenCalledTimes(1));
-    unmount();
+    await unmount();
     expect(disconnectGame).toHaveBeenCalled();
   });
 });

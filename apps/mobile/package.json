@@ -96,6 +96,7 @@
     "jest": "^29.7.0",
     "jest-expo": "~57.0.4",
     "react-test-renderer": "19.2.8",
+    "test-renderer": "^1.2.0",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
     "vitest": "^4.1.11"
   },

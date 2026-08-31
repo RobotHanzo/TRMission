@@ -42,19 +42,19 @@ describe('TrainCarArt', () => {
   });
 
   describe.each(TRAIN_CAR_SKINS)('%s', (skin) => {
-    it.each(CARD_COLORS)('renders %s as real SVG shapes', (color) => {
+    it.each(CARD_COLORS)('renders %s as real SVG shapes', async (color) => {
       mockSkin.mockReturnValue(skin);
-      const tree = render(<TrainCarArt color={color} />).toJSON();
+      const tree = (await render(<TrainCarArt color={color} />)).toJSON();
       // the sparsest car (the open wagon) still draws dozens of shapes
       expect(shapeCount(tree)).toBeGreaterThan(20);
     });
   });
 
-  it('renders the night livery when the theme is dark', () => {
+  it('renders the night livery when the theme is dark', async () => {
     mockDark.mockReturnValue(true);
-    const dark = JSON.stringify(render(<TrainCarArt color="RED" />).toJSON());
+    const dark = JSON.stringify((await render(<TrainCarArt color="RED" />)).toJSON());
     mockDark.mockReturnValue(false);
-    const light = JSON.stringify(render(<TrainCarArt color="RED" />).toJSON());
+    const light = JSON.stringify((await render(<TrainCarArt color="RED" />)).toJSON());
 
     expect(dark).not.toEqual(light);
     // 普悠瑪's white body dims; its red livery band does not.
@@ -64,10 +64,10 @@ describe('TrainCarArt', () => {
     expect(light).not.toContain(dimmed);
   });
 
-  it('draws different artwork per skin', () => {
-    const rolling = JSON.stringify(render(<TrainCarArt color="RED" />).toJSON());
+  it('draws different artwork per skin', async () => {
+    const rolling = JSON.stringify((await render(<TrainCarArt color="RED" />)).toJSON());
     mockSkin.mockReturnValue('classic');
-    const classic = JSON.stringify(render(<TrainCarArt color="RED" />).toJSON());
+    const classic = JSON.stringify((await render(<TrainCarArt color="RED" />)).toJSON());
     expect(classic).not.toEqual(rolling);
   });
 });
@@ -82,9 +82,9 @@ describe('TrainCarCard layout', () => {
   };
 
   /** Where the drawing actually lands: the skin's band, then a 'meet' fit inside it. */
-  function measure(skin: TrainCarSkin) {
+  async function measure(skin: TrainCarSkin) {
     mockSkin.mockReturnValue(skin);
-    const tree = render(<TrainCarCard color="RED" count={3} />).toJSON();
+    const tree = (await render(<TrainCarCard color="RED" count={3} />)).toJSON();
     const nodes: { style: Record<string, number> }[] = [];
     const walk = (n: unknown): void => {
       if (Array.isArray(n)) return void n.forEach(walk);
@@ -116,8 +116,8 @@ describe('TrainCarCard layout', () => {
 
   afterEach(() => mockSkin.mockReturnValue('rollingStock'));
 
-  it.each(TRAIN_CAR_SKINS)('keeps %s artwork inside the card face', (skin) => {
-    const { cardH, artTop, artBottom } = measure(skin);
+  it.each(TRAIN_CAR_SKINS)('keeps %s artwork inside the card face', async (skin) => {
+    const { cardH, artTop, artBottom } = await measure(skin);
     expect(artTop).toBeGreaterThanOrEqual(5); // clear of the colour edge band
     expect(artBottom).toBeLessThanOrEqual(cardH);
   });
@@ -128,8 +128,8 @@ describe('TrainCarCard layout', () => {
   // arithmetic. This is a property of THAT band, not of every skin — `classic` is a 132×72
   // drawing that has always filled the face with the chips over its corners, which is the look
   // being preserved, so it deliberately does not reserve the chip row.
-  it('leaves the rolling-stock artwork clear of the glyph and count chips', () => {
-    const { artBottom, chipTop } = measure('rollingStock');
+  it('leaves the rolling-stock artwork clear of the glyph and count chips', async () => {
+    const { artBottom, chipTop } = await measure('rollingStock');
     expect(artBottom).toBeLessThanOrEqual(chipTop);
   });
 });
