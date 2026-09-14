@@ -46,17 +46,17 @@
   "devDependencies": {
     "@nestjs/testing": "^11.2.1",
     "@swc-node/register": "^1.12.1",
-    "@swc/core": "^1.16.1",
+    "@swc/core": "^1.16.2",
     "@trm/tsc7": "workspace:*",
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
-    "@types/node": "^26.2.0",
+    "@types/node": "^26.5.1",
     "@types/supertest": "^7.2.1",
     "@types/ws": "^8.18.1",
     "mongodb-memory-server": "^11.2.0",
     "supertest": "^7.2.2",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
-    "unplugin-swc": "^1.5.11",
+    "unplugin-swc": "^1.6.0",
     "vitest": "^4.1.11"
   }
 }
