@@ -12,6 +12,9 @@ jest.mock('expo-audio', () => ({
   setAudioModeAsync: jest.fn(() => Promise.resolve()),
 }));
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const expoAudio = require('expo-audio') as { createAudioPlayer: jest.Mock };
+
 function mockPlayers() {
   const created: (CuePlayer & { play: jest.Mock; seekTo: jest.Mock; remove: jest.Mock })[] = [];
   const createPlayer = (_asset: number): CuePlayer => {
@@ -183,6 +186,16 @@ describe('sound player', () => {
     p.play('cardDraw');
     p.setEnabled(false);
     expect(created[0].remove).toHaveBeenCalled();
+  });
+
+  // The assertions above all drive the injected seam. This one exercises the REAL wiring the app
+  // ships — default createPlayer, default audio mode, default AppState — because "preload() touches
+  // expo-audio at all" is the precise thing that cost a background ANR.
+  it('never reaches expo-audio from preload() on the un-injected default path', async () => {
+    expoAudio.createAudioPlayer.mockClear();
+    const p = createSoundPlayer();
+    await expect(p.preload()).resolves.toBeUndefined();
+    expect(expoAudio.createAudioPlayer).not.toHaveBeenCalled();
   });
 
   it('does not stack a second foreground watch when preload runs twice', async () => {
