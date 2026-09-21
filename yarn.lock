@@ -3668,18 +3668,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native/jest-preset@npm:0.87.1":
-  version: 0.87.1
-  resolution: "@react-native/jest-preset@npm:0.87.1"
+"@react-native/jest-preset@npm:0.86.2":
+  version: 0.86.2
+  resolution: "@react-native/jest-preset@npm:0.86.2"
   dependencies:
     "@jest/create-cache-key-function": "npm:^29.7.0"
-    "@react-native/js-polyfills": "npm:0.87.1"
+    "@react-native/js-polyfills": "npm:0.86.2"
     babel-jest: "npm:^29.7.0"
     jest-environment-node: "npm:^29.7.0"
     regenerator-runtime: "npm:^0.13.2"
   peerDependencies:
     react: ^19.2.3
-  checksum: 10/8beb5659d70aa58be56b75f3ddf74d8e9f358ab9cf0e69eb0f8cdd91a34516470ef666268d148534a7a3c0a1b44df7446f66a6f4c4e378b51f6327037e57f6f9
+  checksum: 10/5b8b434fedee7982ae891145dad6b8a0f34b5d0fa0e6398196ea7df6f98b805a392da13253dde701a751534ecd20ea9a56b9b58d51641acc25d3fcc1ebca7429
   languageName: node
   linkType: hard
 
@@ -3690,17 +3690,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native/js-polyfills@npm:0.86.2":
+  version: 0.86.2
+  resolution: "@react-native/js-polyfills@npm:0.86.2"
+  checksum: 10/3c076d314c4e220e7722ceb6e03020433607e0ff330ed43d22b8013da134926a9a267d4dd82776256e780c3bf4452b5fded9b1c05ac8604669813c4bc70a7889
+  languageName: node
+  linkType: hard
+
 "@react-native/js-polyfills@npm:0.86.3":
   version: 0.86.3
   resolution: "@react-native/js-polyfills@npm:0.86.3"
   checksum: 10/5e17bc2f5b638dd54800f749343ed5155d9a5e1076dc4a2d20a5e40079993d049d9e70681dcf62de215d7ad366ea7624a0999712b5a309763ccec86f4f25a749
-  languageName: node
-  linkType: hard
-
-"@react-native/js-polyfills@npm:0.87.1":
-  version: 0.87.1
-  resolution: "@react-native/js-polyfills@npm:0.87.1"
-  checksum: 10/18801f8ae70273723374011d275b751476c3280c7ed3738476acdf3834d9ce67ccac0effe5540d0f63122a7e0418bfc3e826f59d594422ef73a73725d516b603
   languageName: node
   linkType: hard
 
@@ -5279,7 +5279,7 @@ __metadata:
     "@react-native-async-storage/async-storage": "npm:3.1.1"
     "@react-native-community/netinfo": "npm:12.0.1"
     "@react-native-google-signin/google-signin": "npm:^16.1.4"
-    "@react-native/jest-preset": "npm:0.87.1"
+    "@react-native/jest-preset": "npm:0.86.2"
     "@react-navigation/bottom-tabs": "npm:^7.18.17"
     "@react-navigation/elements": "npm:^2.9.39"
     "@react-navigation/native": "npm:^7.3.17"
