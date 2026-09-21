@@ -14,8 +14,8 @@
     "@bufbuild/protobuf": "^2.14.0"
   },
   "devDependencies": {
-    "@bufbuild/buf": "^1.72.0",
-    "@bufbuild/protoc-gen-es": "^2.14.0",
+    "@bufbuild/buf": "^1.73.0",
+    "@bufbuild/protoc-gen-es": "^2.15.0",
     "@trm/tsc7": "workspace:*",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
     "vitest": "^4.1.11"
