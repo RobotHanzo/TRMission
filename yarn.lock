@@ -5343,13 +5343,13 @@ __metadata:
     react-native-confetti-cannon: "npm:^1.5.2"
     react-native-gesture-handler: "npm:~2.32.0"
     react-native-google-mobile-ads: "npm:16.3.4"
-    react-native-reanimated: "npm:4.5.3"
-    react-native-safe-area-context: "npm:~5.10.1"
+    react-native-reanimated: "npm:4.7.1"
+    react-native-safe-area-context: "npm:~5.11.0"
     react-native-screens: "npm:~4.30.0"
     react-native-svg: "npm:15.16.0"
     react-native-web: "npm:^0.21.4"
     react-native-webview: "npm:14.0.1"
-    react-native-worklets: "npm:0.11.4"
+    react-native-worklets: "npm:0.13.1"
     react-test-renderer: "npm:19.3.0"
     sf-symbols-typescript: "npm:^2.2.0"
     test-renderer: "npm:^1.3.1"
@@ -13515,27 +13515,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-reanimated@npm:4.5.3":
-  version: 4.5.3
-  resolution: "react-native-reanimated@npm:4.5.3"
+"react-native-reanimated@npm:4.7.1":
+  version: 4.7.1
+  resolution: "react-native-reanimated@npm:4.7.1"
   dependencies:
     react-native-is-edge-to-edge: "npm:^1.3.1"
     semver: "npm:^7.7.3"
   peerDependencies:
     react: "*"
-    react-native: 0.83 - 0.86
-    react-native-worklets: 0.10.x - 0.11.x
-  checksum: 10/b043b6316156a525f3b77bb22279dc9bc1113c06ae5e818e6511e879f989b5a0884a9b5abc2b8c93c8e14430011602850067585036e4645370ce503c7995673b
+    react-native: 0.86 - 0.88
+    react-native-worklets: 0.13.x
+  checksum: 10/4ae1782f0dc61b2af8a2ef375f61dc3d42c2dfa557c15a2aa09f0425811e480bf5b42c86db52b09a05ab2f3e5673f3bb1fe2d069451ecc64f21063f24f6f955d
   languageName: node
   linkType: hard
 
-"react-native-safe-area-context@npm:~5.10.1":
-  version: 5.10.1
-  resolution: "react-native-safe-area-context@npm:5.10.1"
+"react-native-safe-area-context@npm:~5.11.0":
+  version: 5.11.0
+  resolution: "react-native-safe-area-context@npm:5.11.0"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10/832537389e03bf2705de77ec2eff9400be543b5b244c0a74723ef678894d4c43def97a55e80c1d575fae3a0c7c6f30085dc90c8c216a2a74ee888c128b16e244
+  checksum: 10/d6484585d525f4b4534c7a256001c9b569178dd5db04c6e533022621518dc55575e92bfb1c31e6def1a4ccf5307be108cfeca7f0dc339208d6e561ad4346ad98
   languageName: node
   linkType: hard
 
@@ -13625,9 +13625,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-worklets@npm:0.11.4":
-  version: 0.11.4
-  resolution: "react-native-worklets@npm:0.11.4"
+"react-native-worklets@npm:0.13.1":
+  version: 0.13.1
+  resolution: "react-native-worklets@npm:0.13.1"
   dependencies:
     "@babel/generator": "npm:^7.27.1"
     "@babel/plugin-transform-arrow-functions": "npm:^7.27.1"
@@ -13641,14 +13641,16 @@ __metadata:
     "@babel/preset-typescript": "npm:^7.28.5"
     "@babel/traverse": "npm:^7.27.1"
     "@babel/types": "npm:^7.27.1"
+    "@jridgewell/remapping": "npm:^2.3.5"
     convert-source-map: "npm:^2.0.0"
     semver: "npm:^7.7.4"
+    whatwg-fetch: "npm:^3.6.20"
   peerDependencies:
     "@babel/core": "*"
     "@react-native/metro-config": "*"
     react: "*"
-    react-native: 0.83 - 0.86
-  checksum: 10/3b4d5ccf76f470215dba2ef9609e043cc3d457b6b24e3964e27dc29c09de1183006dd3c9b79fcef5dcbe9aded14f6d5e4723185a453a97b354cbddba1a93e5b8
+    react-native: 0.86 - 0.88
+  checksum: 10/08c9b0d5fd2bf3e70dd56dddfbb3bb709e1332e3ec10cf6b9765f15aaff88057bdc4aabc94567c4276769af9519b086314b5fb59ee6115f78eedbe04836174b5
   languageName: node
   linkType: hard
 
@@ -15863,7 +15865,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"whatwg-fetch@npm:^3.0.0":
+"whatwg-fetch@npm:^3.0.0, whatwg-fetch@npm:^3.6.20":
   version: 3.6.20
   resolution: "whatwg-fetch@npm:3.6.20"
   checksum: 10/2b4ed92acd6a7ad4f626a6cb18b14ec982bbcaf1093e6fe903b131a9c6decd14d7f9c9ca3532663c2759d1bdf01d004c77a0adfb2716a5105465c20755a8c57c
