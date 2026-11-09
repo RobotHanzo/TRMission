@@ -5790,7 +5790,7 @@ __metadata:
     expo-splash-screen: "npm:~57.0.7"
     expo-sqlite: "npm:~57.0.1"
     expo-status-bar: "npm:~57.0.1"
-    expo-store-review: "npm:57.0.2"
+    expo-store-review: "npm:58.0.2"
     expo-tracking-transparency: "npm:~57.0.1"
     expo-updates: "npm:~57.0.16"
     expo-web-browser: "npm:~57.0.2"
@@ -9701,13 +9701,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-store-review@npm:57.0.2":
-  version: 57.0.2
-  resolution: "expo-store-review@npm:57.0.2"
+"expo-store-review@npm:58.0.2":
+  version: 58.0.2
+  resolution: "expo-store-review@npm:58.0.2"
   peerDependencies:
     expo: "*"
     react-native: "*"
-  checksum: 10/db593c89b0093a9b6c548d3ebd74ef12fd7f41236db9b767c95038ea068565628ae2e3072b1aa0ac0105736c9cba9845f3c8ec92911fad1d9acb958ce7a1aac1
+  checksum: 10/1088f5c659c8f264a57ebe792c376457c79e8d45118fce6dd570e998a9671fbc98142a8179141e641388355639d0fc57ece1a163a063f07cde7865c432f1e12b
   languageName: node
   linkType: hard
 
