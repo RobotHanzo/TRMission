@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@bufbuild/protobuf": "^2.16.0",
-    "@nestjs/common": "^11.2.1",
+    "@nestjs/common": "^12.3.3",
     "@nestjs/core": "^11.2.1",
     "@nestjs/jwt": "^11.0.2",
     "@nestjs/platform-express": "^11.2.1",
