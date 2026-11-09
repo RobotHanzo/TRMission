@@ -2203,14 +2203,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@formatjs/intl-getcanonicallocales@npm:3.3.0, @formatjs/intl-getcanonicallocales@npm:^3.2.12":
+"@formatjs/intl-getcanonicallocales@npm:3.3.0, @formatjs/intl-getcanonicallocales@npm:^3.3.0":
   version: 3.3.0
   resolution: "@formatjs/intl-getcanonicallocales@npm:3.3.0"
   checksum: 10/48f48957f271704e35bfcf6df0f908eb7515551b13ae522cd37ba1b3a605abe91aac70b9a7145251250107c78ddffdb243b02a9e7080b88dbdc2597e48e49211
   languageName: node
   linkType: hard
 
-"@formatjs/intl-locale@npm:^5.3.12":
+"@formatjs/intl-locale@npm:^5.4.2":
   version: 5.4.2
   resolution: "@formatjs/intl-locale@npm:5.4.2"
   dependencies:
@@ -4646,7 +4646,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/react-native@npm:^8.32.0":
+"@sentry/react-native@npm:^8.33.0":
   version: 8.33.0
   resolution: "@sentry/react-native@npm:8.33.0"
   dependencies:
@@ -5186,12 +5186,12 @@ __metadata:
     "@types/react": "npm:^19.3.0"
     "@types/react-dom": "npm:^19.3.0"
     "@vitejs/plugin-react": "npm:^6.1.2"
-    i18next: "npm:^26.5.6"
+    i18next: "npm:^26.6.0"
     jsdom: "npm:^30.1.3"
-    lucide-react: "npm:^1.61.0"
+    lucide-react: "npm:^1.66.0"
     react: "npm:19.3.1"
     react-dom: "npm:19.3.1"
-    react-i18next: "npm:^17.1.3"
+    react-i18next: "npm:^17.1.10"
     typescript: "npm:@typescript/typescript6@^6.0.2"
     vite: "npm:^8.3.4"
     vitest: "npm:^4.1.11"
@@ -5280,8 +5280,8 @@ __metadata:
     "@expo/config-plugins": "npm:~57.0.8"
     "@expo/metro-runtime": "npm:~57.0.15"
     "@expo/ngrok": "npm:^4.1.3"
-    "@formatjs/intl-getcanonicallocales": "npm:^3.2.12"
-    "@formatjs/intl-locale": "npm:^5.3.12"
+    "@formatjs/intl-getcanonicallocales": "npm:^3.3.0"
+    "@formatjs/intl-locale": "npm:^5.4.2"
     "@formatjs/intl-pluralrules": "npm:^6.3.16"
     "@react-native-async-storage/async-storage": "npm:3.1.1"
     "@react-native-community/netinfo": "npm:12.0.1"
@@ -5293,7 +5293,7 @@ __metadata:
     "@react-navigation/native-stack": "npm:^7.21.0"
     "@rnrepo/build-tools": "npm:^0.2.2"
     "@rnrepo/expo-config-plugin": "npm:^0.3.6"
-    "@sentry/react-native": "npm:^8.32.0"
+    "@sentry/react-native": "npm:^8.33.0"
     "@shopify/react-native-skia": "npm:2.14.0"
     "@testing-library/react-native": "npm:^14.1.0"
     "@trm/client-core": "workspace:*"
@@ -5330,14 +5330,14 @@ __metadata:
     expo-updates: "npm:~57.0.16"
     expo-web-browser: "npm:~57.0.2"
     fast-text-encoding: "npm:^1.0.6"
-    i18next: "npm:^26.5.6"
+    i18next: "npm:^26.6.0"
     immer: "npm:^11.2.9"
     jest: "npm:^29.7.0"
     jest-expo: "npm:~57.0.5"
-    lucide-react-native: "npm:^1.61.0"
+    lucide-react-native: "npm:^1.66.0"
     react: "npm:19.3.1"
     react-dom: "npm:19.3.1"
-    react-i18next: "npm:^17.1.3"
+    react-i18next: "npm:^17.1.10"
     react-native: "npm:0.86.3"
     react-native-bottom-tabs: "npm:^1.5.0"
     react-native-confetti-cannon: "npm:^1.5.2"
@@ -5402,10 +5402,10 @@ __metadata:
     "@types/supertest": "npm:^7.2.1"
     "@types/ws": "npm:^8.18.2"
     cookie-parser: "npm:^1.4.7"
-    google-auth-library: "npm:^11.3.1"
+    google-auth-library: "npm:^11.3.2"
     helmet: "npm:^8.3.0"
-    jose: "npm:^6.2.13"
-    mongodb: "npm:^7.7.0"
+    jose: "npm:^6.2.14"
+    mongodb: "npm:^7.8.0"
     mongodb-memory-server: "npm:^11.3.0"
     nestjs-zod: "npm:^5.5.0"
     prom-client: "npm:^15.1.3"
@@ -5415,7 +5415,7 @@ __metadata:
     typescript: "npm:@typescript/typescript6@^6.0.2"
     unplugin-swc: "npm:^1.5.11"
     vitest: "npm:^4.1.11"
-    ws: "npm:^8.22.0"
+    ws: "npm:^8.22.1"
     zod: "npm:^4.6.7"
   languageName: unknown
   linkType: soft
@@ -5462,14 +5462,14 @@ __metadata:
     "@types/react-dom": "npm:^19.3.0"
     "@vitejs/plugin-react": "npm:^6.1.2"
     canvas-confetti: "npm:^1.9.4"
-    i18next: "npm:^26.5.6"
+    i18next: "npm:^26.6.0"
     immer: "npm:^11.2.9"
     jsdom: "npm:^30.1.3"
-    lucide-react: "npm:^1.61.0"
+    lucide-react: "npm:^1.66.0"
     polygon-clipping: "npm:^0.15.7"
     react: "npm:19.3.1"
     react-dom: "npm:19.3.1"
-    react-i18next: "npm:^17.1.3"
+    react-i18next: "npm:^17.1.10"
     react-zoom-pan-pinch: "npm:^4.2.0"
     typescript: "npm:@typescript/typescript6@^6.0.2"
     vite: "npm:^8.3.4"
@@ -7240,12 +7240,12 @@ __metadata:
   linkType: hard
 
 "brace-expansion@npm:^1.1.7":
-  version: 1.1.18
-  resolution: "brace-expansion@npm:1.1.18"
+  version: 1.1.21
+  resolution: "brace-expansion@npm:1.1.21"
   dependencies:
     balanced-match: "npm:^1.0.0"
     concat-map: "npm:0.0.1"
-  checksum: 10/b55a3c03239b8d2127c7cbb3408c9ad3a556a8c303bf3064df78bfb7c093160fc8f6e0a32e42a850a78eba12f29ccf6ef997690b9acf945d242c56c61c4aa977
+  checksum: 10/6c0ed34107cb3bd3f44c01d90ec8c01baa3ed75b7755617e2e5797b5908bbf20b313edf575612b200a783b84c7d1826aec2f7a2f03de9905bbfae5dc3dea6a95
   languageName: node
   linkType: hard
 
@@ -9423,12 +9423,12 @@ __metadata:
   linkType: hard
 
 "follow-redirects@npm:^1.16.0":
-  version: 1.16.1
-  resolution: "follow-redirects@npm:1.16.1"
+  version: 1.16.2
+  resolution: "follow-redirects@npm:1.16.2"
   peerDependenciesMeta:
     debug:
       optional: true
-  checksum: 10/269c9f38e4bb413d7ab224fb5aa733118288a18e84d4d0a22821a850574624a55d45f2c6735fc09fc1cceedb6343a5539daf6d2dd70bce8980c8336d230a2f50
+  checksum: 10/3303addfa9aaf145022c2faa76ecba8052fe325bce00f3992ca2b13f3295590d6a64828c128cfcbc9678569f2f98fbd190d6ca5f505857b07eea9867008a38a3
   languageName: node
   linkType: hard
 
@@ -9664,7 +9664,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"google-auth-library@npm:^11.3.1":
+"google-auth-library@npm:^11.3.2":
   version: 11.3.2
   resolution: "google-auth-library@npm:11.3.2"
   dependencies:
@@ -9974,7 +9974,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"i18next@npm:^26.5.6":
+"i18next@npm:^26.6.0":
   version: 26.7.1
   resolution: "i18next@npm:26.7.1"
   peerDependencies:
@@ -10874,7 +10874,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jose@npm:^6.2.13":
+"jose@npm:^6.2.14":
   version: 6.2.15
   resolution: "jose@npm:6.2.15"
   checksum: 10/57ea834a3aae6612b603dc04e5e068dabf1582934ffc759f004a0c654632bec06e6184aee73246157d03fb56179d50ac4e5c56ad02cf939086ef888ae8d8ebec
@@ -11562,7 +11562,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lucide-react-native@npm:^1.61.0":
+"lucide-react-native@npm:^1.66.0":
   version: 1.67.0
   resolution: "lucide-react-native@npm:1.67.0"
   peerDependencies:
@@ -11577,7 +11577,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lucide-react@npm:^1.61.0":
+"lucide-react@npm:^1.66.0":
   version: 1.67.0
   resolution: "lucide-react@npm:1.67.0"
   peerDependencies:
@@ -12360,7 +12360,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mongodb@npm:^7.7.0":
+"mongodb@npm:^7.8.0":
   version: 7.8.0
   resolution: "mongodb@npm:7.8.0"
   dependencies:
@@ -13308,17 +13308,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"qs@npm:^6.14.0, qs@npm:^6.14.1":
-  version: 6.16.0
-  resolution: "qs@npm:6.16.0"
-  dependencies:
-    es-define-property: "npm:^1.0.1"
-    side-channel: "npm:^1.1.1"
-  checksum: 10/7fbf9c2eb9c9bbd8997700caecc4b057ac259635873deefd5027fb26d06d79426cf468da55da87ffd147a24e93d3641352d8ac6664bd84688ad5b2f0b8d04828
-  languageName: node
-  linkType: hard
-
-"qs@npm:^6.16.1":
+"qs@npm:^6.14.0, qs@npm:^6.14.1, qs@npm:^6.16.1":
   version: 6.17.1
   resolution: "qs@npm:6.17.1"
   dependencies:
@@ -13407,7 +13397,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-i18next@npm:^17.1.3":
+"react-i18next@npm:^17.1.10":
   version: 17.1.11
   resolution: "react-i18next@npm:17.1.11"
   dependencies:
@@ -16043,7 +16033,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:^8.22.0":
+"ws@npm:^8.22.1":
   version: 8.22.1
   resolution: "ws@npm:8.22.1"
   peerDependencies:
