@@ -46,7 +46,7 @@
   "devDependencies": {
     "@nestjs/testing": "^11.2.1",
     "@swc-node/register": "^1.12.1",
-    "@swc/core": "^1.16.18",
+    "@swc/core": "^1.16.22",
     "@trm/tsc7": "workspace:*",
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
