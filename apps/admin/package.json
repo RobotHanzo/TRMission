@@ -16,11 +16,11 @@
     "@sentry/react": "^10.74.0",
     "@trm/map-data": "workspace:*",
     "@trm/shared": "workspace:*",
-    "i18next": "^26.6.0",
-    "lucide-react": "^1.66.0",
+    "i18next": "^26.7.2",
+    "lucide-react": "^1.69.0",
     "react": "19.3.1",
     "react-dom": "19.3.1",
-    "react-i18next": "^17.1.10",
+    "react-i18next": "^17.1.13",
     "zustand": "^5.0.16"
   },
   "devDependencies": {
