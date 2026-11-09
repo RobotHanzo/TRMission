@@ -7,5 +7,13 @@
  * resolve immediately, `useAnimatedStyle` runs the updater inline) — exactly right for logic
  * tests. Jest applies this automatically for every mobile test because it is a node_modules
  * manual mock under `<rootDir>/__mocks__` (no `jest.mock` call needed).
+ *
+ * Reanimated >= 4.7 still imports its real entry point from `mock.js`, which registers a CSS
+ * event handler on the JS fallback module at import time and throws there. Stub just that call.
  */
+jest.mock('react-native-reanimated/src/css/native/proxy', () => ({
+  ...jest.requireActual('react-native-reanimated/src/css/native/proxy'),
+  setCSSEventHandler: () => {},
+}));
+
 module.exports = require('react-native-reanimated/mock');

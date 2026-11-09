@@ -20,12 +20,15 @@ const scope = {
 module.exports = {
   init: noop,
   isInitialized: () => false,
+  // `sentry.ts`'s `isLive()` asks for the client; an uninitialised SDK simply has none.
+  getClient: () => undefined,
   wrap: (component) => component,
   captureException: jest.fn(() => 'test-event-id'),
   captureMessage: jest.fn(() => 'test-event-id'),
   setUser: noop,
-  setTag: noop,
+  setTag: jest.fn(),
   setContext: noop,
+  addBreadcrumb: jest.fn(),
   withScope: (callback) => callback(scope),
   reactNavigationIntegration: () => ({
     name: 'ReactNavigation',

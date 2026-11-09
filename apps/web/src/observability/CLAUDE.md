@@ -25,6 +25,13 @@ App-wide context: `apps/web/CLAUDE.md`.
   denylist the server and mobile use — game secrets, credentials and ad identifiers only.
   Identifiers are sent on purpose: `sendDefaultPii: true`, and `App.tsx` attaches
   `{ id, email, username }` as the Sentry user so a report says which account hit it.
+- **`IGNORED_ERRORS` / `DENY_URLS` are a log of settled triage, not a mood.** Nearly every entry
+  is an in-app browser (Instagram, Line, a chat app) tearing down the native bridge it injected into
+  our document — `window.webkit.messageHandlers` on iOS (TRMISSION-WEB-1), a recycled
+  `@JavascriptInterface` Java object on Android (TRMISSION-WEB-9, frames on an `iabjs://` URL) — or
+  Cloudflare's edge-injected beacon/Zaraz. Both lists are exported and covered by `sentry.test.ts`,
+  so add the observed string alongside a regression case and the issue number that motivated it, and
+  keep each pattern narrow enough that the same words thrown from our own bundle still report.
 - Source maps upload only when `SENTRY_AUTH_TOKEN` is set at build time (`vite.config.ts`); they are
   deleted right after upload and never served.
 

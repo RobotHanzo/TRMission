@@ -35,6 +35,12 @@ on the RNW web harness.
 - `TRM_SENTRY_*` must be set on **every** env block that re-evaluates `app.config.ts` — both store
   lanes AND the OTA publish lane, because an applied update's manifest replaces the binary's
   `extra`. Same lockstep rule as the Google client ids (`../../CLAUDE.md` → OTA).
+- **Memory warnings are breadcrumbed on purpose** (`installMemoryPressureBreadcrumbs`, called from
+  `initSentry`). An iOS `WatchdogTermination` (TRMISSION-MOBILE-8) has no stack and cannot get one:
+  sentry-cocoa infers the kill on the NEXT launch from the scope the dead run persisted. JS
+  breadcrumbs and tags are mirrored onto that native scope, so an `AppState 'memoryWarning'`
+  breadcrumb plus the saturating `trm.memoryWarnings` tag are what separate "the OS reclaimed us"
+  from "the user swiped the app away". Don't drop them to quieten the scope.
 - **Mobile Session Replay is wired but OFF** (both sample rates default to 0). It records the
   screen, which on a hidden-information game includes the player's hand, and the Skia board is a
   single native view whose masking has not been verified on a device. Verify masking on a real

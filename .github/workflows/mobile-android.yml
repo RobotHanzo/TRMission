@@ -226,7 +226,7 @@ jobs:
       # Deferred until after prebuild: android/ is CNG output (gitignored, never committed — see the
       # top-of-file note) and doesn't exist until the prebuild step above runs. setup-java provides
       # the JDK only; Gradle caching moves to setup-gradle below.
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '17'

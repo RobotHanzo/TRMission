@@ -10,7 +10,13 @@ import type { Cue } from './cues';
  * to give the app an output (autoplay lock, an OS interruption, silent mode) simply plays nothing.
  */
 export interface SoundPlayer {
-  /** Load/decode every cue. Idempotent — already-loaded cues are skipped. */
+  /**
+   * Ready the platform for playback. Idempotent, and cheap by contract: web decodes the cue
+   * buffers here (one AudioContext, no per-cue OS resource), native only configures the audio
+   * session and leaves each cue's decoder to be built on its first `play()`. Nothing here may
+   * allocate a per-cue OS audio pipeline — this runs at the app root, including on a process the
+   * OS started in the BACKGROUND, where fifteen of them cost a background ANR.
+   */
   preload(): Promise<void>;
   /**
    * Give the platform its user-gesture activation. Meaningful on web (autoplay policy); a no-op
