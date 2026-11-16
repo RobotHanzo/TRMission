@@ -3903,9 +3903,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-google-signin/google-signin@npm:^16.1.5":
-  version: 16.1.5
-  resolution: "@react-native-google-signin/google-signin@npm:16.1.5"
+"@react-native-google-signin/google-signin@npm:^17.0.0":
+  version: 17.0.0
+  resolution: "@react-native-google-signin/google-signin@npm:17.0.0"
   peerDependencies:
     expo: ">=52.0.40"
     react: "*"
@@ -3913,7 +3913,7 @@ __metadata:
   peerDependenciesMeta:
     expo:
       optional: true
-  checksum: 10/b9a3496058b80ba4f1e999ccfeda4a6a42e5fd3d8f613cbeaa95c3ab17083e41542c08d7cc20cdbdb78a7cc8603e6d36a23aea57a8ec30786c94fea6674faf37
+  checksum: 10/2f89ce81b9635d322cdf7027b9753faa5e0b5d42c1ab1a9063d33d1a01a25251f99a9c5bf69d456ce72387e9afa05afbccd1ea4e3d3224b590ee9d15a405535e
   languageName: node
   linkType: hard
 
@@ -5652,7 +5652,7 @@ __metadata:
     "@formatjs/intl-pluralrules": "npm:^6.3.16"
     "@react-native-async-storage/async-storage": "npm:3.1.1"
     "@react-native-community/netinfo": "npm:12.0.1"
-    "@react-native-google-signin/google-signin": "npm:^16.1.5"
+    "@react-native-google-signin/google-signin": "npm:^17.0.0"
     "@react-native/jest-preset": "npm:0.86.3"
     "@react-navigation/bottom-tabs": "npm:^7.21.0"
     "@react-navigation/elements": "npm:^2.9.45"
