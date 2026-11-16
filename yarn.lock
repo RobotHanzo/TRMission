@@ -5774,7 +5774,7 @@ __metadata:
     jose: "npm:^6.2.14"
     mongodb: "npm:^7.8.0"
     mongodb-memory-server: "npm:^11.3.0"
-    nestjs-zod: "npm:^5.5.0"
+    nestjs-zod: "npm:^5.6.0"
     prom-client: "npm:^15.1.3"
     reflect-metadata: "npm:^0.2.2"
     rxjs: "npm:^7.8.2"
@@ -13291,11 +13291,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nestjs-zod@npm:^5.5.0":
-  version: 5.5.0
-  resolution: "nestjs-zod@npm:5.5.0"
-  dependencies:
-    deepmerge: "npm:^4.3.1"
+"nestjs-zod@npm:^5.6.0":
+  version: 5.6.0
+  resolution: "nestjs-zod@npm:5.6.0"
   peerDependencies:
     "@nestjs/common": ^10.0.0 || ^11.0.0
     "@nestjs/swagger": ^7.4.2 || ^8.0.0 || ^11.0.0
@@ -13304,7 +13302,7 @@ __metadata:
   peerDependenciesMeta:
     "@nestjs/swagger":
       optional: true
-  checksum: 10/7e6bbdf513f54aa12ec8d80f884b272f5260b491d768754ef4e93945c0d4c71d9fc089cf9ea2d59c878ee78238fe8b71dd0df3f6f984901ee9fbceb7249dc50d
+  checksum: 10/3697d54cff334f6bf760e8ea55c3124c8e649490538e734ece7d2267d11f126ece5b9ddb3cd0b078240d8be8959535f4324984a83e4ddcab0c160c8df6b1b68e
   languageName: node
   linkType: hard
 
