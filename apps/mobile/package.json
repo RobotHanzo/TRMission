@@ -38,7 +38,7 @@
     "@trm/map-data": "workspace:*",
     "@trm/proto": "workspace:*",
     "@trm/shared": "workspace:*",
-    "expo": "~57.0.31",
+    "expo": "~57.0.33",
     "expo-apple-authentication": "~57.0.1",
     "expo-application": "~57.0.2",
     "expo-audio": "~57.0.4",
