@@ -18,7 +18,7 @@
     "@bufbuild/protoc-gen-es": "^2.16.0",
     "@trm/tsc7": "workspace:*",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
-    "vitest": "^4.1.11"
+    "vitest": "^5.1.0"
   },
   "scripts": {
     "generate": "buf generate",
