@@ -2698,7 +2698,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jest/react-is-19@npm:react-is@^19.2.5, react-is@npm:^19.3.0":
+"@jest/react-is-19@npm:react-is@^19.2.5, react-is@npm:^19.3.1":
   version: 19.3.1
   resolution: "react-is@npm:19.3.1"
   checksum: 10/d763db896daf611bc15456abc356b1d4c5c2fa0a68a60c2c53c0199d39c951e0b6891437c649ee41b1b3614f59932e93075834a42a3a52dfcb0cac22289ab191
@@ -5815,7 +5815,7 @@ __metadata:
     react-native-web: "npm:^0.21.4"
     react-native-webview: "npm:14.0.1"
     react-native-worklets: "npm:0.13.1"
-    react-test-renderer: "npm:19.3.0"
+    react-test-renderer: "npm:19.3.1"
     sf-symbols-typescript: "npm:^2.2.0"
     test-renderer: "npm:^1.3.1"
     typescript: "npm:@typescript/typescript6@^6.0.2"
@@ -14749,15 +14749,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-test-renderer@npm:19.3.0":
-  version: 19.3.0
-  resolution: "react-test-renderer@npm:19.3.0"
+"react-test-renderer@npm:19.3.1":
+  version: 19.3.1
+  resolution: "react-test-renderer@npm:19.3.1"
   dependencies:
-    react-is: "npm:^19.3.0"
+    react-is: "npm:^19.3.1"
     scheduler: "npm:^0.28.0"
   peerDependencies:
-    react: ^19.3.0
-  checksum: 10/66896cc1edd61b25fe758efab55ae0fd69750455805928db49b554b8bdcd501a532ba59e947c30b4d28662e8f787e6fcca33e0f66e69e72aa194a22d63195b2e
+    react: ^19.3.1
+  checksum: 10/f92bfc4862a44aacb98cca71e1037099e197fd61561e40944d44e174b1c72b4f27e3f9a53c4e61fa77574ce216ab8968c559a31f23710f5a4f413c1ed3b24f27
   languageName: node
   linkType: hard
 
