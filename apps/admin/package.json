@@ -17,11 +17,11 @@
     "@trm/map-data": "workspace:*",
     "@trm/shared": "workspace:*",
     "i18next": "^26.7.2",
-    "lucide-react": "^1.69.0",
+    "lucide-react": "^1.72.0",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "react-i18next": "^17.1.13",
-    "zustand": "^5.0.16"
+    "zustand": "^5.1.0"
   },
   "devDependencies": {
     "@sentry/vite-plugin": "^5.4.0",
