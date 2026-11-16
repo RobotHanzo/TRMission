@@ -13,7 +13,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@sentry/react": "^10.74.0",
+    "@sentry/react": "^11.12.0",
     "@trm/map-data": "workspace:*",
     "@trm/shared": "workspace:*",
     "i18next": "^26.7.2",
