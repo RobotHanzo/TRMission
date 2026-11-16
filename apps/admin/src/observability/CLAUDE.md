@@ -12,7 +12,7 @@ including the lazy-load façade: `report.ts` carries no `@sentry/*` import and p
 only once it has seen a DSN, so a DSN-less build doesn't ship the SDK at all. Beyond that:
 everything goes through `@trm/shared`'s `scrubTelemetryEvent` (game secrets, credentials and ad
 identifiers — nothing else), tracing on, and Session Replay recorded **only** for erroring sessions.
-`sendDefaultPii: true` and the signed-in maintainer is attached as `{ id, email, username }`.
+`dataCollection: { userInfo: true }` (the v11 spelling of `sendDefaultPii: true`) and the signed-in maintainer is attached as `{ id, email, username }`.
 
 Replay masking is **off**: no LIVE game's hidden state reaches this app, and the account data that
 does is exactly what an operator needs to see to reconstruct what they were doing — so there is no

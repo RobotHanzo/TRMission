@@ -23,7 +23,7 @@ App-wide context: `apps/web/CLAUDE.md`.
   or anything derived from them must carry it too.**
 - Everything on the wire to Sentry goes through `@trm/shared`'s `scrubTelemetryEvent`, the same
   denylist the server and mobile use — game secrets, credentials and ad identifiers only.
-  Identifiers are sent on purpose: `sendDefaultPii: true`, and `App.tsx` attaches
+  Identifiers are sent on purpose: `dataCollection: { userInfo: true }` (the v11 spelling of `sendDefaultPii: true`), and `App.tsx` attaches
   `{ id, email, username }` as the Sentry user so a report says which account hit it.
 - **`IGNORED_ERRORS` / `DENY_URLS` are a log of settled triage, not a mood.** Nearly every entry
   is an in-app browser (Instagram, Line, a chat app) tearing down the native bridge it injected into

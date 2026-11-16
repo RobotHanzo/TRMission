@@ -43,7 +43,9 @@ export function start(): SentryHandle {
     release: env.VITE_COMMIT_HASH ?? 'dev',
     // Identifiers (notably the client IP) are signal, not secrets — everything still passes
     // through `@trm/shared`'s denylist below.
-    sendDefaultPii: true,
+    // v11 replaced `sendDefaultPii` with `dataCollection`; every category defaults to on, so this
+    // is the same behaviour as the old `sendDefaultPii: true` (user info, IP, cookies, headers).
+    dataCollection: { userInfo: true },
     tracesSampleRate: telemetrySampleRate(
       env.VITE_SENTRY_TRACES_SAMPLE_RATE,
       DEFAULT_TRACES_SAMPLE_RATE,
@@ -69,6 +71,6 @@ export function start(): SentryHandle {
   return {
     captureException: (error, componentStack) =>
       captureException(error, { contexts: { react: { componentStack } } }),
-    setUser: (user) => setUser(user),
+    setUser: (user) => setUser(user ? { ...user } : null),
   };
 }
