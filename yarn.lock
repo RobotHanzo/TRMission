@@ -4144,18 +4144,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native/jest-preset@npm:0.88.1":
-  version: 0.88.1
-  resolution: "@react-native/jest-preset@npm:0.88.1"
+"@react-native/jest-preset@npm:0.86.3":
+  version: 0.86.3
+  resolution: "@react-native/jest-preset@npm:0.86.3"
   dependencies:
     "@jest/create-cache-key-function": "npm:^29.7.0"
-    "@react-native/js-polyfills": "npm:0.88.1"
+    "@react-native/js-polyfills": "npm:0.86.3"
     babel-jest: "npm:^29.7.0"
     jest-environment-node: "npm:^29.7.0"
     regenerator-runtime: "npm:^0.13.2"
   peerDependencies:
     react: ^19.2.3
-  checksum: 10/2cc6a041070be4ac5786b7caa194a021ff37b78581ae6b9aafe86578d6732d6f5c29c5322ec5b32fb48c40f9c8d423e341fdb135f86cbd2e4f4aa769c54753b6
+  checksum: 10/d39acb4188894891210b2e15e1e7092776d6b1a2f40a47414247277f6cfd051151077c0c82cdc69f1843fa652a8ba44517b105df8e13993c363c54fb3bb6ab50
   languageName: node
   linkType: hard
 
@@ -4170,13 +4170,6 @@ __metadata:
   version: 0.86.3
   resolution: "@react-native/js-polyfills@npm:0.86.3"
   checksum: 10/5e17bc2f5b638dd54800f749343ed5155d9a5e1076dc4a2d20a5e40079993d049d9e70681dcf62de215d7ad366ea7624a0999712b5a309763ccec86f4f25a749
-  languageName: node
-  linkType: hard
-
-"@react-native/js-polyfills@npm:0.88.1":
-  version: 0.88.1
-  resolution: "@react-native/js-polyfills@npm:0.88.1"
-  checksum: 10/39521df83ff3bd0f30436a002466c1deadf94139a39e913c1e33caed5c454af114b30539003fdcf0228adfb984b8a8253b2a36c6c5b948020c5dcbc9568e14c5
   languageName: node
   linkType: hard
 
@@ -5704,7 +5697,7 @@ __metadata:
     "@react-native-async-storage/async-storage": "npm:3.1.1"
     "@react-native-community/netinfo": "npm:12.0.1"
     "@react-native-google-signin/google-signin": "npm:^16.1.5"
-    "@react-native/jest-preset": "npm:0.88.1"
+    "@react-native/jest-preset": "npm:0.86.3"
     "@react-navigation/bottom-tabs": "npm:^7.21.0"
     "@react-navigation/elements": "npm:^2.9.45"
     "@react-navigation/native": "npm:^7.5.1"
