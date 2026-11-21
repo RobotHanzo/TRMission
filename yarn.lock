@@ -5852,7 +5852,7 @@ __metadata:
     expo-constants: "npm:~57.0.13"
     expo-crypto: "npm:~57.0.1"
     expo-haptics: "npm:~57.0.1"
-    expo-linear-gradient: "npm:~57.0.1"
+    expo-linear-gradient: "npm:~58.0.4"
     expo-linking: "npm:~57.0.7"
     expo-notifications: "npm:~57.0.13"
     expo-screen-orientation: "npm:~57.0.2"
@@ -9578,14 +9578,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-linear-gradient@npm:~57.0.1":
-  version: 57.0.1
-  resolution: "expo-linear-gradient@npm:57.0.1"
+"expo-linear-gradient@npm:~58.0.4":
+  version: 58.0.4
+  resolution: "expo-linear-gradient@npm:58.0.4"
   peerDependencies:
     expo: "*"
     react: "*"
     react-native: "*"
-  checksum: 10/188d6772749be2535e2fe2a91b2066d829bd960fb0a0da76828ea0519b0516ef6f6fd015640d3959a017b61721d65681f2e93ab487533c6e865d8e86668a554f
+  checksum: 10/01446285991a2d4bba03124bc2a62cfd9c1be0d35e30aa85afbcaad4f81c99dbc34e0dfde62f784c0f9d34aae1c95573b713aba2ea23dc5a1ea8caed375b0399
   languageName: node
   linkType: hard
 
