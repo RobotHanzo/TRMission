@@ -23,14 +23,14 @@
     "@trm/shared": "workspace:*",
     "canvas-confetti": "^1.9.4",
     "i18next": "^26.7.2",
-    "immer": "^11.2.9",
-    "lucide-react": "^1.69.0",
+    "immer": "^11.2.10",
+    "lucide-react": "^1.72.0",
     "polygon-clipping": "^0.15.7",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "react-i18next": "^17.1.13",
     "react-zoom-pan-pinch": "^4.2.0",
-    "zustand": "^5.0.16"
+    "zustand": "^5.1.0"
   },
   "devDependencies": {
     "@sentry/vite-plugin": "^5.4.0",
