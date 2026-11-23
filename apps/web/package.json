@@ -28,7 +28,7 @@
     "polygon-clipping": "^0.15.7",
     "react": "19.3.1",
     "react-dom": "19.3.1",
-    "react-i18next": "^17.1.13",
+    "react-i18next": "^18.0.3",
     "react-zoom-pan-pinch": "^4.2.0",
     "zustand": "^5.1.0"
   },

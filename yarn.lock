@@ -1087,7 +1087,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.20.0, @babel/runtime@npm:^7.25.0, @babel/runtime@npm:^7.29.7":
+"@babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.20.0, @babel/runtime@npm:^7.25.0":
   version: 7.29.7
   resolution: "@babel/runtime@npm:7.29.7"
   checksum: 10/9883b4951787779fd382b121f22f92966d85f19434841f65fb00b2dfec232107e139683f47c6f252891826ad8ee18317b46c3a0e4819116a9885f47b46d7126a
@@ -5756,7 +5756,7 @@ __metadata:
     lucide-react: "npm:^1.72.0"
     react: "npm:19.3.1"
     react-dom: "npm:19.3.1"
-    react-i18next: "npm:^17.1.13"
+    react-i18next: "npm:^18.0.3"
     typescript: "npm:@typescript/typescript6@^6.0.2"
     vite: "npm:^8.3.8"
     vitest: "npm:^5.1.0"
@@ -5902,7 +5902,7 @@ __metadata:
     lucide-react-native: "npm:^1.72.0"
     react: "npm:19.3.1"
     react-dom: "npm:19.3.1"
-    react-i18next: "npm:^17.1.13"
+    react-i18next: "npm:^18.0.3"
     react-native: "npm:0.86.3"
     react-native-bottom-tabs: "npm:^1.5.0"
     react-native-confetti-cannon: "npm:^1.5.2"
@@ -6034,7 +6034,7 @@ __metadata:
     polygon-clipping: "npm:^0.15.7"
     react: "npm:19.3.1"
     react-dom: "npm:19.3.1"
-    react-i18next: "npm:^17.1.13"
+    react-i18next: "npm:^18.0.3"
     react-zoom-pan-pinch: "npm:^4.2.0"
     typescript: "npm:@typescript/typescript6@^6.0.2"
     vite: "npm:^8.3.8"
@@ -14506,25 +14506,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-i18next@npm:^17.1.13":
-  version: 17.1.13
-  resolution: "react-i18next@npm:17.1.13"
+"react-i18next@npm:^18.0.3":
+  version: 18.0.3
+  resolution: "react-i18next@npm:18.0.3"
   dependencies:
-    "@babel/runtime": "npm:^7.29.7"
     html-parse-stringify: "npm:^4.0.1"
-    use-sync-external-store: "npm:^1.6.0"
   peerDependencies:
-    i18next: ">= 26.2.0"
-    react: ">= 16.8.0"
+    "@types/react": "*"
+    i18next: ">= 27.0.1"
+    react: ">= 18.0.0"
     typescript: ^5 || ^6 || ^7
   peerDependenciesMeta:
-    react-dom:
-      optional: true
-    react-native:
+    "@types/react":
       optional: true
     typescript:
       optional: true
-  checksum: 10/335ed1351bb01b12b70e9d85c56a6b05ae236ee2813b3062b64f2e7c36c80fc2d304002d642174bc3295de4d3391160a2f8c2c23b356f4f26104cc684b4bac41
+  checksum: 10/94c6f99f194378f6c3a0cfa050647593b9e61655c60396e3ce8cdc0e078caf1769cac465b51aedaf8716e8dbf400ea0518fbc20edc912339a531b587ea4fdadb
   languageName: node
   linkType: hard
 
@@ -16619,7 +16616,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"use-sync-external-store@npm:^1.5.0, use-sync-external-store@npm:^1.6.0":
+"use-sync-external-store@npm:^1.5.0":
   version: 1.6.0
   resolution: "use-sync-external-store@npm:1.6.0"
   peerDependencies:
